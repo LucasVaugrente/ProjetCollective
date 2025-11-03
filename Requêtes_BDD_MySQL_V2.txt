@@ -1,0 +1,119 @@
+BDD MYSQL FACTOSCOPE
+
+CREATE TABLE IF NOT EXISTS module (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	urlImg VARCHAR(255) NOT NULL,
+	titre VARCHAR(255) NOT NULL,
+	description TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cours (
+	id INTEGER AUTO_INCREMENT PRIMARY KEY,
+	titre VARCHAR(255) NOT NULL,
+	contenu VARCHAR(255) NOT NULL,
+	id_module INTEGER,
+	FOREIGN KEY (id_module) REFERENCES module (id)
+);
+
+CREATE TABLE IF NOT EXISTS page (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    description TEXT,
+    ordre INT NOT NULL,
+    urlAudio TEXT DEFAULT '',
+    est_vue INTEGER DEFAULT 0,
+    id_cours INT NOT NULL,
+    FOREIGN KEY (id_cours) REFERENCES cours(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS MiniJeu (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_cours INT NOT NULL,
+    nom TEXT NOT NULL,
+    description TEXT,
+    progression INT NOT NULL,
+    FOREIGN KEY (id_cours) REFERENCES cours(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS MediaCours (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_page INT NOT NULL,
+    ordre INT NOT NULL,
+    url TEXT NOT NULL,
+    type TEXT NOT NULL,
+    caption TEXT,
+    FOREIGN KEY (id_page) REFERENCES page(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS ObjectifCours (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_cours INT NOT NULL,
+    description TEXT NOT NULL,
+    FOREIGN KEY (id_cours) REFERENCES cours(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Question (
+    idQuestion INT AUTO_INCREMENT PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS QuestionImg (
+    idQuestion INT PRIMARY KEY,
+    urlImage TEXT NOT NULL,
+    caption TEXT NOT NULL,
+    FOREIGN KEY (idQuestion) REFERENCES Question(idQuestion)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS QuestionText (
+    idQuestion INT PRIMARY KEY,
+    txt TEXT NOT NULL,
+    FOREIGN KEY (idQuestion) REFERENCES Question(idQuestion)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS QCM (
+    idQCM INT AUTO_INCREMENT PRIMARY KEY,
+    numSolution INT NOT NULL,
+    idCours INT NOT NULL,
+    idQuestion INT NOT NULL UNIQUE,
+    FOREIGN KEY (idCours) REFERENCES cours(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (idQuestion) REFERENCES Question(idQuestion)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS Reponse (
+    idReponse INT AUTO_INCREMENT PRIMARY KEY,
+    idQCM INT NOT NULL,
+    FOREIGN KEY (idQCM) REFERENCES QCM(idQCM)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS ReponseImg (
+    idReponse INT PRIMARY KEY,
+    urlImage TEXT NOT NULL,
+    caption TEXT NOT NULL,
+    FOREIGN KEY (idReponse) REFERENCES Reponse(idReponse)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS ReponseText (
+    idReponse INT PRIMARY KEY,
+    txt TEXT NOT NULL,
+    FOREIGN KEY (idReponse) REFERENCES Reponse(idReponse)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
