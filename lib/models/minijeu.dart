@@ -1,12 +1,9 @@
-import 'package:seriouse_game/models/motsCroises.dart';
-
 class MiniJeu {
    int? id;
    int idCours;
    String nom;
    String? description;
    int progression;
-   List<MotsCroises>? motsCroises; // Liste des mots croisés associés
 
   MiniJeu({
     this.id,

@@ -191,8 +191,9 @@ SizedBox headerAvancement(){
                           color: Colors.black,
                         ),),
                 //Message d'encouragement        
-                Text("Tout est possible à qui rêve, ose, "),
-                Text("travaille et n'abandonne jamais.")
+                Text("Tout est possible à qui "),
+                Text("rêve, ose, travaille "),
+                Text("et n'abandonne jamais.")
               ],
             ),
           ),

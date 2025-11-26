@@ -1,12 +1,8 @@
 import 'package:seriouse_game/models/module.dart';
-import 'package:seriouse_game/models/mot.dart';
-import 'package:seriouse_game/models/motsCroises.dart';
 import 'package:seriouse_game/models/minijeu.dart';
 import 'package:seriouse_game/repositories/coursRepository.dart';
 
 import 'package:seriouse_game/repositories/moduleRepository.dart';
-import 'package:seriouse_game/repositories/motRepository.dart';
-import 'package:seriouse_game/repositories/motsCroisesRepository.dart';
 import 'package:seriouse_game/repositories/minijeuRepository.dart';
 import 'package:seriouse_game/repositories/mediaCoursRepository.dart';
 import 'package:seriouse_game/repositories/objectifCoursRepository.dart';
@@ -31,8 +27,6 @@ import 'package:seriouse_game/ui/CoursSelectionne.dart';
 
 final moduleRepository = ModuleRepository();
   final coursRepository = CoursRepository();
-  final motRepository = MotRepository();
-  final motsCroisesRepository = MotsCroisesRepository();
   final miniJeuRepository = MiniJeuRepository();
   final mediaCoursRepository = MediaCoursRepository();
   final pageRepository = PageRepository();
@@ -430,8 +424,6 @@ Future<void> insertSampleData() async {
 Future<void> testRepositories() async {
   final moduleRepository = ModuleRepository();
   final coursRepository = CoursRepository();
-  final motRepository = MotRepository();
-  final motsCroisesRepository = MotsCroisesRepository();
   final miniJeuRepository = MiniJeuRepository();
   final mediaCoursRepository = MediaCoursRepository();
   final pageRepository = PageRepository();
@@ -452,41 +444,6 @@ Future<void> testRepositories() async {
 // Supprimer un objectif
   await objectifCoursRepository.delete(objectif.id!);
   print('Objectif supprimé.');
-  
-
-    // --- Test Mot ---
-  print('--- Test Mot ---');
-
-  // Récupérer tous les mots
-  final allMots = await motRepository.getAll();
-  print('Mots disponibles : ${allMots.map((e) => e.mot).toList()}');
-
-  // Récupérer un mot par ID
-  final mot = allMots.first;
-  final fetchedMot = await motRepository.getById(mot.id!);
-  print('Mot récupéré par ID : ${fetchedMot?.mot}');
-
-  // Supprimer un mot
-  await motRepository.delete(mot.id!);
-  print('Mot supprimé.');
-
-  // --- Test MotsCroises ---
-  print('--- Test MotsCroises ---');
-
-  // Récupérer tous les mots croisés
-  final allMotsCroises = await motsCroisesRepository.getAll();
-  print(
-      'Mots croisés disponibles : ${allMotsCroises.map((e) => e.tailleGrille).toList()}');
-
-  // Récupérer un mots croisés par ID
-  final motsCroises = allMotsCroises.first;
-  final fetchedMotsCroises =
-      await motsCroisesRepository.getById(motsCroises.id!);
-  print('Mots croisés récupérés par ID : ${fetchedMotsCroises?.tailleGrille}');
-
-  // Supprimer un mots croisés
-  await motsCroisesRepository.delete(motsCroises.id!);
-  print('Mots croisés supprimé.');
 
   // --- Test MiniJeu ---
   print('--- Test MiniJeu ---');
