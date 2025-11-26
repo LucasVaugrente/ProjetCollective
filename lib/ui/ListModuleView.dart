@@ -220,7 +220,7 @@ SizedBox headerAvancement(){
                                       progress = snapshot.data.toString();
                                     } 
 
-                                    return Text("${progress}%",
+                                    return Text("$progress%",
                                                 style: const TextStyle(
                                                                 fontSize: 30,
                                                                 fontWeight: FontWeight.bold,

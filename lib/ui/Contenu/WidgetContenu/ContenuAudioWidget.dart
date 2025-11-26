@@ -2,7 +2,6 @@
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:seriouse_game/models/mediaCours.dart';
 import 'package:seriouse_game/ui/Contenu/ContenuCoursViewModel.dart';
 
 import 'ContenuVideoWidget.dart'; // Cet import sert à récupérer les fonctions de conversion de minutes en secondes déja créer dans ce fichier pour le lecteur vidéo

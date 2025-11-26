@@ -1,7 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:seriouse_game/ui/App.dart';
 import 'dart:async';
-import 'package:seriouse_game/ui/ListModuleView.dart';
 
 class LaunchScreenView extends StatefulWidget {
   const LaunchScreenView({super.key});
@@ -77,8 +76,10 @@ class _LaunchScreenViewState extends State<LaunchScreenView> with SingleTickerPr
       ),
     );
     } catch (e) {
-      print("Erreur lors du chargement du QCM : $e");
-      return Text("aa");
+      if (kDebugMode) {
+        print("Erreur lors du chargement du QCM : $e");
+      }
+      return const Text("aa");
     }
     
   }

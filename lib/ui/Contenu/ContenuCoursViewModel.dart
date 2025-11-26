@@ -2,9 +2,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:seriouse_game/models/mediaCours.dart';
 import 'package:video_player/video_player.dart';
-import 'package:seriouse_game/repositories/mediaCoursRepository.dart';
-import 'package:seriouse_game/repositories/pageRepository.dart';
-import 'package:seriouse_game/models/cours.dart';
 
 class ContenuCoursViewModel {
   ContenuCoursViewModel();

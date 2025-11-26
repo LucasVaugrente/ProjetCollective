@@ -442,9 +442,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   min: 0,
                   max: 1,
                   //Code changeant le volume quand la barre est manipulée par l'utilisateur :
-                  onChanged: (_volume) => setState(() {
-                    volume = _volume;
-                    _controller.setVolume(_volume);
+                  onChanged: (volume) => setState(() {
+                    volume = volume;
+                    _controller.setVolume(volume);
                                   
                   }
                 ),
@@ -490,10 +490,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       activeColor: const Color.fromARGB(255, 246, 1, 1),
 
       //Code appliqué lorsque l'utilisateur appuie et change la valeur de la barre :   
-      onChanged: (_videoPosition) => setState(() {
+      onChanged: (videoPosition) => setState(() {
         //Code permettant de déplacer la position de la vidéo à celle de la barre :
-        videoPosition = Duration.zero + Duration(seconds: _videoPosition.toInt());
-        _controller.seekTo(videoPosition);
+        videoPosition = (Duration.zero + Duration(seconds: videoPosition.toInt())) as double;
+        _controller.seekTo(videoPosition as Duration);
                                               
         }
       ),

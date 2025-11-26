@@ -19,10 +19,10 @@ class ContenuTextWidget extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(
+          return const Center(
             child: Text(
               'Erreur : Impossible de lire le fichier.',
-              style: const TextStyle(color: Color.fromRGBO(252, 179, 48, 1)),
+              style: TextStyle(color: Color.fromRGBO(252, 179, 48, 1)),
             ),
           );
         } else {
