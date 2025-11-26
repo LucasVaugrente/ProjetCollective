@@ -16,7 +16,7 @@ class CoursViewModel extends ChangeNotifier{
 
   // Information de la page actuelle
   // 0 : Page de description
-  // 1-nbPage : Page de contenu
+  // ArchiveBestPattern2QCM-nbPage : Page de contenu
   // >nbPage : Page de jeu
   int page = 0;
 

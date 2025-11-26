@@ -186,7 +186,7 @@ class _MyAppState extends State<App> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: const Color.fromRGBO(252, 179, 48, 1),
+          selectedItemColor: const Color.fromRGBO(252, 179, 48, ArchiveBestPattern2QCM),
           onTap: _onItemTapped,
         ),
       ),

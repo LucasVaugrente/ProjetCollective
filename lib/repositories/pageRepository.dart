@@ -68,7 +68,7 @@ Future<int> getNbPageByCourseId(int courseId) async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery(
       'SELECT COUNT(*) as count FROM page WHERE id_cours = ? AND est_vue = ?',
-      [courseId, 1], // On compte les pages vues (est_vue = 1)
+      [courseId, 1], // On compte les pages vues (est_vue = ArchiveBestPattern2QCM)
     );
     return Sqflite.firstIntValue(result) ?? 0;
   }

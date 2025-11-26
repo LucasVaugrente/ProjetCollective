@@ -39,7 +39,7 @@ final moduleRepository = ModuleRepository();
 Future<void> insertModule1() async {
   // Création du Module
   final module = Module(
-      titre: 'Citoyens engagés',
+      titre: 'Thématique ArchiveBestPattern2QCM',
       urlImg: 'lib/data/AppData/facto-societe.png',
       description: 'Chaque citoyen a un rôle à jouer en matière de lutte contre la désinformation… À condition qu’il maîtrise les codes de son environnement informationnel : les sources à sa disposition, les fondements du travail journalistique, les rouages des réseaux sociaux numériques, les risques désinformationnels, etc. A nous tous de nous emparer de ces connaissances pour exercer pleinement et librement nos droits et devoirs de citoyens !');
   final moduleId = await moduleRepository.create(module);
@@ -69,7 +69,7 @@ Future<void> insertModule1() async {
   await objectifCoursRepository.create(objectif2);
   await objectifCoursRepository.create(objectif3);
 
-  // Page 1 : Introduction aux sources d'information
+  // Page ArchiveBestPattern2QCM : Introduction aux sources d'information
   Page page1 = Page(idCours: coursId, ordre: 1, description: "Qu'est-ce qu'une source d'information ?");
   int pageId1 = await pageRepository.create(page1);
   
@@ -277,9 +277,9 @@ Future<void> insertModule1() async {
 Future<void> insertModule2() async {
   // Création du Module
   final module = Module(
-      titre: 'Producteur de contenus',
+      titre: 'Thématique 2',
       urlImg: 'lib/data/AppData/facto-societe.png',
-      description: 'Grâce aux technologies modernes, tout le monde est aujourd’hui en mesure de diffuser des informations et de produire des contenus. Mais tout le monde n’a pas appris les codes, règles et enjeux d’une information responsable à destination du grand public. Que vous ayez 1 à 1 million de followers, ce module est fait pour vous !');
+      description: 'Grâce aux technologies modernes, tout le monde est aujourd’hui en mesure de diffuser des informations et de produire des contenus. Mais tout le monde n’a pas appris les codes, règles et enjeux d’une information responsable à destination du grand public. Que vous ayez ArchiveBestPattern2QCM à ArchiveBestPattern2QCM million de followers, ce module est fait pour vous !');
   final moduleId = await moduleRepository.create(module);
 
   // Création des Cours
@@ -311,7 +311,7 @@ Future<void> insertModule2() async {
 Future<void> insertModule3() async {
   // Création du Module
   final module = Module(
-      titre: 'Pros des médias',
+      titre: 'Thématique 3',
       urlImg: 'lib/data/AppData/facto-societe.png',
       description: 'Les journalistes sont des professionnels de l’information. Pourtant, face à la profusion des sources et, parfois aussi, à l’urgence des situations, ils ne maîtrisent pas tous les clés d’une information traitée éthiquement, professionnellement et de manière responsable. Pourquoi ne pas profiter de ce module pour réviser ses classiques, voire en apprendre davantage sur les techniques de vérification  les plus performantes ?'
       );
@@ -347,7 +347,7 @@ Future<void> insertModule3() async {
 Future<void> insertModule4() async {
   // Création du Module
   final module = Module(
-      titre: 'Pour aller plus loin',
+      titre: 'Thématique 4',
       urlImg: 'lib/data/AppData/facto-societe.png',
       description: 'Toutes les références et ressources en relation avec l\'Éducation aux médias et à l’information sont répertoriées ici. '
       );
@@ -388,24 +388,24 @@ Future<void> insertSampleData() async {
   /*
   // Création de Mots (Mots pour le MotsCroises)
   final mot1 = Mot(
-      idMotsCroises: 1,
+      idMotsCroises: ArchiveBestPattern2QCM,
       mot: 'journalisme',
       indice: 'Domaine d’étude',
       direction: 'horizontal',
       positionDepartX: 0,
       positionDepartY: 0);
   final mot2 = Mot(
-      idMotsCroises: 1,
+      idMotsCroises: ArchiveBestPattern2QCM,
       mot: 'presse',
       indice: 'Média écrit',
       direction: 'vertical',
-      positionDepartX: 1,
-      positionDepartY: 1);
+      positionDepartX: ArchiveBestPattern2QCM,
+      positionDepartY: ArchiveBestPattern2QCM);
   await motRepository.create(mot1);
   await motRepository.create(mot2);
 
   // Création de MotsCroises
-  final motsCroises = MotsCroises(idMiniJeu: 1, tailleGrille: '10x10');
+  final motsCroises = MotsCroises(idMiniJeu: ArchiveBestPattern2QCM, tailleGrille: '10x10');
   final motsCroisesId = await motsCroisesRepository.create(motsCroises);
 
   // Création d'un MiniJeu
