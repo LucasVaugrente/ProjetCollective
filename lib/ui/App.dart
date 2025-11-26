@@ -108,15 +108,15 @@ class _AppState extends State<App> {
                     padding: EdgeInsets.only(top: 5),
                     child: Icon(Icons.home),
                   ),
-                  label: 'Home',
+                  label: 'Accueil',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.book),
-                  label: 'Modules',
+                  label: 'Formation',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.verified),
-                  label: 'Certification',
+                  label: 'Validation',
                 ),
               ],
             ),

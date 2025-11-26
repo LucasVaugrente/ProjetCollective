@@ -49,7 +49,7 @@ class _ListModulesViewState extends State<ListModulesView> {
                   margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                   child: 
                     const Text(
-                      "Overview",
+                      "Accueil",
                       style: TextStyle(
                         fontSize: 35,
                         fontWeight: FontWeight.bold,
@@ -71,7 +71,7 @@ class _ListModulesViewState extends State<ListModulesView> {
                   margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                   child: 
                     const Text(
-                      "Modules :",
+                      "Cours :",
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -191,8 +191,8 @@ SizedBox headerAvancement(){
                           color: Colors.black,
                         ),),
                 //Message d'encouragement        
-                Text("Vous êtes bientôt au bout, "),
-                Text("bientôt la certification")
+                Text("Tout est possible à qui rêve, ose, "),
+                Text("travaille et n'abandonne jamais.")
               ],
             ),
           ),
