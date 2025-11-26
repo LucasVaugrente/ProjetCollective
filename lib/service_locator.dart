@@ -1,7 +1,7 @@
 import 'package:get_it/get_it.dart';
-import 'package:seriouse_game/repositories/coursRepository.dart';
-import 'package:seriouse_game/repositories/objectifCoursRepository.dart';
-import 'package:seriouse_game/services/coursService.dart';
+import 'package:factoscope/repositories/cours_repository.dart';
+import 'package:factoscope/repositories/objectif_cours_repository.dart';
+import 'package:factoscope/services/cours_service.dart';
 
 final getIt = GetIt.instance;
 

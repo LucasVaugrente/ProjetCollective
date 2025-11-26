@@ -1,4 +1,4 @@
-# seriouse_game
+# factoscope
 
 A new Flutter project.
 

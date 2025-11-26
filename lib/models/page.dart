@@ -1,4 +1,4 @@
-import 'package:seriouse_game/models/mediaCours.dart';
+import 'package:factoscope/models/media_cours.dart';
 
 class Page {
   int? id;

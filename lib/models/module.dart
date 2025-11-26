@@ -1,4 +1,4 @@
-import 'package:seriouse_game/models/cours.dart';
+import 'package:factoscope/models/cours.dart';
 
 
 class Module {

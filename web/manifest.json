@@ -1,6 +1,6 @@
 {
-    "name": "seriouse_game",
-    "short_name": "seriouse_game",
+    "name": "factoscope",
+    "short_name": "factoscope",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

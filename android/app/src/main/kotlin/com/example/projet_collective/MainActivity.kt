@@ -1,4 +1,4 @@
-package com.example.seriouse_game
+package com.example.factoscope
 
 import io.flutter.embedding.android.FlutterActivity
 

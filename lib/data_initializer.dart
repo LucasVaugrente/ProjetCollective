@@ -1,33 +1,31 @@
-import 'package:seriouse_game/models/module.dart';
-import 'package:seriouse_game/models/mot.dart';
-import 'package:seriouse_game/models/motsCroises.dart';
-import 'package:seriouse_game/models/minijeu.dart';
-import 'package:seriouse_game/repositories/coursRepository.dart';
+import 'package:factoscope/models/module.dart';
+import 'package:factoscope/repositories/cours_repository.dart';
 
-import 'package:seriouse_game/repositories/moduleRepository.dart';
-import 'package:seriouse_game/repositories/motRepository.dart';
-import 'package:seriouse_game/repositories/motsCroisesRepository.dart';
-import 'package:seriouse_game/repositories/minijeuRepository.dart';
-import 'package:seriouse_game/repositories/mediaCoursRepository.dart';
-import 'package:seriouse_game/repositories/objectifCoursRepository.dart';
-import 'package:seriouse_game/repositories/pageRepository.dart';
+import 'package:factoscope/repositories/module_repository.dart';
+import 'package:factoscope/repositories/mot_repository.dart';
+import 'package:factoscope/repositories/mots_croises_repository.dart';
+import 'package:factoscope/repositories/minijeu_repository.dart';
+import 'package:factoscope/repositories/media_cours_repository.dart';
+import 'package:factoscope/repositories/objectif_cours_repository.dart';
+import 'package:factoscope/repositories/page_repository.dart';
 
-import 'package:seriouse_game/repositories/QCM/QCMRepository.dart';
-import 'package:seriouse_game/repositories/QCM/QuestionRepository.dart';
-import 'package:seriouse_game/repositories/QCM/ReponseRepository.dart';
-import 'package:seriouse_game/ui/ModuleSelectionne.dart';
+import 'package:factoscope/repositories/QCM/qcm_repository.dart';
+import 'package:factoscope/repositories/QCM/question_repository.dart';
+import 'package:factoscope/repositories/QCM/reponse_repository.dart';
+import 'package:factoscope/ui/module_selectionne.dart';
+import 'package:flutter/foundation.dart';
 
 import 'DataBase/database_helper.dart';
 import 'models/cours.dart';
-import 'models/mediaCours.dart';
-import 'models/objectifCours.dart';
+import 'models/media_cours.dart';
+import 'models/objectif_cours.dart';
 import 'models/page.dart';
 
 import 'models/QCM/qcm.dart';
 import 'models/QCM/question.dart';
 import 'models/QCM/reponse.dart';
 
-import 'package:seriouse_game/ui/CoursSelectionne.dart';
+import 'package:factoscope/ui/cours_selectionne.dart';
 
 final moduleRepository = ModuleRepository();
   final coursRepository = CoursRepository();
@@ -293,7 +291,7 @@ Future<void> insertModule2() async {
       idModule: moduleId,
       titre: 'Ethique professionnelle et personnelle',
       contenu: '');
-  final coursId = await coursRepository.create(cours);
+  // final coursId = await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
@@ -328,7 +326,7 @@ Future<void> insertModule3() async {
       idModule: moduleId,
       titre: 'Déontologie',
       contenu: '');
-  final coursId = await coursRepository.create(cours);
+  // final coursId = await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
@@ -364,7 +362,7 @@ Future<void> insertModule4() async {
       idModule: moduleId,
       titre: 'Références bibliographiques',
       contenu: '');
-  final coursId = await coursRepository.create(cours);
+  // final coursId = await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
@@ -423,7 +421,9 @@ Future<void> insertSampleData() async {
   final miniJeuId = await miniJeuRepository.create(miniJeu);
   */
 
-  print('Toutes les données d\'exemple ont été insérées avec succès.');
+  if (kDebugMode) {
+    print('Toutes les données d\'exemple ont été insérées avec succès.');
+  }
   //testRepositories();
 }
 
@@ -438,127 +438,183 @@ Future<void> testRepositories() async {
   final objectifCoursRepository = ObjectifCoursRepository();
 
   // --- Test Objectif ---
-  print('--- Test Objectif ---');
+  if (kDebugMode) {
+    print('--- Test Objectif ---');
+  }
 
 // Récupérer tous les objectifs
   final allObjectifs = await objectifCoursRepository.getAll();
-  print('Objectifs disponibles : ${allObjectifs.map((e) => e.description).toList()}');
+  if (kDebugMode) {
+    print('Objectifs disponibles : ${allObjectifs.map((e) => e.description).toList()}');
+  }
 
 // Récupérer un objectif par ID
   final objectif = allObjectifs.first;
   final fetchedObjectif = await objectifCoursRepository.getById(objectif.id!);
-  print('Objectif récupéré par ID : ${fetchedObjectif?.description}');
+  if (kDebugMode) {
+    print('Objectif récupéré par ID : ${fetchedObjectif?.description}');
+  }
 
 // Supprimer un objectif
   await objectifCoursRepository.delete(objectif.id!);
-  print('Objectif supprimé.');
+  if (kDebugMode) {
+    print('Objectif supprimé.');
+  }
   
 
     // --- Test Mot ---
-  print('--- Test Mot ---');
+  if (kDebugMode) {
+    print('--- Test Mot ---');
+  }
 
   // Récupérer tous les mots
   final allMots = await motRepository.getAll();
-  print('Mots disponibles : ${allMots.map((e) => e.mot).toList()}');
+  if (kDebugMode) {
+    print('Mots disponibles : ${allMots.map((e) => e.mot).toList()}');
+  }
 
   // Récupérer un mot par ID
   final mot = allMots.first;
   final fetchedMot = await motRepository.getById(mot.id!);
-  print('Mot récupéré par ID : ${fetchedMot?.mot}');
+  if (kDebugMode) {
+    print('Mot récupéré par ID : ${fetchedMot?.mot}');
+  }
 
   // Supprimer un mot
   await motRepository.delete(mot.id!);
-  print('Mot supprimé.');
+  if (kDebugMode) {
+    print('Mot supprimé.');
+  }
 
   // --- Test MotsCroises ---
-  print('--- Test MotsCroises ---');
+  if (kDebugMode) {
+    print('--- Test MotsCroises ---');
+  }
 
   // Récupérer tous les mots croisés
   final allMotsCroises = await motsCroisesRepository.getAll();
-  print(
+  if (kDebugMode) {
+    print(
       'Mots croisés disponibles : ${allMotsCroises.map((e) => e.tailleGrille).toList()}');
+  }
 
   // Récupérer un mots croisés par ID
   final motsCroises = allMotsCroises.first;
   final fetchedMotsCroises =
       await motsCroisesRepository.getById(motsCroises.id!);
-  print('Mots croisés récupérés par ID : ${fetchedMotsCroises?.tailleGrille}');
+  if (kDebugMode) {
+    print('Mots croisés récupérés par ID : ${fetchedMotsCroises?.tailleGrille}');
+  }
 
   // Supprimer un mots croisés
   await motsCroisesRepository.delete(motsCroises.id!);
-  print('Mots croisés supprimé.');
+  if (kDebugMode) {
+    print('Mots croisés supprimé.');
+  }
 
   // --- Test MiniJeu ---
-  print('--- Test MiniJeu ---');
+  if (kDebugMode) {
+    print('--- Test MiniJeu ---');
+  }
 
   // Récupérer tous les mini-jeux
   final allMiniJeux = await miniJeuRepository.getAll();
-  print('Mini-jeux disponibles : ${allMiniJeux.map((e) => e.nom).toList()}');
+  if (kDebugMode) {
+    print('Mini-jeux disponibles : ${allMiniJeux.map((e) => e.nom).toList()}');
+  }
 
   // Récupérer un mini-jeu par ID
   final miniJeu = allMiniJeux.first;
   final fetchedMiniJeu = await miniJeuRepository.getById(miniJeu.id!);
-  print('Mini-jeu récupéré par ID : ${fetchedMiniJeu?.nom}');
+  if (kDebugMode) {
+    print('Mini-jeu récupéré par ID : ${fetchedMiniJeu?.nom}');
+  }
 
   // Supprimer un mini-jeu
   await miniJeuRepository.delete(miniJeu.id!);
-  print('Mini-jeu supprimé.');
+  if (kDebugMode) {
+    print('Mini-jeu supprimé.');
+  }
 
   // --- Test MediaCours ---
-  print('--- Test MediaCours ---');
+  if (kDebugMode) {
+    print('--- Test MediaCours ---');
+  }
 
   // Récupérer tous les médias
   final allMedias = await mediaCoursRepository.getAll();
-  print('Médias disponibles : ${allMedias.map((e) => e.url).toList()}');
+  if (kDebugMode) {
+    print('Médias disponibles : ${allMedias.map((e) => e.url).toList()}');
+  }
 
   // Récupérer un média par ID
   final media = allMedias.first;
   final fetchedMedia = await mediaCoursRepository.getById(media.id!);
-  print('Média récupéré par ID : ${fetchedMedia?.url}');
+  if (kDebugMode) {
+    print('Média récupéré par ID : ${fetchedMedia?.url}');
+  }
 
   // Supprimer un média
   //await mediaCoursRepository.delete(media.id!);
   //print('Média supprimé.');
 
   // --- Test Page ---
-  print('--- Test Page ---');
+  if (kDebugMode) {
+    print('--- Test Page ---');
+  }
 
 // Récupérer toutes les pages
   final allPages = await pageRepository.getAll();
-  print('Pages disponibles : ${allPages.map((e) => e.id).toList()}');
+  if (kDebugMode) {
+    print('Pages disponibles : ${allPages.map((e) => e.id).toList()}');
+  }
 
 // Récupérer une page par ID
   if (allPages.isNotEmpty) {
     final page = allPages.first;
     final fetchedPage = await pageRepository.getById(page.id!);
-    print('Page récupérée par ID : ${fetchedPage?.id} liée au cours : ${fetchedPage?.idCours}');
+    if (kDebugMode) {
+      print('Page récupérée par ID : ${fetchedPage?.id} liée au cours : ${fetchedPage?.idCours}');
+    }
 
     // Supprimer une page
     //await pageRepository.delete(page.id!);
     //print('Page supprimée.');
   } else {
-    print('Aucune page disponible pour le test.');
+    if (kDebugMode) {
+      print('Aucune page disponible pour le test.');
+    }
   }
 
   // --- Test Cours ---
-  print('--- Test Cours ---');
+  if (kDebugMode) {
+    print('--- Test Cours ---');
+  }
 
   // Récupérer toutes les courss
   final allCours = await coursRepository.getAll();
-  print('Cours disponibles : ${allCours.map((e) => e.titre).toList()}');
+  if (kDebugMode) {
+    print('Cours disponibles : ${allCours.map((e) => e.titre).toList()}');
+  }
 
   // Récupérer une cours par ID
   final cours = allCours.first;
   final fetchedCours = await coursRepository.getById(cours.id!);
-  print('Cours récupérée par ID : ${fetchedCours?.titre}');
+  if (kDebugMode) {
+    print('Cours récupérée par ID : ${fetchedCours?.titre}');
+  }
 
   // méthode loadContenu(Cours cours)
   cours.pages = await pageRepository.getPagesByCourseId(cours.id!);
-  print("Nombre de page récupéré : ${cours.pages?.length}");
+  if (kDebugMode) {
+    print("Nombre de page récupéré : ${cours.pages?.length}");
+  }
 
-  for (int i=0; i<cours!.pages!.length; i++) {
+  for (int i=0; i<cours.pages!.length; i++) {
       cours.pages![i].medias = await mediaCoursRepository.getByPageId(cours.pages![i].id!);
-      print(cours.pages![i].medias?.length);
+      if (kDebugMode) {
+        print(cours.pages![i].medias?.length);
+      }
     }
   
   
@@ -566,20 +622,30 @@ Future<void> testRepositories() async {
 
   // Supprimer une cours
   await coursRepository.delete(cours.id!);
-  print('Cours supprimée.');
+  if (kDebugMode) {
+    print('Cours supprimée.');
+  }
   // --- Test Module ---
-  print('--- Test Module ---');
+  if (kDebugMode) {
+    print('--- Test Module ---');
+  }
 
   // Récupérer tous les module
   final allModulees = await moduleRepository.getAll();
-  print('Module disponibles : ${allModulees.map((e) => e.titre).toList()}');
+  if (kDebugMode) {
+    print('Module disponibles : ${allModulees.map((e) => e.titre).toList()}');
+  }
 
   // Récupérer un module par ID
   final module = allModulees.first;
   final fetchedModule = await moduleRepository.getById(module.id!);
-  print('Module récupéré par ID : ${fetchedModule?.titre}');
+  if (kDebugMode) {
+    print('Module récupéré par ID : ${fetchedModule?.titre}');
+  }
 
   // Supprimer un module
   await moduleRepository.delete(module.id!);
-  print('Module supprimé.');
+  if (kDebugMode) {
+    print('Module supprimé.');
+  }
 }

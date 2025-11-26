@@ -1,5 +1,5 @@
-import 'package:seriouse_game/models/objectifCours.dart';
-import 'package:seriouse_game/models/page.dart';
+import 'package:factoscope/models/objectif_cours.dart';
+import 'package:factoscope/models/page.dart';
 
 class Cours {
    int? id;

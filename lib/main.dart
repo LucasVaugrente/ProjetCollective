@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:seriouse_game/DataBase/database_helper.dart';
-import 'package:seriouse_game/models/cours.dart';
-import 'package:seriouse_game/service_locator.dart';
-import 'package:seriouse_game/services/coursService.dart';
+import 'package:factoscope/service_locator.dart';
 import 'data_initializer.dart';
 
-import 'ui/App.dart';
+import 'ui/app.dart';
 
 void main() {
   setupLocator();
@@ -24,13 +21,13 @@ class MainApp extends StatelessWidget {
               builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
                         case ConnectionState.done: // L'insertion est fini : 
-                          return MaterialApp.router( // Voir App.dart pour avoir le routeur et le 1er widget de l'app
+                          return MaterialApp.router( // Voir app.dart pour avoir le routeur et le 1er widget de l'app
                                 //debugShowCheckedModeBanner: false,
                                 routerConfig: router,
                               );
 
                         default: // L'insertion n'a pas fini : Page d'attente #TODO 
-                          return CircularProgressIndicator();
+                          return const CircularProgressIndicator();
                     }
                     
               }
