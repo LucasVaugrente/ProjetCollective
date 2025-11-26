@@ -537,7 +537,7 @@ String convertToMinutesSeconds(Duration duration) {
   return '$parsedMinutes:$parsedSeconds';
 }
 
-//Fonction permettant de renvoyer une icone de volume différente en fonction d'une valeur entre 0 et ArchiveBestPattern2QCM.
+//Fonction permettant de renvoyer une icone de volume différente en fonction d'une valeur entre 0 et 1.
 IconData animatedVolumeIcon(double volume) {
   if (volume == 0) {
     return Icons.volume_mute;

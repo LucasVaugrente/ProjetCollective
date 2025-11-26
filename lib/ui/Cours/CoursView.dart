@@ -80,7 +80,7 @@ class CoursView extends StatelessWidget {
                                             // La page de description n'a pas besoin du footer : Il change la page vu grâce à un bouton
                       bottomNavigationBar: child.runtimeType == DescriptionView ? null : 
                                             FooterWidget(
-                                              courseTitle: "Cours ArchiveBestPattern2QCM",
+                                              courseTitle: "Cours 1",
                                               pageNumber: coursViewModel.page,
                                               coursViewModel: coursViewModel,
                                             ), 

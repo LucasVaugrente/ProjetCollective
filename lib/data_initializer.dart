@@ -39,7 +39,7 @@ final moduleRepository = ModuleRepository();
 Future<void> insertModule1() async {
   // Création du Module
   final module = Module(
-      titre: 'Thématique ArchiveBestPattern2QCM',
+      titre: 'Thématique 1',
       urlImg: 'lib/data/AppData/facto-societe.png',
       description: 'Chaque citoyen a un rôle à jouer en matière de lutte contre la désinformation… À condition qu’il maîtrise les codes de son environnement informationnel : les sources à sa disposition, les fondements du travail journalistique, les rouages des réseaux sociaux numériques, les risques désinformationnels, etc. A nous tous de nous emparer de ces connaissances pour exercer pleinement et librement nos droits et devoirs de citoyens !');
   final moduleId = await moduleRepository.create(module);
@@ -69,7 +69,7 @@ Future<void> insertModule1() async {
   await objectifCoursRepository.create(objectif2);
   await objectifCoursRepository.create(objectif3);
 
-  // Page ArchiveBestPattern2QCM : Introduction aux sources d'information
+  // Page 1 : Introduction aux sources d'information
   Page page1 = Page(idCours: coursId, ordre: 1, description: "Qu'est-ce qu'une source d'information ?");
   int pageId1 = await pageRepository.create(page1);
   
@@ -279,7 +279,7 @@ Future<void> insertModule2() async {
   final module = Module(
       titre: 'Thématique 2',
       urlImg: 'lib/data/AppData/facto-societe.png',
-      description: 'Grâce aux technologies modernes, tout le monde est aujourd’hui en mesure de diffuser des informations et de produire des contenus. Mais tout le monde n’a pas appris les codes, règles et enjeux d’une information responsable à destination du grand public. Que vous ayez ArchiveBestPattern2QCM à ArchiveBestPattern2QCM million de followers, ce module est fait pour vous !');
+      description: 'Grâce aux technologies modernes, tout le monde est aujourd’hui en mesure de diffuser des informations et de produire des contenus. Mais tout le monde n’a pas appris les codes, règles et enjeux d’une information responsable à destination du grand public. Que vous ayez 1 à 1 million de followers, ce module est fait pour vous !');
   final moduleId = await moduleRepository.create(module);
 
   // Création des Cours

@@ -4,7 +4,6 @@ import 'package:seriouse_game/ui/LaunchScreen/LaunchScreenView.dart';
 import 'package:seriouse_game/ui/ListCoursView.dart';
 import 'package:seriouse_game/ui/ListModuleView.dart';
 import 'package:seriouse_game/ui/Cours/CoursView.dart';
-import 'package:go_router/go_router.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -186,7 +185,7 @@ class _MyAppState extends State<App> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: const Color.fromRGBO(252, 179, 48, ArchiveBestPattern2QCM),
+          selectedItemColor: const Color.fromRGBO(252, 179, 48, 1),
           onTap: _onItemTapped,
         ),
       ),

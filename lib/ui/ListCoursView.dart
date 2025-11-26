@@ -158,7 +158,7 @@ class ListCoursViewState extends State<ListCoursView>{
 
 //Widget correspondant au titre du module
   SizedBox moduleHeader(Module module, double? progress){
-    //progress : Valeur de la progression entre 0 et ArchiveBestPattern2QCM
+    //progress : Valeur de la progression entre 0 et 1
     //module : module dont on veut afficher le header
 
     //Model utilisé pour récupérer l'image du module à afficher dans le header. 
