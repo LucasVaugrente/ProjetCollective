@@ -388,24 +388,24 @@ Future<void> insertSampleData() async {
   /*
   // Création de Mots (Mots pour le MotsCroises)
   final mot1 = Mot(
-      idMotsCroises: ArchiveBestPattern2QCM,
+      idMotsCroises: 1,
       mot: 'journalisme',
       indice: 'Domaine d’étude',
       direction: 'horizontal',
       positionDepartX: 0,
       positionDepartY: 0);
   final mot2 = Mot(
-      idMotsCroises: ArchiveBestPattern2QCM,
+      idMotsCroises: 1,
       mot: 'presse',
       indice: 'Média écrit',
       direction: 'vertical',
-      positionDepartX: ArchiveBestPattern2QCM,
-      positionDepartY: ArchiveBestPattern2QCM);
+      positionDepartX: 1,
+      positionDepartY: 1);
   await motRepository.create(mot1);
   await motRepository.create(mot2);
 
   // Création de MotsCroises
-  final motsCroises = MotsCroises(idMiniJeu: ArchiveBestPattern2QCM, tailleGrille: '10x10');
+  final motsCroises = MotsCroises(idMiniJeu: 1, tailleGrille: '10x10');
   final motsCroisesId = await motsCroisesRepository.create(motsCroises);
 
   // Création d'un MiniJeu
