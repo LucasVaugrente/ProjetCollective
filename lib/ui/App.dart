@@ -76,7 +76,7 @@ class _AppState extends State<App> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'lib/data/AppData/CharteFactoscope/logo-factoscope_seul.png',
+                  'lib/data/AppData/CharteFactoscope/logo-factoscope_seul_2.png',
                   height: 40,
                   width: 190,
                   fit: BoxFit.contain,
