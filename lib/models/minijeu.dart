@@ -1,12 +1,9 @@
-import 'package:seriouse_game/models/motsCroises.dart';
-
 class MiniJeu {
    int? id;
    int idCours;
    String nom;
    String? description;
    int progression;
-   List<MotsCroises>? motsCroises; // Liste des mots croisés associés
 
   MiniJeu({
     this.id,
@@ -16,7 +13,7 @@ class MiniJeu {
     required this.progression,
   });
 
-  // Conversion en Map pour SQLite (sans les mots croisés)
+  // Conversion en Map pour SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -27,7 +24,7 @@ class MiniJeu {
     };
   }
 
-  // Conversion d'une Map SQLite en objet (sans les mots croisés)
+  // Conversion d'une Map SQLite en objet
   factory MiniJeu.fromMap(Map<String, dynamic> map) {
     return MiniJeu(
       id: map['id'],

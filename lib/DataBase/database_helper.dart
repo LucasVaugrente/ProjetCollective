@@ -74,30 +74,6 @@ class DatabaseHelper {
 ''');
 
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS MotsCroises (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_minijeu INTEGER NOT NULL,
-        taille_grille TEXT NOT NULL,
-        description TEXT,
-        FOREIGN KEY (id_minijeu) REFERENCES MiniJeu (id) ON DELETE CASCADE
-
-      );
-    ''');
-
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS Mot (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_motscroises INTEGER NOT NULL,
-        mot TEXT NOT NULL,
-        indice TEXT NOT NULL,
-        direction TEXT NOT NULL,
-        position_depart_x INTEGER NOT NULL,
-        position_depart_y INTEGER NOT NULL,
-        FOREIGN KEY (id_motscroises) REFERENCES MotsCroises (id) ON DELETE CASCADE
-      );
-    ''');
-
-    await db.execute('''
   CREATE TABLE IF NOT EXISTS MediaCours (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_page INTEGER NOT NULL,
