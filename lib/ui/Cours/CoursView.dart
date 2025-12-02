@@ -1,4 +1,4 @@
-import 'dart:ffi';
+// ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
 
@@ -10,7 +10,6 @@ import 'package:seriouse_game/ui/QCM/JeuQCMView.dart';
 
 import 'package:seriouse_game/ui/CoursSelectionne.dart';
 import 'package:seriouse_game/models/cours.dart';
-import 'package:seriouse_game/repositories/coursRepository.dart';
 
 import 'package:go_router/go_router.dart';
 
@@ -124,10 +123,9 @@ class HeaderWidget extends StatelessWidget {
                   value: progression, // Progression à 50%
                   minHeight: 6,
                   color: Colors.teal,
-                  backgroundColor: Colors.teal.withOpacity(0.2),
+                  backgroundColor: Colors.teal.withAlpha((255 * 0.2).round()),
                 ),
               ),
-            
           ],
     );
         

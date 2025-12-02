@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:seriouse_game/repositories/coursRepository.dart';
 import 'package:seriouse_game/repositories/moduleRepository.dart';
 import 'package:seriouse_game/repositories/pageRepository.dart';
@@ -26,7 +27,9 @@ class ProgressionUseCase {
 
       return pourcentage;
     } catch (e) {
-      print("Erreur lors du calcul du pourcentage de progression globale : $e");
+      if (kDebugMode) {
+        print("Erreur lors du calcul du pourcentage de progression globale : $e");
+      }
       return 0;
     }
   }
@@ -48,7 +51,9 @@ class ProgressionUseCase {
 
       return pourcentage;
     } catch (e) {
-      print("Erreur lors du calcul du pourcentage de progression de module : $e");
+      if (kDebugMode) {
+        print("Erreur lors du calcul du pourcentage de progression de module : $e");
+      }
       return 0;
     }
   }
@@ -72,7 +77,9 @@ class ProgressionUseCase {
 
       return pourcentage;
     } catch (e) {
-      print("Erreur lors du calcul du pourcentage de pages vues : $e");
+      if (kDebugMode) {
+        print("Erreur lors du calcul du pourcentage de pages vues : $e");
+      }
       return 0;
     }
   }
@@ -88,7 +95,9 @@ class ProgressionUseCase {
 
       return pourcentage;
     } catch (e) {
-      print("Erreur lors du calcul du pourcentage de pages vues : $e");
+      if (kDebugMode) {
+        print("Erreur lors du calcul du pourcentage de pages vues : $e");
+      }
       return 0;
     }
   }

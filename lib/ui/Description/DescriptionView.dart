@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:seriouse_game/services/coursService.dart';
 import 'package:seriouse_game/models/cours.dart';
-import 'package:seriouse_game/models/objectifCours.dart'; // Importe le modèle ObjectifCours
 
-
-import 'package:seriouse_game/models/cours.dart';
 import 'package:seriouse_game/ui/Cours/CoursViewModel.dart';
 
 class DescriptionView extends StatelessWidget {

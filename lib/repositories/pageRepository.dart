@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:seriouse_game/DataBase/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/page.dart';
@@ -75,7 +76,9 @@ Future<int> getNbPageByCourseId(int courseId) async {
 
   Future<int> setPageVisite(int pageId) async {
     final db = await _dbHelper.database;
-    print("Page $pageId visité");
+    if (kDebugMode) {
+      print("Page $pageId visité");
+    }
     return await db.update(
       'page',
       {'est_vue' : true},
