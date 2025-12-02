@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS page (
     id INT AUTO_INCREMENT PRIMARY KEY,
     description TEXT,
     ordre INT NOT NULL,
-    urlAudio TEXT DEFAULT '',
+    urls TEXT DEFAULT '',
     est_vue INTEGER DEFAULT 0,
     id_cours INT NOT NULL,
     FOREIGN KEY (id_cours) REFERENCES cours(id)
