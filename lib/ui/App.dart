@@ -4,7 +4,6 @@ import 'package:seriouse_game/ui/LaunchScreen/LaunchScreenView.dart';
 import 'package:seriouse_game/ui/ListCoursView.dart';
 import 'package:seriouse_game/ui/ListModuleView.dart';
 import 'package:seriouse_game/ui/Cours/CoursView.dart';
-import 'package:go_router/go_router.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -108,15 +107,15 @@ class _AppState extends State<App> {
                     padding: EdgeInsets.only(top: 5),
                     child: Icon(Icons.home),
                   ),
-                  label: 'Home',
+                  label: 'Accueil',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.book),
-                  label: 'Modules',
+                  label: 'Formation',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.verified),
-                  label: 'Certification',
+                  label: 'Validation',
                 ),
               ],
             ),

@@ -347,7 +347,7 @@ Future<void> insertModule3() async {
 Future<void> insertModule4() async {
   // Création du Module
   final module = Module(
-      titre: 'Pour aller plus loin',
+      titre: 'Thématique 4',
       urlImg: 'lib/data/AppData/facto-societe.png',
       description: 'Toutes les références et ressources en relation avec l\'Éducation aux médias et à l’information sont répertoriées ici. '
       );
