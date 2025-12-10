@@ -1,0 +1,7 @@
+Titre_cours_relie_au_jeu;
+question1;reponse1;reponse2;reponse3;reponse4;ordre_solution;Si c'est que des chaines de caractères à comparer (exemples : dates, etc)
+question2;URL1;URL2;URL3;URL4;ordre_solution;Si c'est que des images à comparer (exemples : evenements historiques, taille d'objets, etc)
+
+
+Par exemple : ordre=reponse2<reponse1<reponse4<reponse3
+Par exemple : ordre=URL3<URL4<URL1<URL1
