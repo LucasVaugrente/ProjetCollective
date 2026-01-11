@@ -14,25 +14,24 @@ class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     // FutureBuilder permet d'attendre que les données d'exemple soient insérés avant le lancement de l'UI
     return FutureBuilder<void>(
-              future: insertSampleData(), // Insertion des données dans la bdd
-              builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                        case ConnectionState.done: // L'insertion est fini : 
-                          return MaterialApp.router( // Voir app.dart pour avoir le routeur et le 1er widget de l'app
-                                //debugShowCheckedModeBanner: false,
-                                routerConfig: router,
-                              );
-                        default: // L'insertion n'a pas fini : Page d'attente #TODO
-                          return const CircularProgressIndicator();
-                    }
-              }
-    );
+        future: insertSampleData(), // Insertion des données dans la bdd
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done: // L'insertion est fini :
+              return MaterialApp.router(
+                // Voir app.dart pour avoir le routeur et le 1er widget de l'app
+                //debugShowCheckedModeBanner: false,
+                routerConfig: router,
+              );
+            default: // L'insertion n'a pas fini : Page d'attente #TODO
+              return const CircularProgressIndicator();
+          }
+        });
   }
 }
-
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -60,16 +59,12 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Demo',
       home: Scaffold(
         appBar: AppBar(
-
           title: const Text("Courses List"),
         ),
         body: const Center(
           child: Text("Hello"),
         ),
-
       ),
     );
   }
 }
-
-

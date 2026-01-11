@@ -1,11 +1,11 @@
 import 'package:factoscope/models/module.dart';
 import 'package:factoscope/database_helper.dart';
 
-class ModuleRepository{
+class ModuleRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // --- CRUD Methods ---
-   Future<int> create(Module Module) async {
+  Future<int> create(Module Module) async {
     final db = await _dbHelper.database;
     return await db.insert('module', Module.toMap());
   }
@@ -24,13 +24,13 @@ class ModuleRepository{
     return null;
   }
 
-   Future<List<Module>> getAll() async {
+  Future<List<Module>> getAll() async {
     final db = await _dbHelper.database;
     final result = await db.query('module');
     return result.map((map) => Module.fromMap(map)).toList();
   }
 
-   Future<int> update(Module Module) async {
+  Future<int> update(Module Module) async {
     final db = await _dbHelper.database;
     return await db.update(
       'module',
@@ -40,7 +40,7 @@ class ModuleRepository{
     );
   }
 
-   Future<int> delete(int id) async {
+  Future<int> delete(int id) async {
     final db = await _dbHelper.database;
     return await db.delete(
       'module',
@@ -48,5 +48,4 @@ class ModuleRepository{
       whereArgs: [id],
     );
   }
-
 }

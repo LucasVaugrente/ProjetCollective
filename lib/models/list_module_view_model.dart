@@ -5,7 +5,6 @@ import 'package:factoscope/repositories/module_repository.dart';
 
 // Classe permettant d'extraire la liste des modules
 class ListModuleViewModel with ChangeNotifier {
-  
   final progressionUseCase = ProgressionUseCase();
 
   List<Module> listModule = List.empty();
@@ -18,7 +17,7 @@ class ListModuleViewModel with ChangeNotifier {
       print("Erreur lors de la récupération des modules : $e");
     }
   }
-  
+
   Future<int> getProgressionGlobale() async {
     double progress = await progressionUseCase.calculerProgressionGlobale();
     return progress.round();

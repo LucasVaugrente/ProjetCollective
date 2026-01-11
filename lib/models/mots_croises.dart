@@ -1,10 +1,11 @@
 import 'package:factoscope/models/mot.dart';
+
 class MotsCroises {
-   int? id;
-   int idMiniJeu;
-   String tailleGrille;
-   String? description;
-   List<Mot>? mots; // Liste des mots associés
+  int? id;
+  int idMiniJeu;
+  String tailleGrille;
+  String? description;
+  List<Mot>? mots; // Liste des mots associés
 
   MotsCroises({
     this.id,
@@ -32,6 +33,4 @@ class MotsCroises {
       description: map['description'],
     );
   }
-
-
 }

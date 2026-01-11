@@ -7,7 +7,6 @@ import 'package:factoscope/ui/Description/description_view.dart';
 import 'package:factoscope/ui/Contenu/contenu_cours_view.dart';
 import 'package:factoscope/ui/QCM/jeu_qcm_view.dart';
 
-
 import 'package:factoscope/ui/cours_selectionne.dart';
 import 'package:factoscope/models/cours.dart';
 
@@ -17,32 +16,39 @@ class CoursView extends StatelessWidget {
   CoursView({super.key, required int coursId}) {
     // MAJ du ViewModel avec le nouveau cours séléctionné
     CoursSelectionne coursSelectionne = CoursSelectionne.instance;
-    coursViewModel.loadContenu(coursSelectionne.cours);  // #TODO : A mettre dans ListCours.dart
+    coursViewModel.loadContenu(
+        coursSelectionne.cours); // #TODO : A mettre dans ListCours.dart
     coursViewModel.setIndexPageVisite(coursSelectionne.cours);
   }
 
   Widget? child;
-  
+
   final coursViewModel = CoursViewModel();
 
   Future<void> changePage(BuildContext context) async {
     CoursSelectionne coursSelectionne = CoursSelectionne.instance;
 
-    int nbPageCours = await coursViewModel.getNombrePageDeContenu(coursSelectionne.cours);
-    int nbPageJeu = await coursViewModel.getNombrePageDeJeu(coursSelectionne.cours);
+    int nbPageCours =
+        await coursViewModel.getNombrePageDeContenu(coursSelectionne.cours);
+    int nbPageJeu =
+        await coursViewModel.getNombrePageDeJeu(coursSelectionne.cours);
     int page = coursViewModel.page;
 
-    Widget nouvellePage = const Text("PB lors du chargement de la page de cours");
-    if (page==0) {
-      nouvellePage = DescriptionView(cours: coursSelectionne.cours, coursViewModel: coursViewModel);
+    Widget nouvellePage =
+        const Text("PB lors du chargement de la page de cours");
+    if (page == 0) {
+      nouvellePage = DescriptionView(
+          cours: coursSelectionne.cours, coursViewModel: coursViewModel);
       //print("Chargement de description");
-    } else if (page<=nbPageCours) {
-
-      nouvellePage = ContenuCoursView(cours: coursSelectionne.cours, selectedPageIndex: page - 1);
+    } else if (page <= nbPageCours) {
+      nouvellePage = ContenuCoursView(
+          cours: coursSelectionne.cours, selectedPageIndex: page - 1);
       //print("Chargement de contenu");
-    } else if (page<=nbPageCours + nbPageJeu) {
-      // Page jeu 
-      nouvellePage = JeuQCMView(cours: coursSelectionne.cours, selectedPageIndex: page - nbPageCours - 1);
+    } else if (page <= nbPageCours + nbPageJeu) {
+      // Page jeu
+      nouvellePage = JeuQCMView(
+          cours: coursSelectionne.cours,
+          selectedPageIndex: page - nbPageCours - 1);
     } else {
       // Redirection vers la page de module
       GoRouter.of(context).go('/module');
@@ -53,42 +59,44 @@ class CoursView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return ListenableBuilder(
-          listenable: coursViewModel, // On écoute le changement de page du ViewModel
-          builder: (context, _) {
-            // Le futur Builder sert à attendre l'exécution de la méthode changePage() avant de build :
-            // Sans, la page à afficher (ie this.child) est récupéré après le build : 
-            //            Il n'est donc pas affiché
-            return FutureBuilder<void>(
-              future: changePage(context), // Récupération de la bonne View à charger selon la page visitée du cours sélectionné
+        listenable: coursViewModel,
+        // On écoute le changement de page du ViewModel
+        builder: (context, _) {
+          // Le futur Builder sert à attendre l'exécution de la méthode changePage() avant de build :
+          // Sans, la page à afficher (ie this.child) est récupéré après le build :
+          //            Il n'est donc pas affiché
+          return FutureBuilder<void>(
+              future: changePage(context),
+              // Récupération de la bonne View à charger selon la page visitée du cours sélectionné
               builder: (context, snapshot) {
-
-                    return Scaffold(
-                      appBar: AppBar(
-                        backgroundColor: Colors.white,
-                        elevation: 2,
-                        title: FutureBuilder( // Permet d'attendre le calcul de progression 
-                                  future: coursViewModel.getProgressionActuelle(CoursSelectionne.instance.cours), 
-                                  builder: (context, snapshot) {  
-                                      return HeaderWidget(cours: CoursSelectionne.instance.cours, progression: snapshot.data);
-                                  }),
-                        centerTitle: false,
-                      ),
-                      body: child,
-                                            // La page de description n'a pas besoin du footer : Il change la page vu grâce à un bouton
-                      bottomNavigationBar: child.runtimeType == DescriptionView ? null : 
-                                            FooterWidget(
-                                              courseTitle: "Cours 1",
-                                              pageNumber: coursViewModel.page,
-                                              coursViewModel: coursViewModel,
-                                            ), 
-                    );
-              }
-            );
-          }
-    );
-
+                return Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: Colors.white,
+                    elevation: 2,
+                    title: FutureBuilder(
+                        // Permet d'attendre le calcul de progression
+                        future: coursViewModel.getProgressionActuelle(
+                            CoursSelectionne.instance.cours),
+                        builder: (context, snapshot) {
+                          return HeaderWidget(
+                              cours: CoursSelectionne.instance.cours,
+                              progression: snapshot.data);
+                        }),
+                    centerTitle: false,
+                  ),
+                  body: child,
+                  // La page de description n'a pas besoin du footer : Il change la page vu grâce à un bouton
+                  bottomNavigationBar: child.runtimeType == DescriptionView
+                      ? null
+                      : FooterWidget(
+                          courseTitle: "Cours 1",
+                          pageNumber: coursViewModel.page,
+                          coursViewModel: coursViewModel,
+                        ),
+                );
+              });
+        });
   }
 }
 
@@ -105,33 +113,30 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-          children: [
-            const SizedBox(width: 8),
-            // Titre
-            Text(
-              cours.titre,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            // Barre de progression
-            ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progression, // Progression à 50%
-                  minHeight: 6,
-                  color: Colors.teal,
-                  backgroundColor: Colors.teal.withOpacity(0.2),
-                ),
-              ),
-            
-          ],
+      children: [
+        const SizedBox(width: 8),
+        // Titre
+        Text(
+          cours.titre,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        // Barre de progression
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: progression, // Progression à 50%
+            minHeight: 6,
+            color: Colors.teal,
+            backgroundColor: Colors.teal.withOpacity(0.2),
+          ),
+        ),
+      ],
     );
-        
   }
-     
 }
 
 class FooterWidget extends StatelessWidget {

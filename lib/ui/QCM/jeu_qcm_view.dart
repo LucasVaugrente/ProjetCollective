@@ -8,7 +8,8 @@ class JeuQCMView extends StatefulWidget {
   final Cours cours;
   final int selectedPageIndex;
 
-  const JeuQCMView({super.key, required this.cours, required this.selectedPageIndex});
+  const JeuQCMView(
+      {super.key, required this.cours, required this.selectedPageIndex});
 
   @override
   _JeuQCMViewState createState() => _JeuQCMViewState();
@@ -22,7 +23,7 @@ class _JeuQCMViewState extends State<JeuQCMView> {
   @override
   void didUpdateWidget(covariant JeuQCMView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Si la page sélectionnée change, réinitialiser l'état
     if (oldWidget.selectedPageIndex != widget.selectedPageIndex) {
       setState(() {
@@ -37,7 +38,8 @@ class _JeuQCMViewState extends State<JeuQCMView> {
     return Scaffold(
       appBar: AppBar(title: const Text("Jeu QCM")),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: JeuQCMViewModel().recupererQCM(widget.cours, widget.selectedPageIndex),
+        future: JeuQCMViewModel()
+            .recupererQCM(widget.cours, widget.selectedPageIndex),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -63,7 +65,8 @@ class _JeuQCMViewState extends State<JeuQCMView> {
           List<String?> reponseText;
           if (reponses.first.imageUrl == null && reponses.first.text != null) {
             reponseText = reponses.map((r) => r.text).toList();
-          } else if (reponses.first.imageUrl != null && reponses.first.text == null) {
+          } else if (reponses.first.imageUrl != null &&
+              reponses.first.text == null) {
             reponseText = reponses.map((r) => r.imageUrl).toList();
           } else {
             throw Exception("Format reponse non respecter : Image ou texte ");
@@ -74,7 +77,10 @@ class _JeuQCMViewState extends State<JeuQCMView> {
           return Column(
             children: [
               _buildQuestionWidget(questionText),
-              ...List.generate(reponseText.length, (index) => _buildAnswerWidget(reponseText[index], index + 1, correctAnswer)),
+              ...List.generate(
+                  reponseText.length,
+                  (index) => _buildAnswerWidget(
+                      reponseText[index], index + 1, correctAnswer)),
               ElevatedButton(
                 onPressed: _selectedAnswer == null
                     ? null
@@ -96,8 +102,10 @@ class _JeuQCMViewState extends State<JeuQCMView> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: question is String
-          ? Text(question, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
-          : Image.network(question), // Remplace par Image.asset si fichiers locaux
+          ? Text(question,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+          : Image.network(
+              question), // Remplace par Image.asset si fichiers locaux
     );
   }
 

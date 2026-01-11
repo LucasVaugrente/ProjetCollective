@@ -74,7 +74,8 @@ class CoursRepository {
     );
   }
 
-  Future<int> saveMediaForCourse(int coursId, String url, String localPath, String type, int pageId) async {
+  Future<int> saveMediaForCourse(int coursId, String url, String localPath,
+      String type, int pageId) async {
     final db = await _dbHelper.database;
     return await db.insert('media', {
       'url': url,

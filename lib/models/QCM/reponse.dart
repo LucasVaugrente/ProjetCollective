@@ -7,7 +7,13 @@ class Reponse {
   final String? caption;
   final String type;
 
-  Reponse({required this.id, required this.idQCM, this.text, this.imageUrl, this.caption, required this.type});
+  Reponse(
+      {required this.id,
+      required this.idQCM,
+      this.text,
+      this.imageUrl,
+      this.caption,
+      required this.type});
 
   /// Crée une instance de Reponse à partir d'une map.
   factory Reponse.fromMap(Map<String, dynamic> map) {
@@ -17,7 +23,11 @@ class Reponse {
       text: map['txt'],
       imageUrl: map['urlImage'],
       caption: map['caption'],
-      type: map.containsKey('txt') ? 'text' : map.containsKey('urlImage') ? 'image' : 'unknown',
+      type: map.containsKey('txt')
+          ? 'text'
+          : map.containsKey('urlImage')
+              ? 'image'
+              : 'unknown',
     );
   }
 

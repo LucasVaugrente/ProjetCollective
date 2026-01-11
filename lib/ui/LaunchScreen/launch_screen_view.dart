@@ -9,7 +9,8 @@ class LaunchScreenView extends StatefulWidget {
   _LaunchScreenViewState createState() => _LaunchScreenViewState();
 }
 
-class _LaunchScreenViewState extends State<LaunchScreenView> with SingleTickerProviderStateMixin {
+class _LaunchScreenViewState extends State<LaunchScreenView>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<Offset> _offsetAnimation;
@@ -42,7 +43,6 @@ class _LaunchScreenViewState extends State<LaunchScreenView> with SingleTickerPr
     Future.delayed(const Duration(seconds: 2), () {
       _controller.forward();
     });
-    
   }
 
   @override
@@ -55,32 +55,31 @@ class _LaunchScreenViewState extends State<LaunchScreenView> with SingleTickerPr
   Widget build(BuildContext context) {
     try {
       return Scaffold(
-      body: FadeTransition(
-        opacity: _opacityAnimation,
-        child: Container(
-          color: const Color.fromRGBO(252, 179, 48, 1),
-          child: Center(
-            child: SlideTransition(
-              position: _offsetAnimation,
-              child: SizedBox(
-                width: 250,
-                height: 250,
-                child: Image.asset(
-                  'lib/assets/logo-factoscope.png',
-                  fit: BoxFit.contain,
+        body: FadeTransition(
+          opacity: _opacityAnimation,
+          child: Container(
+            color: const Color.fromRGBO(252, 179, 48, 1),
+            child: Center(
+              child: SlideTransition(
+                position: _offsetAnimation,
+                child: SizedBox(
+                  width: 250,
+                  height: 250,
+                  child: Image.asset(
+                    'lib/assets/logo-factoscope.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
     } catch (e) {
       if (kDebugMode) {
         print("Erreur lors du chargement du QCM : $e");
       }
       return const Text("aa");
     }
-    
   }
 }

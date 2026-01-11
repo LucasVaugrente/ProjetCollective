@@ -56,16 +56,16 @@ class PageRepository {
     return result.map((map) => Page.fromMap(map)).toList();
   }
 
-Future<int> getNbPageByCourseId(int courseId) async {
-  final db = await _dbHelper.database;
-  final result = await db.rawQuery(
-    'SELECT COUNT(*) as count FROM page WHERE id_cours = ?',
-    [courseId],
-  );
-  return Sqflite.firstIntValue(result) ?? 0;
-}
+  Future<int> getNbPageByCourseId(int courseId) async {
+    final db = await _dbHelper.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM page WHERE id_cours = ?',
+      [courseId],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
 
- Future<int> getNbPageVisite(int courseId) async {
+  Future<int> getNbPageVisite(int courseId) async {
     final db = await _dbHelper.database;
     final result = await db.rawQuery(
       'SELECT COUNT(*) as count FROM page WHERE id_cours = ? AND est_vue = ?',
@@ -81,10 +81,9 @@ Future<int> getNbPageByCourseId(int courseId) async {
     }
     return await db.update(
       'page',
-      {'est_vue' : true},
+      {'est_vue': true},
       where: 'id = ?',
       whereArgs: [pageId],
     );
   }
-
 }

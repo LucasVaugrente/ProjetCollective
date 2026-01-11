@@ -66,5 +66,4 @@ class MiniJeuRepository {
 
     return result.isNotEmpty ? MiniJeu.fromMap(result.first) : null;
   }
-
 }

@@ -5,7 +5,7 @@ import 'package:factoscope/repositories/media_cours_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/models/cours.dart';
 
-class CoursViewModel extends ChangeNotifier{
+class CoursViewModel extends ChangeNotifier {
   CoursViewModel();
 
   // Information de la page actuelle
@@ -33,11 +33,10 @@ class CoursViewModel extends ChangeNotifier{
 
   void setIndexPageVisite(Cours cours) {
     // Attention la page 0 est la page de description, pas la 1ère page de contenu
-    pageRepository.getNbPageVisite(cours.id!).then( (indexPage) {
+    pageRepository.getNbPageVisite(cours.id!).then((indexPage) {
       page = indexPage;
       notifyListeners();
     });
-
   }
 
   void changementPageSuivante() async {
@@ -47,14 +46,16 @@ class CoursViewModel extends ChangeNotifier{
   }
 
   void changementPagePrecedente() {
-    if (page>0) {
+    if (page > 0) {
       page--;
       notifyListeners();
     }
   }
-  
+
   Future<double> getProgressionActuelle(Cours cours) async {
-    return await progressionUseCase.calculerProgressionActuelleCours(cours.id!, page)/100;
+    return await progressionUseCase.calculerProgressionActuelleCours(
+            cours.id!, page) /
+        100;
   }
 
   Future<void> loadContenu(Cours cours) async {
@@ -68,11 +69,9 @@ class CoursViewModel extends ChangeNotifier{
     for (var page in cours.pages ?? []) {
       page.medias = await mediaCoursRepository.getByPageId(page.id!);
       if (kDebugMode) {
-        print("Nombre de médias pour la page \${page.id} : \${page.medias?.length}");
+        print(
+            "Nombre de médias pour la page \${page.id} : \${page.medias?.length}");
       }
     }
   }
-
 }
-
-

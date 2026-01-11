@@ -199,8 +199,8 @@ SizedBox moduleHeader(Module module, double? progress) {
                       borderRadius: BorderRadius.circular(4),
                       //Barre de progression du module
                       child: LinearProgressIndicator(
-                        value:
-                            progress, //On utilise progress pour définir le remplissage
+                        value: progress,
+                        //On utilise progress pour définir le remplissage
                         minHeight: 6,
                         color: const Color.fromARGB(255, 90, 230, 220),
                         backgroundColor:

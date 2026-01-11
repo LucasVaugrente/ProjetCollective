@@ -15,12 +15,15 @@ final router = GoRouter(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) => App(child: child),
       routes: [
-        GoRoute(path: '/', builder: (context, state) => const ListModulesView()),
+        GoRoute(
+            path: '/', builder: (context, state) => const ListModulesView()),
         GoRoute(path: '/cours', builder: (context, state) => ListCoursView()),
-        GoRoute(path: '/cours/:coursId', builder: (context, state) {
-          final coursId = int.parse(state.pathParameters['coursId']!);
-          return CoursView(coursId: coursId);
-        }),
+        GoRoute(
+            path: '/cours/:coursId',
+            builder: (context, state) {
+              final coursId = int.parse(state.pathParameters['coursId']!);
+              return CoursView(coursId: coursId);
+            }),
       ],
     ),
   ],
@@ -32,9 +35,9 @@ class App extends StatefulWidget {
   final Widget? child;
 
   @override
-  State<App> createState() =>
-      _AppState();
+  State<App> createState() => _AppState();
 }
+
 class _AppState extends State<App> {
   int currentIndex = 0;
   bool showLaunchScreen = true;

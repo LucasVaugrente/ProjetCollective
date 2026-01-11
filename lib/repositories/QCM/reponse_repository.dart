@@ -6,10 +6,13 @@ import 'package:factoscope/database_helper.dart';
 class ReponseRepository {
   Future<List<Reponse>> getByQCMId(int qcmId) async {
     final db = await DatabaseHelper.instance.database;
-    final List<Map<String, dynamic>> responseMaps; 
-    responseMaps = await db.query('Reponse', 
-                                  where: 'idQCM = ?', whereArgs: [qcmId],
-                                  orderBy: "idReponse",); // Le order est nécessaire pour l'attribut numSolution du QCM
+    final List<Map<String, dynamic>> responseMaps;
+    responseMaps = await db.query(
+      'Reponse',
+      where: 'idQCM = ?',
+      whereArgs: [qcmId],
+      orderBy: "idReponse",
+    ); // Le order est nécessaire pour l'attribut numSolution du QCM
 
     List<Reponse> responses = [];
 
@@ -57,15 +60,23 @@ class ReponseRepository {
   /// Insère une réponse dans la base de données.
   Future<int> insert(Reponse reponse) async {
     final db = await DatabaseHelper.instance.database;
-    int id = await db.insert('Reponse', {'idReponse': reponse.id, 'idQCM': reponse.idQCM});
-    
+    int id = await db
+        .insert('Reponse', {'idReponse': reponse.id, 'idQCM': reponse.idQCM});
+
     // Vérifie si la réponse est de type texte et insère les données correspondantes.
     if (reponse.type == 'text' && reponse.text != null) {
-      await db.insert('ReponseText', {'idReponse': reponse.id, 'txt': reponse.text});
-    } 
+      await db.insert(
+          'ReponseText', {'idReponse': reponse.id, 'txt': reponse.text});
+    }
     // Vérifie si la réponse est de type image et insère les données correspondantes.
-    else if (reponse.type == 'image' && reponse.imageUrl != null && reponse.caption != null) {
-      await db.insert('ReponseImg', {'idReponse': reponse.id, 'urlImage': reponse.imageUrl, 'caption': reponse.caption});
+    else if (reponse.type == 'image' &&
+        reponse.imageUrl != null &&
+        reponse.caption != null) {
+      await db.insert('ReponseImg', {
+        'idReponse': reponse.id,
+        'urlImage': reponse.imageUrl,
+        'caption': reponse.caption
+      });
     }
     return id;
   }

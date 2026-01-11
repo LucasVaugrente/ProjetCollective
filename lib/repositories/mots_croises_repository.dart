@@ -66,5 +66,4 @@ class MotsCroisesRepository {
 
     return result.map((map) => MotsCroises.fromMap(map)).toList();
   }
-
 }

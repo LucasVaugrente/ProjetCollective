@@ -1,11 +1,12 @@
 import 'package:factoscope/models/cours.dart';
 
 class Module {
-   int? id;
-   String titre;
-   String urlImg;
-   String description;
-   List<Cours>? cours;
+  int? id;
+  String titre;
+  String urlImg;
+  String description;
+  List<Cours>? cours;
+
   Module({
     this.id,
     required this.urlImg,
@@ -16,7 +17,7 @@ class Module {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'urlImg':urlImg,
+      'urlImg': urlImg,
       'titre': titre,
       'description': description,
     };
@@ -30,5 +31,4 @@ class Module {
       description: map['description'],
     );
   }
-
 }

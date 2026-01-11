@@ -38,7 +38,8 @@ final reponseRepo = ReponseRepository();
 final qcmRepo = QCMRepository();
 
 Future<void> insertModule1() async {
-  final String response = await rootBundle.loadString('lib/data/AppData/Module1/metadata.json');
+  final String response =
+      await rootBundle.loadString('lib/data/AppData/Module1/metadata.json');
   final moduleData = await json.decode(response);
 
   final module = Module(
@@ -73,7 +74,8 @@ Future<void> insertModule1() async {
   await objectifCoursRepository.create(objectif3);
 
   // Page 1 : Introduction aux sources d'information
-  Page page1 = Page(idCours: coursId, description: "Qu'est-ce qu'une source d'information ?");
+  Page page1 = Page(
+      idCours: coursId, description: "Qu'est-ce qu'une source d'information ?");
   int pageId1 = await pageRepository.create(page1);
 
   await mediaCoursRepository.create(MediaCours(
@@ -90,7 +92,8 @@ Future<void> insertModule1() async {
       caption: 'Journaliste réalisant une interview'));
 
   // Page 2 : Les différentes sources
-  Page page2 = Page(idCours: coursId, description: "Types de sources d'information");
+  Page page2 =
+      Page(idCours: coursId, description: "Types de sources d'information");
   int pageId2 = await pageRepository.create(page2);
 
   await mediaCoursRepository.create(MediaCours(
@@ -107,7 +110,9 @@ Future<void> insertModule1() async {
       caption: 'Illustration des sources primaires et secondaires'));
 
   // Page 3 : Évaluer la crédibilité d'une source
-  Page page3 = Page(idCours: coursId, description: "Comment vérifier la fiabilité d'une source ?");
+  Page page3 = Page(
+      idCours: coursId,
+      description: "Comment vérifier la fiabilité d'une source ?");
   int pageId3 = await pageRepository.create(page3);
 
   await mediaCoursRepository.create(MediaCours(
@@ -200,7 +205,8 @@ Future<void> insertModule2() async {
   final module = Module(
       titre: 'Producteur de contenus',
       urlImg: 'assets/facto-societe.png',
-      description: 'Grâce aux technologies modernes, tout le monde est aujourd’hui en mesure de diffuser des informations et de produire des contenus. Mais tout le monde n’a pas appris les codes, règles et enjeux d’une information responsable à destination du grand public. Que vous ayez 1 à 1 million de followers, ce module est fait pour vous !');
+      description:
+          'Grâce aux technologies modernes, tout le monde est aujourd’hui en mesure de diffuser des informations et de produire des contenus. Mais tout le monde n’a pas appris les codes, règles et enjeux d’une information responsable à destination du grand public. Que vous ayez 1 à 1 million de followers, ce module est fait pour vous !');
   final moduleId = await moduleRepository.create(module);
 
   // Création des Cours
@@ -238,16 +244,13 @@ Future<void> insertModule3() async {
   final module = Module(
       titre: 'Pros des médias',
       urlImg: 'assets/facto-societe.png',
-      description: 'Les journalistes sont des professionnels de l’information. Pourtant, face à la profusion des sources et, parfois aussi, à l’urgence des situations, ils ne maîtrisent pas tous les clés d’une information traitée éthiquement, professionnellement et de manière responsable. Pourquoi ne pas profiter de ce module pour réviser ses classiques, voire en apprendre davantage sur les techniques de vérification  les plus performantes ?'
-      );
+      description:
+          'Les journalistes sont des professionnels de l’information. Pourtant, face à la profusion des sources et, parfois aussi, à l’urgence des situations, ils ne maîtrisent pas tous les clés d’une information traitée éthiquement, professionnellement et de manière responsable. Pourquoi ne pas profiter de ce module pour réviser ses classiques, voire en apprendre davantage sur les techniques de vérification  les plus performantes ?');
   final moduleId = await moduleRepository.create(module);
 
   // Création des Cours
   Cours cours = Cours(
-      idModule: moduleId,
-      titre: 'Déontologie',
-      contenu: '',
-      description: '');
+      idModule: moduleId, titre: 'Déontologie', contenu: '', description: '');
   // final coursId = await coursRepository.create(cours);
 
   cours = Cours(
@@ -270,7 +273,6 @@ Future<void> insertModule3() async {
       contenu: '',
       description: '');
   await coursRepository.create(cours);
-
 }
 
 Future<void> insertModule4() async {
@@ -278,8 +280,8 @@ Future<void> insertModule4() async {
   final module = Module(
       titre: 'Pour aller plus loin',
       urlImg: 'assets/facto-societe.png',
-      description: 'Toutes les références et ressources en relation avec l\'Éducation aux médias et à l’information sont répertoriées ici. '
-      );
+      description:
+          'Toutes les références et ressources en relation avec l\'Éducation aux médias et à l’information sont répertoriées ici. ');
   final moduleId = await moduleRepository.create(module);
 
   // Création des Cours
@@ -324,7 +326,6 @@ Future<void> insertSampleData() async {
 
   print(moduleSelectionne);
 
-
   if (kDebugMode) {
     print('Toutes les données d\'exemple ont été insérées avec succès.');
   }
@@ -350,7 +351,8 @@ Future<void> testRepositories() async {
 // Récupérer tous les objectifs
   final allObjectifs = await objectifCoursRepository.getAll();
   if (kDebugMode) {
-    print('Objectifs disponibles : ${allObjectifs.map((e) => e.description).toList()}');
+    print(
+        'Objectifs disponibles : ${allObjectifs.map((e) => e.description).toList()}');
   }
 
 // Récupérer un objectif par ID
@@ -366,8 +368,7 @@ Future<void> testRepositories() async {
     print('Objectif supprimé.');
   }
 
-
-    // --- Test Mot ---
+  // --- Test Mot ---
   if (kDebugMode) {
     print('--- Test Mot ---');
   }
@@ -400,7 +401,7 @@ Future<void> testRepositories() async {
   final allMotsCroises = await motsCroisesRepository.getAll();
   if (kDebugMode) {
     print(
-      'Mots croisés disponibles : ${allMotsCroises.map((e) => e.tailleGrille).toList()}');
+        'Mots croisés disponibles : ${allMotsCroises.map((e) => e.tailleGrille).toList()}');
   }
 
   // Récupérer un mots croisés par ID
@@ -408,7 +409,8 @@ Future<void> testRepositories() async {
   final fetchedMotsCroises =
       await motsCroisesRepository.getById(motsCroises.id!);
   if (kDebugMode) {
-    print('Mots croisés récupérés par ID : ${fetchedMotsCroises?.tailleGrille}');
+    print(
+        'Mots croisés récupérés par ID : ${fetchedMotsCroises?.tailleGrille}');
   }
 
   // Supprimer un mots croisés
@@ -479,7 +481,8 @@ Future<void> testRepositories() async {
     final page = allPages.first;
     final fetchedPage = await pageRepository.getById(page.id!);
     if (kDebugMode) {
-      print('Page récupérée par ID : ${fetchedPage?.id} liée au cours : ${fetchedPage?.idCours}');
+      print(
+          'Page récupérée par ID : ${fetchedPage?.id} liée au cours : ${fetchedPage?.idCours}');
     }
 
     // Supprimer une page
@@ -515,12 +518,13 @@ Future<void> testRepositories() async {
     print("Nombre de page récupéré : ${cours.pages?.length}");
   }
 
-  for (int i=0; i<cours.pages!.length; i++) {
-      cours.pages![i].medias = await mediaCoursRepository.getByPageId(cours.pages![i].id!);
-      if (kDebugMode) {
-        print(cours.pages![i].medias?.length);
-      }
+  for (int i = 0; i < cours.pages!.length; i++) {
+    cours.pages![i].medias =
+        await mediaCoursRepository.getByPageId(cours.pages![i].id!);
+    if (kDebugMode) {
+      print(cours.pages![i].medias?.length);
     }
+  }
 
   // Supprimer une cours
   await coursRepository.delete(cours.id!);

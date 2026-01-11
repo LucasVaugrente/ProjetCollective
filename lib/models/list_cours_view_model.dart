@@ -16,6 +16,7 @@ class ListCoursViewModel with ChangeNotifier {
   List<Cours> _cours = [];
 
   bool get isLoading => _isLoading;
+
   List<Cours> get cours => _cours;
 
   Future<void> getCours(int? idModule) async {
@@ -54,7 +55,8 @@ class ListCoursViewModel with ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await http.get(Uri.parse('${AppConfig.apiBaseUrl}/api/cours/$coursId'));
+      final response = await http
+          .get(Uri.parse('${AppConfig.apiBaseUrl}/api/cours/$coursId'));
       if (response.statusCode == 200) {
         final courseData = jsonDecode(response.body);
 

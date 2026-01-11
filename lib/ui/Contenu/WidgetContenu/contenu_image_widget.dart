@@ -4,14 +4,14 @@ import 'package:factoscope/ui/Contenu/contenu_cours_view_model.dart';
 
 class ContenuImageWidget extends StatelessWidget {
   final MediaCours media;
-  final double width; 
-  final double height; 
-  final ContenuCoursViewModel viewModel = ContenuCoursViewModel(); 
+  final double width;
+  final double height;
+  final ContenuCoursViewModel viewModel = ContenuCoursViewModel();
 
   ContenuImageWidget({
     super.key,
     required this.media,
-    this.width = 200,  // Valeur par défaut
+    this.width = 200, // Valeur par défaut
     this.height = 200, // Valeur par défaut
   });
 
@@ -24,12 +24,16 @@ class ContenuImageWidget extends StatelessWidget {
       child: imagePath != null
           ? Image.asset(
               imagePath,
-              width: width,  // Largeur de l'image
-              height: height, // Hauteur de l'image
+              width: width,
+              // Largeur de l'image
+              height: height,
+              // Hauteur de l'image
               fit: BoxFit.cover,
-              semanticLabel: media.caption, // Accessibilité
+              semanticLabel: media.caption,
+              // Accessibilité
               errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.broken_image, size: 50, color: Colors.grey);
+                return const Icon(Icons.broken_image,
+                    size: 50, color: Colors.grey);
               },
             )
           : const Icon(Icons.image_not_supported, size: 50, color: Colors.grey),

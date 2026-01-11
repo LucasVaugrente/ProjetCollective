@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/repositories/cours_repository.dart';
-import 'package:factoscope/ui/Cours/cours_view.dart';
 import 'package:go_router/go_router.dart';
 
 class AllCoursView extends StatefulWidget {

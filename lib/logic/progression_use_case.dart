@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 class ProgressionUseCase {
   final pageRepository = PageRepository();
   final coursRepository = CoursRepository();
-  final moduleRepository = ModuleRepository(); 
+  final moduleRepository = ModuleRepository();
 
   ProgressionUseCase();
 
@@ -28,7 +28,8 @@ class ProgressionUseCase {
       return pourcentage;
     } catch (e) {
       if (kDebugMode) {
-        print("Erreur lors du calcul du pourcentage de progression globale : $e");
+        print(
+            "Erreur lors du calcul du pourcentage de progression globale : $e");
       }
       return 0;
     }
@@ -52,7 +53,8 @@ class ProgressionUseCase {
       return pourcentage;
     } catch (e) {
       if (kDebugMode) {
-        print("Erreur lors du calcul du pourcentage de progression de module : $e");
+        print(
+            "Erreur lors du calcul du pourcentage de progression de module : $e");
       }
       return 0;
     }
@@ -69,7 +71,7 @@ class ProgressionUseCase {
 
       // Calcul du pourcentage de pages vues
       double pourcentage;
-      if (totalPages>0) {
+      if (totalPages > 0) {
         pourcentage = (pagesVues / totalPages) * 100;
       } else {
         pourcentage = 0;

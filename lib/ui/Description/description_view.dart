@@ -6,9 +6,12 @@ import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/ui/Cours/cours_view_model.dart';
 
 class DescriptionView extends StatelessWidget {
-  const DescriptionView({Key? key, required this.cours, required this.coursViewModel}) : super(key: key);
+  const DescriptionView(
+      {Key? key, required this.cours, required this.coursViewModel})
+      : super(key: key);
 
-  final CoursViewModel coursViewModel; // Permet de changer la page de cours (utilisé pour le bouton "Commencer le cours")
+  final CoursViewModel
+      coursViewModel; // Permet de changer la page de cours (utilisé pour le bouton "Commencer le cours")
   final Cours cours;
 
   @override
@@ -20,7 +23,7 @@ class DescriptionView extends StatelessWidget {
         title: const Text("Description du Cours"),
       ),
       body: FutureBuilder<Cours?>(
-        future: coursService.getCoursWithObjectifs(cours.id!), 
+        future: coursService.getCoursWithObjectifs(cours.id!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -74,12 +77,13 @@ class DescriptionView extends StatelessWidget {
                   // Liste des objectifs
                   if (cours.objectifs != null && cours.objectifs!.isNotEmpty)
                     ...cours.objectifs!.map(
-                          (objectif) => Padding(
+                      (objectif) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                            const Icon(Icons.check_circle,
+                                color: Colors.green, size: 20),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -100,22 +104,18 @@ class DescriptionView extends StatelessWidget {
                         coursViewModel.changementPageSuivante();
                       },
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        backgroundColor: const Color.fromRGBO(252, 179, 48, 1)
-                      ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          backgroundColor:
+                              const Color.fromRGBO(252, 179, 48, 1)),
                       child: const Text(
                         "Commencer le cours",
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white
-                        ),
-
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ),

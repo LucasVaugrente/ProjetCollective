@@ -57,7 +57,9 @@ class Cours {
           ? (json['pages'] as List).map((page) => Page.fromJson(page)).toList()
           : null,
       objectifs: json['objectifs'] != null
-          ? (json['objectifs'] as List).map((obj) => ObjectifCours.fromJson(obj)).toList()
+          ? (json['objectifs'] as List)
+              .map((obj) => ObjectifCours.fromJson(obj))
+              .toList()
           : null,
     );
   }

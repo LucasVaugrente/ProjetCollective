@@ -1,12 +1,12 @@
 import 'package:factoscope/models/mots_croises.dart';
 
 class MiniJeu {
-   int? id;
-   int idCours;
-   String nom;
-   String? description;
-   int progression;
-   List<MotsCroises>? motsCroises; // Liste des mots croisés associés
+  int? id;
+  int idCours;
+  String nom;
+  String? description;
+  int progression;
+  List<MotsCroises>? motsCroises; // Liste des mots croisés associés
 
   MiniJeu({
     this.id,
@@ -37,6 +37,4 @@ class MiniJeu {
       progression: map['progression'],
     );
   }
-
-
 }
