@@ -76,14 +76,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+  - lib/assets/
   - lib/data/AppData/
-  - lib/data/AppData/CharteFactoscope/
+  - lib/data/AppData/Module1/
   - lib/data/AppData/Module1/Cours1/
   - lib/data/AppData/Module1/Cours2/
-  - lib/data/qcm/
-
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

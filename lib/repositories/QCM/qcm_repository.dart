@@ -2,7 +2,7 @@ import 'package:factoscope/models/QCM/qcm.dart';
 
 import 'package:factoscope/repositories/QCM/question_repository.dart';
 import 'package:factoscope/repositories/QCM/reponse_repository.dart';
-import 'package:factoscope/DataBase/database_helper.dart';
+import 'package:factoscope/database_helper.dart';
 
 /// Repository pour gérer les opérations CRUD des QCM.
 class QCMRepository {

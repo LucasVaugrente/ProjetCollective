@@ -1,4 +1,4 @@
-import 'package:factoscope/DataBase/database_helper.dart';
+import 'package:factoscope/database_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/page.dart';

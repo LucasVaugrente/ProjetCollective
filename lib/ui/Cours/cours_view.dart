@@ -14,7 +14,7 @@ import 'package:factoscope/models/cours.dart';
 import 'package:go_router/go_router.dart';
 
 class CoursView extends StatelessWidget {
-  CoursView({super.key}) {
+  CoursView({super.key, required int coursId}) {
     // MAJ du ViewModel avec le nouveau cours séléctionné
     CoursSelectionne coursSelectionne = CoursSelectionne.instance;
     coursViewModel.loadContenu(coursSelectionne.cours);  // #TODO : A mettre dans ListCours.dart

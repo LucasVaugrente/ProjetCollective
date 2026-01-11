@@ -1,11 +1,11 @@
+// lib/models/objectif_cours.dart
 class ObjectifCours {
-  int? id;
-  int idCours;
-  String description;
+  final int? id;
+  final int idCours;
+  final String description;
 
   ObjectifCours({this.id, required this.idCours, required this.description});
 
-  // Convertir en Map pour SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -14,12 +14,19 @@ class ObjectifCours {
     };
   }
 
-  // Conversion Map vers l'objet ObjectifCours
   factory ObjectifCours.fromMap(Map<String, dynamic> map) {
     return ObjectifCours(
       id: map['id'],
       idCours: map['id_cours'],
       description: map['description'],
+    );
+  }
+
+  factory ObjectifCours.fromJson(Map<String, dynamic> json) {
+    return ObjectifCours(
+      id: json['id'],
+      idCours: json['id_cours'],
+      description: json['description'],
     );
   }
 }

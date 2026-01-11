@@ -7,7 +7,7 @@ class CoursSelectionne {
 
   static CoursSelectionne get instance => _instance;
 
-  Cours cours = Cours(idModule: 0, titre: "UTILISE POUR INIT LE SINGLETON COURSSELECTIONNE", contenu: "UTILISE POUR INIT LE SINGLETON COURSSELECTIONNE");
+  Cours cours = Cours(idModule: 0, titre: "UTILISE POUR INIT LE SINGLETON COURSSELECTIONNE", contenu: "UTILISE POUR INIT LE SINGLETON COURSSELECTIONNE", description: "UTILISE POUR INIT LE SINGLETON COURSSELECTIONNE");
 
   void setCours(Cours cours) {
     this.cours = cours;

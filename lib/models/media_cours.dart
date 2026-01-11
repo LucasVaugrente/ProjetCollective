@@ -1,21 +1,22 @@
 class MediaCours {
-  int? id;
-  int idPage;
-  int ordre;
-  String url;
-  String type;
-  String? caption;
+  final int? id;
+  final String url;
+  final String? localPath;
+  final String type;
+  final int idPage;
+  final String? caption;
+  final int ordre;
 
   MediaCours({
     this.id,
-    required this.idPage,
-    required this.ordre,
     required this.url,
+    this.localPath,
     required this.type,
+    required this.idPage,
     this.caption,
+    this.ordre = 0,
   });
 
-  // Conversion en Map pour SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -27,7 +28,6 @@ class MediaCours {
     };
   }
 
-  // Conversion d'une Map SQLite en objet MediaCours
   factory MediaCours.fromMap(Map<String, dynamic> map) {
     return MediaCours(
       id: map['id'],
@@ -36,6 +36,15 @@ class MediaCours {
       url: map['url'],
       type: map['type'],
       caption: map['caption'],
+    );
+  }
+
+  factory MediaCours.fromJson(Map<String, dynamic> json) {
+    return MediaCours(
+      url: json['url'],
+      type: json['type'],
+      idPage: json['id_page'] ?? 0,
+      caption: json['caption'],
     );
   }
 }

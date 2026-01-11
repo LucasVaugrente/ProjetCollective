@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:factoscope/models/module.dart';
 import 'package:factoscope/repositories/cours_repository.dart';
 
@@ -13,46 +15,43 @@ import 'package:factoscope/repositories/QCM/qcm_repository.dart';
 import 'package:factoscope/repositories/QCM/question_repository.dart';
 import 'package:factoscope/repositories/QCM/reponse_repository.dart';
 import 'package:factoscope/ui/module_selectionne.dart';
+import 'package:factoscope/ui/cours_selectionne.dart';
 import 'package:flutter/foundation.dart';
 
-import 'DataBase/database_helper.dart';
+import 'package:factoscope/database_helper.dart';
 import 'models/cours.dart';
 import 'models/media_cours.dart';
 import 'models/objectif_cours.dart';
 import 'models/page.dart';
 
-import 'models/QCM/qcm.dart';
-import 'models/QCM/question.dart';
-import 'models/QCM/reponse.dart';
-
-import 'package:factoscope/ui/cours_selectionne.dart';
-
 final moduleRepository = ModuleRepository();
-  final coursRepository = CoursRepository();
-  final motRepository = MotRepository();
-  final motsCroisesRepository = MotsCroisesRepository();
-  final miniJeuRepository = MiniJeuRepository();
-  final mediaCoursRepository = MediaCoursRepository();
-  final pageRepository = PageRepository();
-  final objectifCoursRepository = ObjectifCoursRepository();
+final coursRepository = CoursRepository();
+final motRepository = MotRepository();
+final motsCroisesRepository = MotsCroisesRepository();
+final miniJeuRepository = MiniJeuRepository();
+final mediaCoursRepository = MediaCoursRepository();
+final pageRepository = PageRepository();
+final objectifCoursRepository = ObjectifCoursRepository();
 
-  final questionRepo = QuestionRepository();
-  final reponseRepo = ReponseRepository();
-  final qcmRepo = QCMRepository();
+final questionRepo = QuestionRepository();
+final reponseRepo = ReponseRepository();
+final qcmRepo = QCMRepository();
 
 Future<void> insertModule1() async {
-  // Création du Module
+  final String response = await rootBundle.loadString('lib/data/AppData/Module1/metadata.json');
+  final moduleData = await json.decode(response);
+
   final module = Module(
-      titre: 'Citoyens engagés',
-      urlImg: 'lib/data/AppData/facto-societe.png',
-      description: 'Chaque citoyen a un rôle à jouer en matière de lutte contre la désinformation… À condition qu’il maîtrise les codes de son environnement informationnel : les sources à sa disposition, les fondements du travail journalistique, les rouages des réseaux sociaux numériques, les risques désinformationnels, etc. A nous tous de nous emparer de ces connaissances pour exercer pleinement et librement nos droits et devoirs de citoyens !');
+      titre: moduleData['titre'],
+      urlImg: moduleData['urlImg'] ?? 'assets/facto-societe.png',
+      description: moduleData['description']);
   final moduleId = await moduleRepository.create(module);
 
-  // Création du Cours
   Cours cours = Cours(
       idModule: moduleId,
       titre: 'Les sources d’informations',
-      contenu: 'Comprendre et évaluer les sources d’information.');
+      contenu: 'Comprendre et évaluer les sources d’information.',
+      description: 'Description des sources d’informations.');
   final coursId = await coursRepository.create(cours);
 
   // Ajout des Objectifs du Cours
@@ -68,15 +67,15 @@ Future<void> insertModule1() async {
     idCours: coursId,
     description: 'Identifier les signes de désinformation',
   );
-  
+
   await objectifCoursRepository.create(objectif1);
   await objectifCoursRepository.create(objectif2);
   await objectifCoursRepository.create(objectif3);
 
   // Page 1 : Introduction aux sources d'information
-  Page page1 = Page(idCours: coursId, ordre: 1, description: "Qu'est-ce qu'une source d'information ?");
+  Page page1 = Page(idCours: coursId, description: "Qu'est-ce qu'une source d'information ?");
   int pageId1 = await pageRepository.create(page1);
-  
+
   await mediaCoursRepository.create(MediaCours(
       idPage: pageId1,
       ordre: 1,
@@ -91,9 +90,9 @@ Future<void> insertModule1() async {
       caption: 'Journaliste réalisant une interview'));
 
   // Page 2 : Les différentes sources
-  Page page2 = Page(idCours: coursId, ordre: 2, description: "Types de sources d'information");
+  Page page2 = Page(idCours: coursId, description: "Types de sources d'information");
   int pageId2 = await pageRepository.create(page2);
-  
+
   await mediaCoursRepository.create(MediaCours(
       idPage: pageId2,
       ordre: 1,
@@ -108,9 +107,9 @@ Future<void> insertModule1() async {
       caption: 'Illustration des sources primaires et secondaires'));
 
   // Page 3 : Évaluer la crédibilité d'une source
-  Page page3 = Page(idCours: coursId, ordre: 3, description: "Comment vérifier la fiabilité d'une source ?");
+  Page page3 = Page(idCours: coursId, description: "Comment vérifier la fiabilité d'une source ?");
   int pageId3 = await pageRepository.create(page3);
-  
+
   await mediaCoursRepository.create(MediaCours(
       idPage: pageId3,
       ordre: 1,
@@ -124,165 +123,83 @@ Future<void> insertModule1() async {
       type: 'image',
       caption: 'Techniques de vérification des fake news'));
 
-  /// Données de test pour les QCM
-  List<QCM> testQCMs = [
-    QCM(
-      id: 1,
-      numSolution: 2,
-      idCours: 1,
-      idQuestion: 1,
-      question: 
-        Question(
-          id: 1,
-          text: "Quel est le principal indicateur de la fiabilité d’une source d’information ?",
-          type: "text",
-        ),
-      
-      reponses: [
-        Reponse(id: 1, idQCM: 1, text: "Sa popularité sur les réseaux sociaux", type: "text"),
-        Reponse(id: 2, idQCM: 1, text: "La vérifiabilité des informations par d’autres sources fiables", type: "text"),
-        Reponse(id: 3, idQCM: 1, text: "Le nombre de commentaires sous l’article", type: "text"),
-        Reponse(id: 4, idQCM: 1, text: "Le design du site web", type: "text"),
-      ],
-    ),
-    QCM(
-      id: 2,
-      numSolution: 2,
-      idCours: 1,
-      idQuestion: 2,
-      question: 
-        Question(
-          id: 2,
-          text: "Quelle est la meilleure manière de vérifier une information trouvée en ligne ?",
-          type: "text",
-        ),
-      
-      reponses: [
-        Reponse(id: 5, idQCM: 2, text: "La partager immédiatement avec ses amis", type: "text"),
-        Reponse(id: 6, idQCM: 2, text: "Consulter plusieurs sources fiables et vérifier la cohérence de l’information", type: "text"),
-        Reponse(id: 7, idQCM: 2, text: "Faire confiance à la première source trouvée", type: "text"),
-        Reponse(id: 8, idQCM: 2, text: "Vérifier si l’information est amusante avant de la croire", type: "text"),
-      ],
-    ),
-    QCM(
-      id: 3,
-      numSolution: 2,
-      idCours: 1,
-      idQuestion: 3,
-      question: 
-        Question(
-          id: 3,
-          text: "Quel est un signe révélateur d’une fausse information ?",
-          type: "text",
-        ),
-      
-      reponses: [
-        Reponse(id: 9, idQCM: 3, text: "Elle provient d’un média reconnu et sérieux", type: "text"),
-        Reponse(id: 10, idQCM: 3, text: "Elle utilise un ton sensationnaliste et manque de sources vérifiables", type: "text"),
-        Reponse(id: 11, idQCM: 3, text: "Elle cite plusieurs experts et références", type: "text"),
-        Reponse(id: 12, idQCM: 3, text: "Elle est reprise par plusieurs médias de confiance", type: "text"),
-      ],
-    ),
-  ];
-
-  // Insertion des qcm dans la bdd
-  for (var qcm in testQCMs) {
-    await qcmRepo.insert(qcm);
-    await questionRepo.insert(qcm.question!);
-    
-    for (var reponse in qcm.reponses!) {
-      await reponseRepo.insert(reponse);
-    }
-  }
-
-
-
-
-
-
-  //ajout d'un autre cours
-
-  cours = Cours(
-      idModule: moduleId,
-      titre: 'Genres journalistiques',
-      contenu: 'Découvrir les genres journalistiques.');
-
-  final coursId2 = await coursRepository.create(cours);
-
-  // Ajout des Objectifs du Cours
-  final objectif4 = ObjectifCours(
-    idCours: coursId2,
-    description: 'Les genres d\'information',
-  );
-  final objectif5 = ObjectifCours(
-    idCours: coursId2,
-    description: 'Les genres d\'opinion',
-  );
- 
-  
-  await objectifCoursRepository.create(objectif4);
-  await objectifCoursRepository.create(objectif5);
-
-  // Page 4 : Les differents genres d'information
-  Page page4 = Page(idCours: coursId2, ordre: 1, description: "Qu'elle sont les genres d'information ?",urlAudio: 'lib/data/AppData/Module1/Cours1/genre_d_information.mp3');
-  int pageId4 = await pageRepository.create(page4);
-  
-  await mediaCoursRepository.create(MediaCours(
-      idPage: pageId4,
-      ordre: 1,
-      url: 'lib/data/AppData/Module1/Cours1/genre_d_information.txt',
-      type: 'text'));
-
-  await mediaCoursRepository.create(MediaCours(
-      idPage: pageId4,
-      ordre: 2,
-      url: 'lib/data/AppData/Module1/Cours1/genre_d_information.jpg',
-      type: 'image',
-      caption: 'Les genres d\'information'));
-  
-  await mediaCoursRepository.create(MediaCours( 
-    idPage: pageId4,
-    ordre : 3,
-    url : 'lib/data/AppData/Module1/Cours1/genre_d_information2.txt', 
-    type: 'text',
-  ));
-
-  // Page 5 : Les différents genres d'opinion
-  Page page5 = Page(idCours: coursId2, ordre: 2, description: "Les genres d'opinion");
-  int pageId5 = await pageRepository.create(page5);
-  
-  await mediaCoursRepository.create(MediaCours(
-      idPage: pageId5,
-      ordre: 1,
-      url: 'lib/data/AppData/Module1/Cours1/genre_opinion.mp4',
-      type: 'video'));
-
-
-
-
-
-
-  // Ajout des autres cours
-  
-
-  cours = Cours(
-      idModule: moduleId,
-      titre: 'Réseaux sociaux',
-      contenu: '');
-  await coursRepository.create(cours);
-
-  cours = Cours(
-      idModule: moduleId,
-      titre: 'Désinformation/Mésinformation',
-      contenu: '');
-  await coursRepository.create(cours);
+  // /// Données de test pour les QCM
+  // List<QCM> testQCMs = [
+  //   QCM(
+  //     id: 1,
+  //     numSolution: 2,
+  //     idCours: 1,
+  //     idQuestion: 1,
+  //     question:
+  //       Question(
+  //         id: 1,
+  //         text: "Quel est le principal indicateur de la fiabilité d’une source d’information ?",
+  //         type: "text",
+  //       ),
+  //
+  //     reponses: [
+  //       Reponse(id: 1, idQCM: 1, text: "Sa popularité sur les réseaux sociaux", type: "text"),
+  //       Reponse(id: 2, idQCM: 1, text: "La vérifiabilité des informations par d’autres sources fiables", type: "text"),
+  //       Reponse(id: 3, idQCM: 1, text: "Le nombre de commentaires sous l’article", type: "text"),
+  //       Reponse(id: 4, idQCM: 1, text: "Le design du site web", type: "text"),
+  //     ],
+  //   ),
+  //   QCM(
+  //     id: 2,
+  //     numSolution: 2,
+  //     idCours: 1,
+  //     idQuestion: 2,
+  //     question:
+  //       Question(
+  //         id: 2,
+  //         text: "Quelle est la meilleure manière de vérifier une information trouvée en ligne ?",
+  //         type: "text",
+  //       ),
+  //
+  //     reponses: [
+  //       Reponse(id: 5, idQCM: 2, text: "La partager immédiatement avec ses amis", type: "text"),
+  //       Reponse(id: 6, idQCM: 2, text: "Consulter plusieurs sources fiables et vérifier la cohérence de l’information", type: "text"),
+  //       Reponse(id: 7, idQCM: 2, text: "Faire confiance à la première source trouvée", type: "text"),
+  //       Reponse(id: 8, idQCM: 2, text: "Vérifier si l’information est amusante avant de la croire", type: "text"),
+  //     ],
+  //   ),
+  //   QCM(
+  //     id: 3,
+  //     numSolution: 2,
+  //     idCours: 1,
+  //     idQuestion: 3,
+  //     question:
+  //       Question(
+  //         id: 3,
+  //         text: "Quel est un signe révélateur d’une fausse information ?",
+  //         type: "text",
+  //       ),
+  //
+  //     reponses: [
+  //       Reponse(id: 9, idQCM: 3, text: "Elle provient d’un média reconnu et sérieux", type: "text"),
+  //       Reponse(id: 10, idQCM: 3, text: "Elle utilise un ton sensationnaliste et manque de sources vérifiables", type: "text"),
+  //       Reponse(id: 11, idQCM: 3, text: "Elle cite plusieurs experts et références", type: "text"),
+  //       Reponse(id: 12, idQCM: 3, text: "Elle est reprise par plusieurs médias de confiance", type: "text"),
+  //     ],
+  //   ),
+  // ];
+  //
+  // // Insertion des qcm dans la bdd
+  // for (var qcm in testQCMs) {
+  //   await qcmRepo.insert(qcm);
+  //   await questionRepo.insert(qcm.question!);
+  //
+  //   for (var reponse in qcm.reponses!) {
+  //     await reponseRepo.insert(reponse);
+  //   }
+  // }
 }
 
 Future<void> insertModule2() async {
   // Création du Module
   final module = Module(
       titre: 'Producteur de contenus',
-      urlImg: 'lib/data/AppData/facto-societe.png',
+      urlImg: 'assets/facto-societe.png',
       description: 'Grâce aux technologies modernes, tout le monde est aujourd’hui en mesure de diffuser des informations et de produire des contenus. Mais tout le monde n’a pas appris les codes, règles et enjeux d’une information responsable à destination du grand public. Que vous ayez 1 à 1 million de followers, ce module est fait pour vous !');
   final moduleId = await moduleRepository.create(module);
 
@@ -290,25 +207,29 @@ Future<void> insertModule2() async {
   Cours cours = Cours(
       idModule: moduleId,
       titre: 'Ethique professionnelle et personnelle',
-      contenu: '');
+      contenu: '',
+      description: '');
   // final coursId = await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
       titre: 'Journalisme et production de contenus',
-      contenu: '');
+      contenu: '',
+      description: '');
   await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
       titre: 'Risques économiques et sociétaux',
-      contenu: '');
+      contenu: '',
+      description: '');
   await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
       titre: 'EMI - Education aux médias et à l’information',
-      contenu: '');
+      contenu: '',
+      description: '');
   await coursRepository.create(cours);
 }
 
@@ -316,7 +237,7 @@ Future<void> insertModule3() async {
   // Création du Module
   final module = Module(
       titre: 'Pros des médias',
-      urlImg: 'lib/data/AppData/facto-societe.png',
+      urlImg: 'assets/facto-societe.png',
       description: 'Les journalistes sont des professionnels de l’information. Pourtant, face à la profusion des sources et, parfois aussi, à l’urgence des situations, ils ne maîtrisent pas tous les clés d’une information traitée éthiquement, professionnellement et de manière responsable. Pourquoi ne pas profiter de ce module pour réviser ses classiques, voire en apprendre davantage sur les techniques de vérification  les plus performantes ?'
       );
   final moduleId = await moduleRepository.create(module);
@@ -325,25 +246,29 @@ Future<void> insertModule3() async {
   Cours cours = Cours(
       idModule: moduleId,
       titre: 'Déontologie',
-      contenu: '');
+      contenu: '',
+      description: '');
   // final coursId = await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
       titre: 'Osint et Investigation numérique',
-      contenu: '');
+      contenu: '',
+      description: '');
   await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
       titre: 'SR et fact-checking',
-      contenu: '');
+      contenu: '',
+      description: '');
   await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
       titre: 'EMI - Education aux médias et à l’information',
-      contenu: '');
+      contenu: '',
+      description: '');
   await coursRepository.create(cours);
 
 }
@@ -352,7 +277,7 @@ Future<void> insertModule4() async {
   // Création du Module
   final module = Module(
       titre: 'Pour aller plus loin',
-      urlImg: 'lib/data/AppData/facto-societe.png',
+      urlImg: 'assets/facto-societe.png',
       description: 'Toutes les références et ressources en relation avec l\'Éducation aux médias et à l’information sont répertoriées ici. '
       );
   final moduleId = await moduleRepository.create(module);
@@ -361,69 +286,49 @@ Future<void> insertModule4() async {
   Cours cours = Cours(
       idModule: moduleId,
       titre: 'Références bibliographiques',
-      contenu: '');
+      contenu: '',
+      description: '');
   // final coursId = await coursRepository.create(cours);
 
   cours = Cours(
       idModule: moduleId,
       titre: 'Ressources en ligne',
-      contenu: '');
+      contenu: '',
+      description: '');
   await coursRepository.create(cours);
 }
 
 Future<void> insertSampleData() async {
-  await DatabaseHelper.instance.resetDatabase();
-  
-  insertModule1();
-  insertModule2();
-  insertModule3();
-  insertModule4();
+  await DatabaseHelper.instance.resetDB();
+
+  await insertModule1();
+  // insertModule2();
+  // insertModule3();
+  // insertModule4();
 
   // Init du singleton CoursSelectionne
   CoursSelectionne coursSelectionne = CoursSelectionne.instance;
   List<Cours> lstCours = await coursRepository.getAll();
-  coursSelectionne.setCours(lstCours[0]);
+  if (lstCours.isNotEmpty) {
+    coursSelectionne.setCours(lstCours[0]);
+  }
+
+  print(coursSelectionne);
 
   // Init du singleton ModuleSelectionne
   ModuleSelectionne moduleSelectionne = ModuleSelectionne.instance;
   List<Module> lstModule = await moduleRepository.getAll();
-  moduleSelectionne.moduleSelectionne = lstModule[0];
+  if (lstModule.isNotEmpty) {
+    moduleSelectionne.moduleSelectionne = lstModule[0];
+  }
 
-  /*
-  // Création de Mots (Mots pour le MotsCroises)
-  final mot1 = Mot(
-      idMotsCroises: 1,
-      mot: 'journalisme',
-      indice: 'Domaine d’étude',
-      direction: 'horizontal',
-      positionDepartX: 0,
-      positionDepartY: 0);
-  final mot2 = Mot(
-      idMotsCroises: 1,
-      mot: 'presse',
-      indice: 'Média écrit',
-      direction: 'vertical',
-      positionDepartX: 1,
-      positionDepartY: 1);
-  await motRepository.create(mot1);
-  await motRepository.create(mot2);
+  print(moduleSelectionne);
 
-  // Création de MotsCroises
-  final motsCroises = MotsCroises(idMiniJeu: 1, tailleGrille: '10x10');
-  final motsCroisesId = await motsCroisesRepository.create(motsCroises);
-
-  // Création d'un MiniJeu
-  final miniJeu = MiniJeu(
-      idCours: coursId,
-      nom: 'Jeu de mots croisés',
-      description: 'Mini-jeu de mots croisés sur le journalisme',
-      progression: 0);
-  final miniJeuId = await miniJeuRepository.create(miniJeu);
-  */
 
   if (kDebugMode) {
     print('Toutes les données d\'exemple ont été insérées avec succès.');
   }
+
   //testRepositories();
 }
 
@@ -460,7 +365,7 @@ Future<void> testRepositories() async {
   if (kDebugMode) {
     print('Objectif supprimé.');
   }
-  
+
 
     // --- Test Mot ---
   if (kDebugMode) {
@@ -616,9 +521,6 @@ Future<void> testRepositories() async {
         print(cours.pages![i].medias?.length);
       }
     }
-  
-  
-
 
   // Supprimer une cours
   await coursRepository.delete(cours.id!);

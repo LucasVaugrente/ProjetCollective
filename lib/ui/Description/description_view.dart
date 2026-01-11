@@ -40,7 +40,7 @@ class DescriptionView extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
-                      'lib/data/AppData/goals.png', // #TODO: Remplace par ton image
+                      'lib/assets/goals.png', // #TODO: Remplace par ton image
                       fit: BoxFit.cover,
                       height: 200,
                       width: double.infinity,

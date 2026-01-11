@@ -1,4 +1,4 @@
-import '../DataBase/database_helper.dart';
+import '../database_helper.dart';
 import '../models/media_cours.dart';
 
 class MediaCoursRepository {

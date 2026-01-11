@@ -1,5 +1,5 @@
 import 'package:factoscope/models/module.dart';
-import 'package:factoscope/DataBase/database_helper.dart';
+import 'package:factoscope/database_helper.dart';
 
 class ModuleRepository{
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;

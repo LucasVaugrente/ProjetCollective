@@ -1,6 +1,6 @@
 import 'package:factoscope/models/QCM/question.dart';
 
-import 'package:factoscope/DataBase/database_helper.dart';
+import 'package:factoscope/database_helper.dart';
 
 /// Repository pour gérer les opérations CRUD des Questions.
 class QuestionRepository {

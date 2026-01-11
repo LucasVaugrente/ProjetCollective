@@ -1,5 +1,5 @@
 import '../models/mot.dart';
-import '../DataBase/database_helper.dart';
+import '../database_helper.dart';
 
 class MotRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;

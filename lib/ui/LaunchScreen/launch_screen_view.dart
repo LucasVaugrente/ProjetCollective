@@ -66,7 +66,7 @@ class _LaunchScreenViewState extends State<LaunchScreenView> with SingleTickerPr
                 width: 250,
                 height: 250,
                 child: Image.asset(
-                  'lib/data/AppData/CharteFactoscope/logo-factoscope.png',
+                  'lib/assets/logo-factoscope.png',
                   fit: BoxFit.contain,
                 ),
               ),

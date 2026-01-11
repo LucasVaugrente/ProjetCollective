@@ -1,8 +1,7 @@
 import 'package:factoscope/models/cours.dart';
 
-
 class Module {
-   int? id; // `id` est nullable pour les nouvelles entrées
+   int? id;
    String titre;
    String urlImg;
    String description;
@@ -14,7 +13,6 @@ class Module {
     required this.description,
   });
 
-  // Convertir un objet en Map pour SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -24,7 +22,6 @@ class Module {
     };
   }
 
-  // Convertir une ligne SQLite en objet Module
   static Module fromMap(Map<String, dynamic> map) {
     return Module(
       id: map['id'],

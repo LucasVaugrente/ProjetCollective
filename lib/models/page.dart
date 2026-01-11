@@ -2,43 +2,46 @@ import 'package:factoscope/models/media_cours.dart';
 
 class Page {
   int? id;
-  int ordre;
+  String? description;
   int idCours;
-  String urlAudio;
   int estVue;
-  String? description ;
   List<MediaCours>? medias;
 
   Page({
     this.id,
-    required this.ordre,
-    this.urlAudio = "",
-    this.estVue=0,
+    this.description,
     required this.idCours,
-     this.description ,
+    this.estVue = 0,
+    this.medias,
   });
 
-  // Convertir un objet Page en Map pour SQLite
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'ordre': ordre,
+      'description': description,
       'id_cours': idCours,
-      'description':description,
-      'est_vue':estVue,
-      'urlAudio':urlAudio,
+      'est_vue': estVue,
     };
   }
 
-  // Créer un objet Page à partir d'une Map SQLite
   factory Page.fromMap(Map<String, dynamic> map) {
     return Page(
       id: map['id'],
-      ordre: map['ordre'],
-      idCours: map['id_cours'],
       description: map['description'],
-      estVue: map['est_vue'],
-      urlAudio: map['urlAudio']
+      idCours: map['id_cours'],
+      estVue: map['est_vue'] ?? 0,
+    );
+  }
+
+  factory Page.fromJson(Map<String, dynamic> json) {
+    return Page(
+      id: json['id'],
+      description: json['description'],
+      idCours: json['id_cours'],
+      estVue: json['est_vue'] ?? 0,
+      medias: json['medias'] != null
+          ? (json['medias'] as List).map((m) => MediaCours.fromJson(m)).toList()
+          : null,
     );
   }
 }

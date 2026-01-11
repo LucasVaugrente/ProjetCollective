@@ -1,55 +1,54 @@
-import '../DataBase/database_helper.dart';
+import '../database_helper.dart';
 import '../models/cours.dart';
+import '../models/media_cours.dart';
 
 class CoursRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-  // Créer une Cours
   Future<int> create(Cours cours) async {
     final db = await _dbHelper.database;
-    return await db.insert('Cours', cours.toMap());
+    return await db.insert('cours', cours.toMap());
   }
 
-  // Lire toutes les Courss
+  Future<int> createOrUpdate(Cours cours) async {
+    final existingCours = await getById(cours.id!);
+    if (existingCours != null) {
+      return await update(cours);
+    } else {
+      return await create(cours);
+    }
+  }
+
   Future<List<Cours>> getAll() async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query('Cours');
-
-    return List.generate(maps.length, (i) {
-      return Cours.fromMap(maps[i]);
-    });
+    final List<Map<String, dynamic>> maps = await db.query('cours');
+    return List.generate(maps.length, (i) => Cours.fromMap(maps[i]));
   }
 
-  // Lire une Cours par son ID
   Future<Cours?> getById(int id) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
-      'Cours',
+      'cours',
       where: 'id = ?',
       whereArgs: [id],
     );
-    if (maps.isNotEmpty) {
-      return Cours.fromMap(maps.first);
-    }
-    return null;
+    return maps.isNotEmpty ? Cours.fromMap(maps.first) : null;
   }
 
-  // Mettre à jour une Cours
   Future<int> update(Cours cours) async {
     final db = await _dbHelper.database;
     return await db.update(
-      'Cours',
+      'cours',
       cours.toMap(),
       where: 'id = ?',
       whereArgs: [cours.id],
     );
   }
 
-  // Supprimer une Cours
   Future<int> delete(int id) async {
     final db = await _dbHelper.database;
     return await db.delete(
-      'Cours',
+      'cours',
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -58,11 +57,41 @@ class CoursRepository {
   Future<List<Cours>> getCoursesByModuleId(int moduleId) async {
     final db = await _dbHelper.database;
     final result = await db.query(
-      'Cours',
-      where: 'id_Module = ?',
+      'cours',
+      where: 'id_module = ?',
       whereArgs: [moduleId],
     );
     return result.map((map) => Cours.fromMap(map)).toList();
   }
 
+  Future<int> markAsDownloaded(int coursId) async {
+    final db = await _dbHelper.database;
+    return await db.update(
+      'cours',
+      {'is_downloaded': 1},
+      where: 'id = ?',
+      whereArgs: [coursId],
+    );
+  }
+
+  Future<int> saveMediaForCourse(int coursId, String url, String localPath, String type, int pageId) async {
+    final db = await _dbHelper.database;
+    return await db.insert('media', {
+      'url': url,
+      'local_path': localPath,
+      'type': type,
+      'id_page': pageId,
+      'is_downloaded': 1,
+    });
+  }
+
+  Future<List<MediaCours>> getMediasForCourse(int coursId) async {
+    final db = await _dbHelper.database;
+    final result = await db.query(
+      'media',
+      where: 'id_page IN (SELECT id FROM page WHERE id_cours = ?)',
+      whereArgs: [coursId],
+    );
+    return result.map((map) => MediaCours.fromMap(map)).toList();
+  }
 }
