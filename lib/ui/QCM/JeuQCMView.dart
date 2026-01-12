@@ -17,16 +17,33 @@ class JeuQCMView extends StatefulWidget {
 class _JeuQCMViewState extends State<JeuQCMView> {
   int? _selectedAnswer;
   bool _validated = false;
+  int _currentQuestionIndex = 0;
+  int _score = 0;
+  late List<int?> _answers;
+  late int _totalQuestions;
 
-  // Ajout de la logique pour suivre si on est sur la question suivante
   @override
-  void didUpdateWidget(covariant JeuQCMView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    
-    // Si la page sélectionnée change, réinitialiser l'état
-    if (oldWidget.selectedPageIndex != widget.selectedPageIndex) {
+  void initState() {
+    super.initState();
+    _answers = [];
+  }
+
+  void _nextQuestion() {
+    if (_selectedAnswer != null) {
+      _answers.add(_selectedAnswer);
       setState(() {
+        _currentQuestionIndex++;
         _selectedAnswer = null;
+        _validated = false;
+      });
+    }
+  }
+
+  void _previousQuestion() {
+    if (_currentQuestionIndex > 0) {
+      setState(() {
+        _currentQuestionIndex--;
+        _selectedAnswer = _answers[_currentQuestionIndex];
         _validated = false;
       });
     }
@@ -37,53 +54,64 @@ class _JeuQCMViewState extends State<JeuQCMView> {
     return Scaffold(
       appBar: AppBar(title: const Text("Jeu QCM")),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: JeuQCMViewModel().recupererQCM(widget.cours, widget.selectedPageIndex),
+        future: JeuQCMViewModel().recupererQCM(widget.cours, _currentQuestionIndex),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text("Erreur lors du chargement"));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text("Aucune donnée disponible"));
+          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("QCM indisponible pour ce cours"));
           }
 
-          var data = snapshot.data as Map<String, dynamic>;
-
+          var data = snapshot.data!;
           Question question = data["question"];
-          String? questionText;
-          if (question.type == "text") {
-            questionText = question.text;
-          } else if (question.type == "image") {
-            questionText = question.imageUrl;
-          } else {
-            throw Exception("Format question non respecte : Image ou texte ");
-          }
-
           List<Reponse> reponses = data["options"];
-          List<String?> reponseText;
-          if (reponses.first.imageUrl == null && reponses.first.text != null) {
-            reponseText = reponses.map((r) => r.text).toList();
-          } else if (reponses.first.imageUrl != null && reponses.first.text == null) {
-            reponseText = reponses.map((r) => r.imageUrl).toList();
-          } else {
-            throw Exception("Format reponse non respecter : Image ou texte ");
-          }
-
           int correctAnswer = data["correctAnswer"];
+          _totalQuestions = data["totalQuestions"];
+
+          dynamic questionText = question.type == "text" ? question.text : question.imageUrl;
+          List<dynamic> reponseText = reponses.map((r) => r.type == "text" ? r.text : r.imageUrl).toList();
 
           return Column(
             children: [
               _buildQuestionWidget(questionText),
               ...List.generate(reponseText.length, (index) => _buildAnswerWidget(reponseText[index], index + 1, correctAnswer)),
+              const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: _selectedAnswer == null
-                    ? null
-                    : () {
-                        setState(() {
-                          _validated = true;
-                        });
-                      },
+                onPressed: _selectedAnswer == null ? null : () => setState(() => _validated = true),
                 child: const Text("Valider"),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: _currentQuestionIndex > 0 ? _previousQuestion : null,
+                    child: const Text("Précédent"),
+                  ),
+                  ElevatedButton(
+                    onPressed: _validated ? () {
+                      if (_selectedAnswer == correctAnswer) _score++;
+                      if (_currentQuestionIndex + 1 < _totalQuestions) {
+                        _nextQuestion();
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text("Résultat"),
+                            content: Text("Score : $_score / $_totalQuestions"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("OK"),
+                              )
+                            ],
+                          ),
+                        );
+                      }
+                    } : null,
+                    child: const Text("Suivant"),
+                  ),
+                ],
               ),
             ],
           );
@@ -97,7 +125,7 @@ class _JeuQCMViewState extends State<JeuQCMView> {
       padding: const EdgeInsets.all(16.0),
       child: question is String
           ? Text(question, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
-          : Image.network(question), // Remplace par Image.asset si fichiers locaux
+          : Image.network(question),
     );
   }
 
@@ -116,13 +144,7 @@ class _JeuQCMViewState extends State<JeuQCMView> {
       leading: Radio<int>(
         value: index,
         groupValue: _selectedAnswer,
-        onChanged: _validated
-            ? null
-            : (int? value) {
-                setState(() {
-                  _selectedAnswer = value;
-                });
-              },
+        onChanged: _validated ? null : (int? value) => setState(() => _selectedAnswer = value),
       ),
       tileColor: color,
     );
