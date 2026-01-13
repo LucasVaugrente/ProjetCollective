@@ -70,6 +70,18 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
+      CREATE TABLE IF NOT EXISTS MediaCours (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_page INTEGER NOT NULL,
+        ordre INTEGER NOT NULL,
+        url TEXT NOT NULL,
+        type TEXT NOT NULL,
+        caption TEXT,
+        FOREIGN KEY (id_page) REFERENCES page (id) ON DELETE CASCADE
+      );
+    ''');
+
+    await db.execute('''
       CREATE TABLE IF NOT EXISTS qcm (
         id INTEGER PRIMARY KEY,
         question TEXT NOT NULL,

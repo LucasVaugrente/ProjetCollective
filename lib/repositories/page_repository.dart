@@ -46,14 +46,16 @@ class PageRepository {
     );
   }
 
-  Future<List<Page>> getPagesByCourseId(int courseId) async {
+  Future<List<Page>> getPagesByCourseId(int coursId) async {
     final db = await _dbHelper.database;
-    final result = await db.query(
+    final List<Map<String, dynamic>> maps = await db.query(
       'page',
       where: 'id_cours = ?',
-      whereArgs: [courseId],
+      whereArgs: [coursId],
     );
-    return result.map((map) => Page.fromMap(map)).toList();
+    return List.generate(maps.length, (i) {
+      return Page.fromMap(maps[i]);
+    });
   }
 
   Future<int> getNbPageByCourseId(int courseId) async {

@@ -19,24 +19,21 @@ class CoursViewModel extends ChangeNotifier {
   final mediaCoursRepository = MediaCoursRepository();
   final progressionUseCase = ProgressionUseCase();
 
-  Future<int> getNombrePageDeContenu(Cours cours) {
-    return pageRepository.getPagesByCourseId(cours.id!).then((lstPage) {
-      return lstPage.length;
-    });
+  Future<int> getNombrePageDeContenu(Cours cours) async {
+    final lstPage = await pageRepository.getPagesByCourseId(cours.id!);
+    return lstPage.length;
   }
 
-  Future<int> getNombrePageDeJeu(Cours cours) {
-    return qcmRepository.getAllIdByCoursId(cours.id!).then((lstIdPageJeu) {
-      return lstIdPageJeu.length;
-    });
+  Future<int> getNombrePageDeJeu(Cours cours) async {
+    final lstIdPageJeu = await qcmRepository.getAllIdByCoursId(cours.id!);
+    return lstIdPageJeu.length;
   }
 
-  void setIndexPageVisite(Cours cours) {
+  Future<void> setIndexPageVisite(Cours cours) async {
     // Attention la page 0 est la page de description, pas la 1ère page de contenu
-    pageRepository.getNbPageVisite(cours.id!).then((indexPage) {
-      page = indexPage;
-      notifyListeners();
-    });
+    final indexPage = await pageRepository.getNbPageVisite(cours.id!);
+    page = indexPage;
+    notifyListeners();
   }
 
   void changementPageSuivante() async {
@@ -62,16 +59,18 @@ class CoursViewModel extends ChangeNotifier {
     // Récupération des pages associées au cours
     cours.pages = await pageRepository.getPagesByCourseId(cours.id!);
     if (kDebugMode) {
-      print("Nombre de pages récupérées : \${cours.pages?.length}");
+      print("Nombre de pages récupérées : ${cours.pages?.length}");
     }
 
     // Parcours des pages pour récupérer les médias associés
     for (var page in cours.pages ?? []) {
       page.medias = await mediaCoursRepository.getByPageId(page.id!);
       if (kDebugMode) {
-        print(
-            "Nombre de médias pour la page \${page.id} : \${page.medias?.length}");
+        print("Nombre de médias pour la page ${page.id} : ${page.medias?.length}");
       }
     }
+
+    cours.objectifs ??= [];
   }
+
 }

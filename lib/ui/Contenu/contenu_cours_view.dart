@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_image_widget.dart';
-import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_video_widget.dart';
 import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_text_widget.dart';
+import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_video_widget.dart';
 
 class ContenuCoursView extends StatelessWidget {
   final Cours cours;
@@ -15,7 +15,6 @@ class ContenuCoursView extends StatelessWidget {
     required this.selectedPageIndex,
   });
 
-  @override
   @override
   Widget build(BuildContext context) {
     if (cours.pages == null ||
@@ -32,22 +31,52 @@ class ContenuCoursView extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: page.medias?.map((media) {
+        children: [
+          // Affichage de la description de la page
+          if (page.description != null)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                page.description!,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+          // Affichage des médias
+          if (page.medias != null && page.medias!.isNotEmpty)
+            ...page.medias!.map((media) {
               if (kDebugMode) {
                 print("Media url: ${media.url}");
               }
 
               if (media.type == "image") {
-                return Center(child: ContenuImageWidget(media: media));
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ContenuImageWidget(media: media),
+                );
               } else if (media.type == "video") {
-                return ContenuVideoWidget(data: media);
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ContenuVideoWidget(data: media),
+                );
               } else if (media.type == "text") {
-                return ContenuTextWidget(filePath: media.url);
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ContenuTextWidget(filePath: media.url),
+                );
               } else {
-                return const Text("Le Media n'a pas le bon type !");
+                return const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Le Media n'a pas le bon type !"),
+                );
               }
-            }).toList() ??
-            [const Text("Aucun média disponible")],
+            }).toList(),
+          if (page.medias == null || page.medias!.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text("Aucun média disponible"),
+            ),
+        ],
       ),
     );
   }

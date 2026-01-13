@@ -1,6 +1,8 @@
 import '../database_helper.dart';
 import '../models/cours.dart';
 import '../models/media_cours.dart';
+import '../models/objectif_cours.dart';
+import '../models/page.dart';
 
 class CoursRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
@@ -20,9 +22,14 @@ class CoursRepository {
   }
 
   Future<List<Cours>> getAll() async {
+    print("Récupération de tous les cours depuis la base de données");
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('cours');
-    return List.generate(maps.length, (i) => Cours.fromMap(maps[i]));
+    print(
+        "Nombre de cours récupérés depuis la base de données : ${maps.length}");
+    return List.generate(maps.length, (i) {
+      return Cours.fromMap(maps[i]);
+    });
   }
 
   Future<Cours?> getById(int id) async {
@@ -32,7 +39,37 @@ class CoursRepository {
       where: 'id = ?',
       whereArgs: [id],
     );
-    return maps.isNotEmpty ? Cours.fromMap(maps.first) : null;
+    if (maps.isNotEmpty) {
+      final cours = Cours.fromMap(maps.first);
+      // Charger les objectifs associés au cours
+      cours.objectifs = await _getObjectifsByCoursId(id);
+      return cours;
+    }
+    return null;
+  }
+
+  Future<List<ObjectifCours>> _getObjectifsByCoursId(int coursId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'objectif_cours',
+      where: 'id_cours = ?',
+      whereArgs: [coursId],
+    );
+    return List.generate(maps.length, (i) {
+      return ObjectifCours.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<Page>> _getPagesByCoursId(int coursId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'page',
+      where: 'id_cours = ?',
+      whereArgs: [coursId],
+    );
+    return List.generate(maps.length, (i) {
+      return Page.fromMap(maps[i]);
+    });
   }
 
   Future<int> update(Cours cours) async {

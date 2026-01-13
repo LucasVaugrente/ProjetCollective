@@ -4,8 +4,6 @@ import 'package:factoscope/models/module.dart';
 import 'package:factoscope/repositories/cours_repository.dart';
 
 import 'package:factoscope/repositories/module_repository.dart';
-import 'package:factoscope/repositories/mot_repository.dart';
-import 'package:factoscope/repositories/mots_croises_repository.dart';
 import 'package:factoscope/repositories/minijeu_repository.dart';
 import 'package:factoscope/repositories/media_cours_repository.dart';
 import 'package:factoscope/repositories/objectif_cours_repository.dart';
@@ -26,8 +24,6 @@ import 'models/page.dart';
 
 final moduleRepository = ModuleRepository();
 final coursRepository = CoursRepository();
-final motRepository = MotRepository();
-final motsCroisesRepository = MotsCroisesRepository();
 final miniJeuRepository = MiniJeuRepository();
 final mediaCoursRepository = MediaCoursRepository();
 final pageRepository = PageRepository();
@@ -336,8 +332,6 @@ Future<void> insertSampleData() async {
 Future<void> testRepositories() async {
   final moduleRepository = ModuleRepository();
   final coursRepository = CoursRepository();
-  final motRepository = MotRepository();
-  final motsCroisesRepository = MotsCroisesRepository();
   final miniJeuRepository = MiniJeuRepository();
   final mediaCoursRepository = MediaCoursRepository();
   final pageRepository = PageRepository();
@@ -366,57 +360,6 @@ Future<void> testRepositories() async {
   await objectifCoursRepository.delete(objectif.id!);
   if (kDebugMode) {
     print('Objectif supprimé.');
-  }
-
-  // --- Test Mot ---
-  if (kDebugMode) {
-    print('--- Test Mot ---');
-  }
-
-  // Récupérer tous les mots
-  final allMots = await motRepository.getAll();
-  if (kDebugMode) {
-    print('Mots disponibles : ${allMots.map((e) => e.mot).toList()}');
-  }
-
-  // Récupérer un mot par ID
-  final mot = allMots.first;
-  final fetchedMot = await motRepository.getById(mot.id!);
-  if (kDebugMode) {
-    print('Mot récupéré par ID : ${fetchedMot?.mot}');
-  }
-
-  // Supprimer un mot
-  await motRepository.delete(mot.id!);
-  if (kDebugMode) {
-    print('Mot supprimé.');
-  }
-
-  // --- Test MotsCroises ---
-  if (kDebugMode) {
-    print('--- Test MotsCroises ---');
-  }
-
-  // Récupérer tous les mots croisés
-  final allMotsCroises = await motsCroisesRepository.getAll();
-  if (kDebugMode) {
-    print(
-        'Mots croisés disponibles : ${allMotsCroises.map((e) => e.tailleGrille).toList()}');
-  }
-
-  // Récupérer un mots croisés par ID
-  final motsCroises = allMotsCroises.first;
-  final fetchedMotsCroises =
-      await motsCroisesRepository.getById(motsCroises.id!);
-  if (kDebugMode) {
-    print(
-        'Mots croisés récupérés par ID : ${fetchedMotsCroises?.tailleGrille}');
-  }
-
-  // Supprimer un mots croisés
-  await motsCroisesRepository.delete(motsCroises.id!);
-  if (kDebugMode) {
-    print('Mots croisés supprimé.');
   }
 
   // --- Test MiniJeu ---

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:factoscope/ui/LaunchScreen/launch_screen_view.dart';
-import 'package:factoscope/ui/list_cours_view.dart';
 import 'package:factoscope/ui/list_module_view.dart';
 import 'package:factoscope/ui/Cours/cours_view.dart';
+import 'package:factoscope/ui/all_cours_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -17,13 +17,15 @@ final router = GoRouter(
       routes: [
         GoRoute(
             path: '/', builder: (context, state) => const ListModulesView()),
-        GoRoute(path: '/cours', builder: (context, state) => ListCoursView()),
         GoRoute(
-            path: '/cours/:coursId',
-            builder: (context, state) {
-              final coursId = int.parse(state.pathParameters['coursId']!);
-              return CoursView(coursId: coursId);
-            }),
+            path: '/cours', builder: (context, state) => const AllCoursView()),
+        GoRoute(
+          path: '/cours/:coursId',
+          builder: (context, state) {
+            final coursId = int.parse(state.pathParameters['coursId']!);
+            return CoursView(coursId: coursId);
+          },
+        ),
       ],
     ),
   ],

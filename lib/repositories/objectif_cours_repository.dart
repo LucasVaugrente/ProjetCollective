@@ -6,13 +6,13 @@ class ObjectifCoursRepository {
 
   Future<int> create(ObjectifCours objectifCours) async {
     final db = await _dbHelper.database;
-    return await db.insert('ObjectifCours', objectifCours.toMap());
+    return await db.insert('objectif_cours', objectifCours.toMap());
   }
 
   Future<ObjectifCours?> getById(int id) async {
     final db = await _dbHelper.database;
     final result = await db.query(
-      'ObjectifCours',
+      'objectif_cours',
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -21,14 +21,14 @@ class ObjectifCoursRepository {
 
   Future<List<ObjectifCours>> getAll() async {
     final db = await _dbHelper.database;
-    final result = await db.query('ObjectifCours');
+    final result = await db.query('objectif_cours');
     return result.map((map) => ObjectifCours.fromMap(map)).toList();
   }
 
   Future<List<ObjectifCours>> getByCoursId(int coursId) async {
     final db = await _dbHelper.database;
     final result = await db.query(
-      'ObjectifCours',
+      'objectif_cours',
       where: 'id_cours = ?',
       whereArgs: [coursId],
     );
@@ -38,7 +38,7 @@ class ObjectifCoursRepository {
   Future<int> update(ObjectifCours objectifCours) async {
     final db = await _dbHelper.database;
     return await db.update(
-      'ObjectifCours',
+      'objectif_cours',
       objectifCours.toMap(),
       where: 'id = ?',
       whereArgs: [objectifCours.id],
@@ -48,7 +48,7 @@ class ObjectifCoursRepository {
   Future<int> delete(int id) async {
     final db = await _dbHelper.database;
     return await db.delete(
-      'ObjectifCours',
+      'objectif_cours',
       where: 'id = ?',
       whereArgs: [id],
     );
