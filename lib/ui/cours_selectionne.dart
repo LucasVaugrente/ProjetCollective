@@ -14,9 +14,9 @@ class CoursSelectionne with ChangeNotifier {
     isDownloaded: 0,
   );
 
-  void setCours(Cours cours) {
-    print("Mise à jour du cours sélectionné : ${cours.titre}");
-    cours = cours;
+  void setCours(Cours nouveauCours) {
+    print("Mise à jour du cours sélectionné : ${nouveauCours.titre}");
+    cours = nouveauCours; // FIX : c'était "cours = cours" avant
     notifyListeners();
   }
 }

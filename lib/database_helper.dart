@@ -16,7 +16,6 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    //resetDB();
     return await openDatabase(
       path,
       version: 1,
@@ -27,6 +26,7 @@ class DatabaseHelper {
   }
 
   Future<void> _createDB(Database db, int version) async {
+    // Table Module
     await db.execute('''
       CREATE TABLE IF NOT EXISTS module (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,6 +36,7 @@ class DatabaseHelper {
       );
     ''');
 
+    // Table Cours
     await db.execute('''
       CREATE TABLE IF NOT EXISTS cours (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,19 +46,11 @@ class DatabaseHelper {
         id_module INTEGER,
         last_updated TEXT,
         is_downloaded INTEGER DEFAULT 0,
-        FOREIGN KEY (id_module) REFERENCES module (id)
+        FOREIGN KEY (id_module) REFERENCES module (id) ON DELETE CASCADE
       );
     ''');
 
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS objectif_cours (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_cours INTEGER NOT NULL,
-        description TEXT NOT NULL,
-        FOREIGN KEY (id_cours) REFERENCES cours (id) ON DELETE CASCADE
-      );
-    ''');
-
+    // Table Page avec medias en JSON
     await db.execute('''
       CREATE TABLE IF NOT EXISTS page (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,21 +62,10 @@ class DatabaseHelper {
       );
     ''');
 
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS MediaCours (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_page INTEGER NOT NULL,
-        ordre INTEGER NOT NULL,
-        url TEXT NOT NULL,
-        type TEXT NOT NULL,
-        caption TEXT,
-        FOREIGN KEY (id_page) REFERENCES page (id) ON DELETE CASCADE
-      );
-    ''');
-
+    // Table QCM
     await db.execute('''
       CREATE TABLE IF NOT EXISTS qcm (
-        id INTEGER PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         question TEXT NOT NULL,
         rep1 TEXT NOT NULL,
         rep2 TEXT NOT NULL,
@@ -99,10 +81,7 @@ class DatabaseHelper {
   Future<void> resetDB() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'app.db');
-
     await deleteDatabase(path);
-
-    // Rouvre la base de données pour recréer les tables
     _database = await _initDB('app.db');
   }
 

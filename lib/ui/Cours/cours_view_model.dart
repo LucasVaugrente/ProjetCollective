@@ -1,22 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:factoscope/logic/progression_use_case.dart';
 import 'package:factoscope/repositories/QCM/qcm_repository.dart';
-import 'package:factoscope/repositories/media_cours_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/models/cours.dart';
 
 class CoursViewModel extends ChangeNotifier {
   CoursViewModel();
 
-  // Information de la page actuelle
-  // 0 : Page de description
-  // 1-nbPage : Page de contenu
-  // >nbPage : Page de jeu
   int page = 0;
 
   final pageRepository = PageRepository();
   final qcmRepository = QCMRepository();
-  final mediaCoursRepository = MediaCoursRepository();
   final progressionUseCase = ProgressionUseCase();
 
   Future<int> getNombrePageDeContenu(Cours cours) async {
@@ -30,7 +24,6 @@ class CoursViewModel extends ChangeNotifier {
   }
 
   Future<void> setIndexPageVisite(Cours cours) async {
-    // Attention la page 0 est la page de description, pas la 1ère page de contenu
     final indexPage = await pageRepository.getNbPageVisite(cours.id!);
     page = indexPage;
     notifyListeners();
@@ -50,27 +43,17 @@ class CoursViewModel extends ChangeNotifier {
   }
 
   Future<double> getProgressionActuelle(Cours cours) async {
-    return await progressionUseCase.calculerProgressionActuelleCours(
-            cours.id!, page) /
-        100;
+    return await progressionUseCase.calculerProgressionActuelleCours(cours.id!, page) / 100;
   }
 
   Future<void> loadContenu(Cours cours) async {
-    // Récupération des pages associées au cours
+    // Récupération des pages avec leurs médias déjà parsés
     cours.pages = await pageRepository.getPagesByCourseId(cours.id!);
     if (kDebugMode) {
       print("Nombre de pages récupérées : ${cours.pages?.length}");
-    }
-
-    // Parcours des pages pour récupérer les médias associés
-    for (var page in cours.pages ?? []) {
-      page.medias = await mediaCoursRepository.getByPageId(page.id!);
-      if (kDebugMode) {
-        print("Nombre de médias pour la page ${page.id} : ${page.medias?.length}");
+      for (var page in cours.pages ?? []) {
+        print("Page ${page.id} : ${page.medias?.length ?? 0} médias");
       }
     }
-
-    cours.objectifs ??= [];
   }
-
 }

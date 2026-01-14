@@ -1,5 +1,3 @@
-// ignore_for_file: must_be_immutable
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/ui/Cours/cours_view_model.dart';
@@ -35,7 +33,6 @@ class _CoursViewState extends State<CoursView> {
       final coursRepository = CoursRepository();
       final loadedCours = await coursRepository.getById(widget.coursId);
       if (loadedCours != null) {
-        loadedCours.objectifs ??= [];
         CoursSelectionne.instance.setCours(loadedCours);
         await coursViewModel.loadContenu(loadedCours);
         await coursViewModel.setIndexPageVisite(loadedCours);
@@ -75,7 +72,7 @@ class _CoursViewState extends State<CoursView> {
     int currentPage = coursViewModel.page;
 
     Widget nouvellePage =
-        const Text("PB lors du chargement de la page de cours");
+    const Text("PB lors du chargement de la page de cours");
     if (currentPage == 0) {
       nouvellePage = DescriptionView(
           cours: coursSelectionne.cours, coursViewModel: coursViewModel);
@@ -102,10 +99,10 @@ class _CoursViewState extends State<CoursView> {
       body: nouvellePage,
       bottomNavigationBar: nouvellePage.runtimeType != DescriptionView
           ? FooterWidget(
-              courseTitle: coursSelectionne.cours.titre,
-              pageNumber: currentPage,
-              coursViewModel: coursViewModel,
-            )
+        courseTitle: coursSelectionne.cours.titre,
+        pageNumber: currentPage,
+        coursViewModel: coursViewModel,
+      )
           : null,
     );
   }
@@ -116,10 +113,10 @@ class HeaderWidget extends StatelessWidget {
   final double? progression;
 
   const HeaderWidget({
-    Key? key,
+    super.key,
     required this.cours,
     this.progression,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

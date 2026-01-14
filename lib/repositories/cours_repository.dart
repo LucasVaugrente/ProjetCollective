@@ -1,7 +1,5 @@
 import '../database_helper.dart';
 import '../models/cours.dart';
-import '../models/media_cours.dart';
-import '../models/objectif_cours.dart';
 import '../models/page.dart';
 
 class CoursRepository {
@@ -25,8 +23,7 @@ class CoursRepository {
     print("Récupération de tous les cours depuis la base de données");
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('cours');
-    print(
-        "Nombre de cours récupérés depuis la base de données : ${maps.length}");
+    print("Nombre de cours récupérés depuis la base de données : ${maps.length}");
     return List.generate(maps.length, (i) {
       return Cours.fromMap(maps[i]);
     });
@@ -41,23 +38,9 @@ class CoursRepository {
     );
     if (maps.isNotEmpty) {
       final cours = Cours.fromMap(maps.first);
-      // Charger les objectifs associés au cours
-      cours.objectifs = await _getObjectifsByCoursId(id);
       return cours;
     }
     return null;
-  }
-
-  Future<List<ObjectifCours>> _getObjectifsByCoursId(int coursId) async {
-    final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'objectif_cours',
-      where: 'id_cours = ?',
-      whereArgs: [coursId],
-    );
-    return List.generate(maps.length, (i) {
-      return ObjectifCours.fromMap(maps[i]);
-    });
   }
 
   Future<List<Page>> _getPagesByCoursId(int coursId) async {
@@ -109,27 +92,5 @@ class CoursRepository {
       where: 'id = ?',
       whereArgs: [coursId],
     );
-  }
-
-  Future<int> saveMediaForCourse(int coursId, String url, String localPath,
-      String type, int pageId) async {
-    final db = await _dbHelper.database;
-    return await db.insert('media', {
-      'url': url,
-      'local_path': localPath,
-      'type': type,
-      'id_page': pageId,
-      'is_downloaded': 1,
-    });
-  }
-
-  Future<List<MediaCours>> getMediasForCourse(int coursId) async {
-    final db = await _dbHelper.database;
-    final result = await db.query(
-      'media',
-      where: 'id_page IN (SELECT id FROM page WHERE id_cours = ?)',
-      whereArgs: [coursId],
-    );
-    return result.map((map) => MediaCours.fromMap(map)).toList();
   }
 }

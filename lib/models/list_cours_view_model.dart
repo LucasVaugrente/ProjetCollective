@@ -16,7 +16,6 @@ class ListCoursViewModel with ChangeNotifier {
   List<Cours> _cours = [];
 
   bool get isLoading => _isLoading;
-
   List<Cours> get cours => _cours;
 
   Future<void> getCours(int? idModule) async {
@@ -60,9 +59,11 @@ class ListCoursViewModel with ChangeNotifier {
       if (response.statusCode == 200) {
         final courseData = jsonDecode(response.body);
 
+        // Créer ou mettre à jour le cours avec ses pages et médias en JSON
         await _coursRepository.createOrUpdate(Cours.fromJson(courseData));
 
-        await _downloadMedias(courseData['id'], courseData['pages']);
+        // Marquer le cours comme téléchargé
+        await _coursRepository.markAsDownloaded(coursId);
 
         await getCours(ModuleSelectionne().moduleSelectionne.id);
       }
@@ -72,25 +73,6 @@ class ListCoursViewModel with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-  }
-
-  Future<void> _downloadMedias(int coursId, List<dynamic> pages) async {
-    for (var page in pages) {
-      for (var media in page['medias']) {
-        final localPath = await _downloadMedia(media['url']);
-        await _coursRepository.saveMediaForCourse(
-          coursId,
-          media['url'],
-          localPath,
-          media['type'],
-          page['id'],
-        );
-      }
-    }
-  }
-
-  Future<String> _downloadMedia(String url) async {
-    return 'chemon/local';
   }
 
   // Calcule la progression d'un module

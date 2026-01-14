@@ -38,15 +38,14 @@ class ContenuCoursView extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 page.description!,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           // Affichage des médias
           if (page.medias != null && page.medias!.isNotEmpty)
             ...page.medias!.map((media) {
               if (kDebugMode) {
-                print("Media url: ${media.url}");
+                print("Media url: ${media.url}, type: ${media.type}");
               }
 
               if (media.type == "image") {

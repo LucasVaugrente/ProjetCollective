@@ -1,81 +1,61 @@
-// ignore_for_file: must_be_immutable
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:factoscope/models/media_cours.dart';
-import 'package:factoscope/ui/Contenu/contenu_cours_view_model.dart';
+import 'package:factoscope/models/page.dart';
 import 'package:video_player/video_player.dart';
 
-//Classe chargée de build un widget vidéo à partir des données contenues dans un MediaCours
 class ContenuVideoWidget extends StatelessWidget {
-  late MediaCours data; //Les données correspondant à la vidéo à charger
-  late ContenuCoursViewModel
-      fileLoader; // objet chargé d'initialiser le lecteur vidéo en utililisant les données de data
-  late VideoPlayerController controller; //Lecteur vidéo
-  bool error =
-      false; // permet de gerer les erreurs remontés par le fileloader et gérer leur affichage
+  final MediaItem data;
+  late VideoPlayerController controller;
+  bool error = false;
 
-  //Constructeur permettant d'initialiser cette classe. Pour créer une instance de cette classe, on apelle ce constructeur de cette façon :
-  //ContenuVideoWidget(data: data)
-  ContenuVideoWidget({super.key, required this.data}) {
-    fileLoader = ContenuCoursViewModel();
-  }
+  ContenuVideoWidget({super.key, required this.data});
 
-  //Méthode chargée d'initialisée le lecteur vidéo
   Future<bool> initController() async {
-    //Création d'un lecteur vidéo vide pour éviter une erreur de variable non initialisée.
-    //Cette valeur ne sera cependant jamais utilisé.
-    //Il n'existe aucune méthode permettant de créer un VideoPlayerController sans lui passer une ressource
     controller = VideoPlayerController.asset("");
 
-    //Le code suivant va tenter de changer la valeur de notre lecteur vidéo avec les données contenues dans data.
-    //Si aucun fichier ne correspond aux données transmises, on change la valeur de "error" à true
     try {
-      //On apelle fileloader pour extraire la vidéo de notre système de fichier
-      controller = await fileLoader.videoLoader(data);
+      await rootBundle.load(data.url);
+      controller = VideoPlayerController.asset(data.url);
     } catch (_) {
       error = true;
     }
-    //On retourne error à la fin pour forçer le widget à attendre la fin de l'initialisation.
     return error;
   }
 
   @override
   Widget build(BuildContext context) {
-    //Ici FutureBuilder nous permet d'attendre la fin de notre initialisation pour build le widget.
     return FutureBuilder(
         future: initController(),
-        //Indique que l'ont doit attendre le retour de la valeur de initController pour build le widget.
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            //Si aucune erreur n'as été reporté durant l'initialisation du lecteur, alors on build une instance de VideoPlayerScreen, widget permettant de jouer la vidéo
             if (!error) {
               return LayoutBuilder(
                   builder: (BuildContext context, BoxConstraints constraints) {
-                return VideoPlayerScreen(controller: controller);
-              });
-              //En cas d'erreur, on indique qu'aucun fichier vidéo n'as été trouvé.
+                    return VideoPlayerScreen(controller: controller);
+                  }
+              );
             } else {
               return const Scaffold(
                   body: Center(
                       child: SizedBox(
-                child: Text("Video file not found"),
-              )));
+                        child: Text("Video file not found"),
+                      )
+                  )
+              );
             }
-            //Affiche un ecran de chargement tant que le lecteur vidéo n'est pas prêt.
           } else {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
-        });
+        }
+    );
   }
 }
 
 //Widget affichant la vidéo à l'écran
 class VideoPlayerScreen extends StatefulWidget {
-  //Lecteur vidéo
   final VideoPlayerController controller;
 
   const VideoPlayerScreen({super.key, required this.controller});
@@ -86,25 +66,15 @@ class VideoPlayerScreen extends StatefulWidget {
 
 //State du widget d'affichage de la vidéo
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late VideoPlayerController _controller; //Lecteur vidéo
-  late Future<void>
-      _initializeVideoPlayerFuture; //Future lié à l'initialisation de la lecture de la vidéo.
-  //Sert par la suite à synchronizer le build du widget à la fin de l'initialisation
-
-  Duration videoLength = const Duration(); //Durée de la vidéo
-  Duration videoPosition = const Duration(); //Position actuelle dans la vidéo
-
-  bool errorLoadingVideo =
-      false; //Indique si une erreur à été s'est produite lors du lancement de la vidéo.
-  double volume = 0.5; //Volume sonore de la vidéo
-
-  bool isFullscreen = false; //Indique si la vidéo est en plein écran ou non.
-
-  //Indique si les boutons du mode fullscreen doivent être visibles ou non
-  //Lorsque la vidéo est jouée en plein écran aucun bouton n'est visible tant que l'utilisateur ne touche pas à l'écran.
+  late VideoPlayerController _controller;
+  late Future<void> _initializeVideoPlayerFuture;
+  Duration videoLength = const Duration();
+  Duration videoPosition = const Duration();
+  bool errorLoadingVideo = false;
+  double volume = 0.5;
+  bool isFullscreen = false;
   bool fullscreenWidgetButtons = false;
-  bool hasVideoNotStarted =
-      true; //Indique si la vidéo à déjà commencé à jouer au moins une fois.
+  bool hasVideoNotStarted = true;
 
   _VideoPlayerScreenState(VideoPlayerController controller) {
     _controller = controller;
@@ -122,43 +92,29 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   @override
-  //Initialisation de notre State.
-  //Va permettre d'initialiser toutes les variables liées au lecteur vidéo
   void initState() {
     super.initState();
-
-    //On tente de charger la vidéo contenue dans le fichier passer au lecteur.
     try {
-      _initializeVideoPlayerFuture =
-          _controller.initialize().then((_) => setState(() {
-                try {
-                  //On initialise la valeur de la durée de la vidéo
-                  videoLength = _controller.value.duration;
-                } catch (_) {
-                  errorLoadingVideo = true;
-                }
-              }));
-
-      //Si la vidéo a pu être chargée, on active la lecture en boucle
+      _initializeVideoPlayerFuture = _controller.initialize().then((_) => setState(() {
+        try {
+          videoLength = _controller.value.duration;
+        } catch (_) {
+          errorLoadingVideo = true;
+        }
+      }));
       _controller.setLooping(true);
-
-      //Ajout de deux listener :
-      //L'un permet de synchroniser notre variable videoPosition à la position dans la vidéo.
-      //Le deuxième permet de détecter si une erreur survient lors de la lecture de la vidéo.
       _controller.addListener(() => setState(() {
-            videoPosition = _controller.value.position;
-            errorLoadingVideo = _controller.value.hasError;
-          }));
+        videoPosition = _controller.value.position;
+        errorLoadingVideo = _controller.value.hasError;
+      }));
     } catch (_) {
       errorLoadingVideo = true;
     }
   }
 
-  //Méthode permettant de détruire le lecteur vidéo à la destruction du widget.
   @override
   void dispose() {
     _controller.dispose();
-
     super.dispose();
   }
 

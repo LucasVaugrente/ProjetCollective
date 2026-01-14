@@ -1,7 +1,5 @@
 import 'package:factoscope/models/page.dart';
 
-import 'objectif_cours.dart';
-
 class Cours {
   int? id;
   int idModule;
@@ -10,7 +8,6 @@ class Cours {
   String description;
   int isDownloaded;
   List<Page>? pages;
-  List<ObjectifCours>? objectifs;
 
   Cours({
     this.id,
@@ -20,7 +17,6 @@ class Cours {
     required this.description,
     this.isDownloaded = 0,
     this.pages,
-    this.objectifs,
   });
 
   Map<String, dynamic> toMap() {
@@ -55,11 +51,6 @@ class Cours {
       isDownloaded: 1,
       pages: json['pages'] != null
           ? (json['pages'] as List).map((page) => Page.fromJson(page)).toList()
-          : null,
-      objectifs: json['objectifs'] != null
-          ? (json['objectifs'] as List)
-              .map((obj) => ObjectifCours.fromJson(obj))
-              .toList()
           : null,
     );
   }
