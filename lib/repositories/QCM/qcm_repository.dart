@@ -1,52 +1,69 @@
+import 'package:factoscope/database_helper.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
 
-import 'package:factoscope/repositories/QCM/question_repository.dart';
-import 'package:factoscope/repositories/QCM/reponse_repository.dart';
-import 'package:factoscope/database_helper.dart';
-
-/// Repository pour gérer les opérations CRUD des QCM.
 class QCMRepository {
-  /// Insère un nouveau QCM dans la base de données.
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
   Future<int> insert(QCM qcm) async {
-    final db = await DatabaseHelper.instance.database;
-    return await db.insert('QCM', qcm.toMap());
+    final db = await _dbHelper.database;
+    return await db.insert('qcm', qcm.toMap());
   }
 
-  /// Récupère tous les QCM.
-  Future<List<QCM>> getAll() async {
-    final db = await DatabaseHelper.instance.database;
-    final List<Map<String, dynamic>> maps = await db.query('QCM');
-    return maps.map((map) => QCM.fromMap(map)).toList();
-  }
-
-  /// Récupère un QCM par son identifiant et complète ses listes de questions et réponses.
   Future<QCM?> getById(int id) async {
-    final db = await DatabaseHelper.instance.database;
-    final maps = await db.query('QCM', where: 'idQCM = ?', whereArgs: [id]);
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'qcm',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
     if (maps.isNotEmpty) {
-      QCM qcm = QCM.fromMap(maps.first);
-
-      final questionRepo = QuestionRepository();
-      qcm.question = await questionRepo.getById(qcm.idQuestion);
-
-      final reponseRepo = ReponseRepository();
-      qcm.reponses = await reponseRepo.getByQCMId(qcm.id);
-
-      return qcm;
+      return QCM.fromMap(maps.first);
     }
     return null;
   }
 
-  /// Récupère tous les QCM.
-  Future<List<int>> getAllIdByCoursId(int idCours) async {
-    final db = await DatabaseHelper.instance.database;
-    final List<Map<String, dynamic>> maps =
-        await db.query('QCM', where: "idCours = ?", whereArgs: [idCours]);
+  Future<List<QCM>> getAllByCoursId(int coursId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'qcm',
+      where: 'id_cours = ?',
+      whereArgs: [coursId],
+    );
 
-    List<int> qcmIds = [];
-    for (final qcmMap in maps) {
-      qcmIds.add(qcmMap["idQCM"] as int);
-    }
-    return qcmIds;
+    return List.generate(maps.length, (i) {
+      return QCM.fromMap(maps[i]);
+    });
+  }
+
+  Future<List<int>> getAllIdByCoursId(int coursId) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'qcm',
+      columns: ['id'],
+      where: 'id_cours = ?',
+      whereArgs: [coursId],
+    );
+
+    return maps.map((map) => map['id'] as int).toList();
+  }
+
+  Future<int> update(QCM qcm) async {
+    final db = await _dbHelper.database;
+    return await db.update(
+      'qcm',
+      qcm.toMap(),
+      where: 'id = ?',
+      whereArgs: [qcm.id],
+    );
+  }
+
+  Future<int> delete(int id) async {
+    final db = await _dbHelper.database;
+    return await db.delete(
+      'qcm',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

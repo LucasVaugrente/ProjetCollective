@@ -1,8 +1,5 @@
 import 'dart:async';
-
 import 'package:factoscope/models/QCM/qcm.dart';
-import 'package:factoscope/models/QCM/question.dart';
-import 'package:factoscope/models/QCM/reponse.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/repositories/QCM/qcm_repository.dart';
 import 'package:flutter/foundation.dart';
@@ -12,25 +9,22 @@ class JeuQCMViewModel {
       Cours cours, int selectedPageIndex) async {
     try {
       final qcmRepo = QCMRepository();
-      List<int> idQCMList = await qcmRepo.getAllIdByCoursId(cours.id!);
-      QCM? qcm = await qcmRepo.getById(idQCMList[selectedPageIndex]);
 
-      Question? question;
-      List<Reponse>? reponses = [];
-      int? solution;
+      // Récupérer tous les QCM du cours
+      List<QCM> qcmList = await qcmRepo.getAllByCoursId(cours.id!);
 
-      if (qcm == null || qcm.question == null || qcm.reponses == null) {
-        throw Exception("QCM incomplet ou invalide");
+      // Vérifier que l'index est valide
+      if (selectedPageIndex >= qcmList.length) {
+        throw Exception("Index de QCM invalide");
       }
 
-      question = qcm.question;
-      reponses = qcm.reponses;
-      solution = qcm.numSolution;
+      QCM qcm = qcmList[selectedPageIndex];
 
+      // Retourner les données du QCM dans le format attendu par la vue
       return {
-        "question": question,
-        "options": reponses,
-        "correctAnswer": solution,
+        "question": qcm.question,
+        "options": qcm.getReponses(),
+        "correctAnswer": qcm.soluce,
       };
     } catch (e) {
       if (kDebugMode) {
