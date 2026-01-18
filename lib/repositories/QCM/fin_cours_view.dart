@@ -6,9 +6,9 @@ class FinCoursView extends StatelessWidget {
   final Cours cours;
 
   const FinCoursView({
-    Key? key,
+    super.key,
     required this.cours,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class FinCoursView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.2),
+                color: Colors.green.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -62,7 +62,8 @@ class FinCoursView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 90, 230, 220).withOpacity(0.2),
+                color: const Color.fromARGB(255, 90, 230, 220)
+                    .withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(

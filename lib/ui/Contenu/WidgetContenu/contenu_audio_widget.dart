@@ -65,7 +65,7 @@ class AudioPlayerScreen extends StatefulWidget {
   const AudioPlayerScreen({super.key, required this.player});
 
   @override
-  State<AudioPlayerScreen> createState() => _AudioPlayerScreenState(player);
+  State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
 }
 
 class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
@@ -74,8 +74,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   Duration duration = Duration.zero;
   Duration position = Duration.zero;
 
-  _AudioPlayerScreenState(this.player);
-
   Future<void> getDurationFromPlayer() async {
     duration = (await player.getDuration())!;
   }
@@ -83,6 +81,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    player = widget.player;
 
     getDurationFromPlayer();
 

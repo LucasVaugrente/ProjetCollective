@@ -51,6 +51,7 @@ class _JeuQCMViewState extends State<JeuQCMView> {
 
         var data = snapshot.data!;
 
+        // ✅ Données simplifiées
         String questionText = data["question"] as String;
         List<String> reponses = data["options"] as List<String>;
         int correctAnswer = data["correctAnswer"] as int;
@@ -114,9 +115,9 @@ class _JeuQCMViewState extends State<JeuQCMView> {
     Color? color;
     if (_validated) {
       if (index == correctAnswer) {
-        color = Colors.green.withOpacity(0.3);
+        color = Colors.green.withValues(alpha: 0.3);
       } else if (index == _selectedAnswer) {
-        color = Colors.red.withOpacity(0.3);
+        color = Colors.red.withValues(alpha: 0.3);
       }
     }
 

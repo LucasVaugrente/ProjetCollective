@@ -7,10 +7,10 @@ class TransitionQCMView extends StatelessWidget {
   final CoursViewModel coursViewModel;
 
   const TransitionQCMView({
-    Key? key,
+    super.key,
     required this.cours,
     required this.coursViewModel,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,8 @@ class TransitionQCMView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color.fromRGBO(252, 179, 48, 0.2),
+                color: const Color.fromRGBO(252, 179, 48, 1)
+                    .withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -80,7 +81,8 @@ class TransitionQCMView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 90, 230, 220).withOpacity(0.2),
+                color: const Color.fromARGB(255, 90, 230, 220)
+                    .withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: const Color.fromARGB(255, 90, 230, 220),

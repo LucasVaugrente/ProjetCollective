@@ -199,7 +199,9 @@ Future<void> insertSampleData() async {
     coursSelectionne.setCours(lstCours[0]);
   }
 
-  print(coursSelectionne);
+  if (kDebugMode) {
+    print(coursSelectionne);
+  }
 
   // Init du singleton ModuleSelectionne
   ModuleSelectionne moduleSelectionne = ModuleSelectionne.instance;
@@ -208,7 +210,9 @@ Future<void> insertSampleData() async {
     moduleSelectionne.moduleSelectionne = lstModule[0];
   }
 
-  print(moduleSelectionne);
+  if (kDebugMode) {
+    print(moduleSelectionne);
+  }
 
   if (kDebugMode) {
     print('Toutes les données d\'exemple ont été insérées avec succès.');

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/repositories/cours_repository.dart';
@@ -19,17 +20,25 @@ class _AllCoursViewState extends State<AllCoursView> {
   @override
   void initState() {
     super.initState();
-    print("Initialisation de AllCoursView");
+    if (kDebugMode) {
+      print("Initialisation de AllCoursView");
+    }
     _loadCours();
   }
 
   Future<void> _loadCours() async {
     try {
-      print("Chargement des cours...");
+      if (kDebugMode) {
+        print("Chargement des cours...");
+      }
       final cours = await coursRepository.getAll();
-      print("Nombre de cours chargés : ${cours.length}");
+      if (kDebugMode) {
+        print("Nombre de cours chargés : ${cours.length}");
+      }
       for (var c in cours) {
-        print("Cours chargé : ${c.titre}");
+        if (kDebugMode) {
+          print("Cours chargé : ${c.titre}");
+        }
       }
       setState(() {
         coursList = cours;
@@ -39,13 +48,17 @@ class _AllCoursViewState extends State<AllCoursView> {
       setState(() {
         isLoading = false;
       });
-      print("Erreur lors du chargement des cours: $e");
+      if (kDebugMode) {
+        print("Erreur lors du chargement des cours: $e");
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print("Construction de la vue AllCoursView");
+    if (kDebugMode) {
+      print("Construction de la vue AllCoursView");
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tous les Cours'),
@@ -62,9 +75,13 @@ class _AllCoursViewState extends State<AllCoursView> {
                     title: Text(cours.titre),
                     subtitle: Text(cours.contenu),
                     onTap: () {
-                      print("Cours sélectionné : ${cours.titre}");
+                      if (kDebugMode) {
+                        print("Cours sélectionné : ${cours.titre}");
+                      }
                       CoursSelectionne.instance.setCours(cours);
-                      print("Navigation vers /cours/${cours.id}");
+                      if (kDebugMode) {
+                        print("Navigation vers /cours/${cours.id}");
+                      }
                       GoRouter.of(context).go('/cours/${cours.id}');
                     },
                   ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/cours.dart';
 
@@ -15,7 +16,9 @@ class CoursSelectionne with ChangeNotifier {
   );
 
   void setCours(Cours nouveauCours) {
-    print("Mise à jour du cours sélectionné : ${nouveauCours.titre}");
+    if (kDebugMode) {
+      print("Mise à jour du cours sélectionné : ${nouveauCours.titre}");
+    }
     cours = nouveauCours; // FIX : c'était "cours = cours" avant
     notifyListeners();
   }

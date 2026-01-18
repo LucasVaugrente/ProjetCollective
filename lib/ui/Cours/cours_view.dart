@@ -107,17 +107,20 @@ class _CoursViewState extends State<CoursView> {
             selectedPageIndex: currentPage - 1,
           );
         } else if (currentPage == transitionPage) {
+          // ✅ Page de transition avant les QCM
           nouvellePage = TransitionQCMView(
             cours: coursSelectionne.cours,
             coursViewModel: coursViewModel,
           );
         } else if (currentPage >= firstQCMPage && currentPage <= lastQCMPage) {
+          // ✅ Pages de QCM
           int qcmIndex = currentPage - firstQCMPage;
           nouvellePage = JeuQCMView(
             cours: coursSelectionne.cours,
             selectedPageIndex: qcmIndex,
           );
         } else if (currentPage == finPage) {
+          // ✅ Page de fin de cours
           nouvellePage = FinCoursView(cours: coursSelectionne.cours);
         } else {
           nouvellePage = const Center(child: Text("Page introuvable"));
@@ -160,10 +163,10 @@ class HeaderWidget extends StatelessWidget {
   final double? progression;
 
   const HeaderWidget({
-    Key? key,
+    super.key,
     required this.cours,
     this.progression,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +188,7 @@ class HeaderWidget extends StatelessWidget {
               value: progression,
               minHeight: 6,
               color: Colors.teal,
-              backgroundColor: Colors.teal.withOpacity(0.2),
+              backgroundColor: Colors.teal.withValues(alpha: 0.2),
             ),
           ),
       ],

@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 class ContenuTextWidget extends StatelessWidget {
   final String filePath;
 
-  const ContenuTextWidget({Key? key, required this.filePath}) : super(key: key);
+  const ContenuTextWidget({super.key, required this.filePath});
 
   @override
   Widget build(BuildContext context) {

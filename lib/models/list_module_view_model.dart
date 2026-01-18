@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:factoscope/logic/progression_use_case.dart';
 import 'package:factoscope/models/module.dart';
 import 'package:factoscope/repositories/module_repository.dart';
