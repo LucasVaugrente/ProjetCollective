@@ -1,11 +1,16 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/ui/Cours/cours_view_model.dart';
 import 'package:factoscope/ui/Description/description_view.dart';
 import 'package:factoscope/ui/Contenu/contenu_cours_view.dart';
+import 'package:factoscope/ui/QCM/jeu_qcm_view.dart';
 import 'package:factoscope/ui/cours_selectionne.dart';
 
 import '../../models/cours.dart';
+import '../../repositories/QCM/fin_cours_view.dart';
+import '../../repositories/QCM/transition_qcm_view.dart';
 import '../../repositories/cours_repository.dart';
 
 class CoursView extends StatefulWidget {
@@ -33,6 +38,7 @@ class _CoursViewState extends State<CoursView> {
       final coursRepository = CoursRepository();
       final loadedCours = await coursRepository.getById(widget.coursId);
       if (loadedCours != null) {
+        // ✅ Ligne supprimée : loadedCours.objectifs ??= [];
         CoursSelectionne.instance.setCours(loadedCours);
         await coursViewModel.loadContenu(loadedCours);
         await coursViewModel.setIndexPageVisite(loadedCours);
@@ -71,39 +77,80 @@ class _CoursViewState extends State<CoursView> {
     int nbPageCours = coursSelectionne.cours.pages?.length ?? 0;
     int currentPage = coursViewModel.page;
 
-    Widget nouvellePage =
-    const Text("PB lors du chargement de la page de cours");
-    if (currentPage == 0) {
-      nouvellePage = DescriptionView(
-          cours: coursSelectionne.cours, coursViewModel: coursViewModel);
-    } else if (currentPage <= nbPageCours) {
-      nouvellePage = ContenuCoursView(
-          cours: coursSelectionne.cours, selectedPageIndex: currentPage - 1);
-    }
+    return FutureBuilder<int>(
+      future: coursViewModel.getNombrePageDeJeu(coursSelectionne.cours),
+      builder: (context, qcmSnapshot) {
+        if (!qcmSnapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 2,
-        title: FutureBuilder(
-          future: coursViewModel.getProgressionActuelle(coursSelectionne.cours),
-          builder: (context, snapshot) {
-            return HeaderWidget(
-              cours: coursSelectionne.cours,
-              progression: snapshot.data,
-            );
-          },
-        ),
-        centerTitle: false,
-      ),
-      body: nouvellePage,
-      bottomNavigationBar: nouvellePage.runtimeType != DescriptionView
-          ? FooterWidget(
-        courseTitle: coursSelectionne.cours.titre,
-        pageNumber: currentPage,
-        coursViewModel: coursViewModel,
-      )
-          : null,
+        int nbQCM = qcmSnapshot.data!;
+        int transitionPage = nbPageCours + 1; // Page juste après le contenu
+        int firstQCMPage = transitionPage + 1;
+        int lastQCMPage = firstQCMPage + nbQCM - 1;
+        int finPage = lastQCMPage + 1;
+
+        Widget nouvellePage;
+
+        if (currentPage == 0) {
+          // Page de description
+          nouvellePage = DescriptionView(
+            cours: coursSelectionne.cours,
+            coursViewModel: coursViewModel,
+          );
+        } else if (currentPage <= nbPageCours) {
+          // Pages de contenu
+          nouvellePage = ContenuCoursView(
+            cours: coursSelectionne.cours,
+            selectedPageIndex: currentPage - 1,
+          );
+        } else if (currentPage == transitionPage) {
+          nouvellePage = TransitionQCMView(
+            cours: coursSelectionne.cours,
+            coursViewModel: coursViewModel,
+          );
+        } else if (currentPage >= firstQCMPage && currentPage <= lastQCMPage) {
+          int qcmIndex = currentPage - firstQCMPage;
+          nouvellePage = JeuQCMView(
+            cours: coursSelectionne.cours,
+            selectedPageIndex: qcmIndex,
+          );
+        } else if (currentPage == finPage) {
+          nouvellePage = FinCoursView(cours: coursSelectionne.cours);
+        } else {
+          nouvellePage = const Center(child: Text("Page introuvable"));
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 2,
+            title: FutureBuilder(
+              future:
+                  coursViewModel.getProgressionActuelle(coursSelectionne.cours),
+              builder: (context, snapshot) {
+                return HeaderWidget(
+                  cours: coursSelectionne.cours,
+                  progression: snapshot.data,
+                );
+              },
+            ),
+            centerTitle: false,
+          ),
+          body: nouvellePage,
+          bottomNavigationBar: (nouvellePage.runtimeType != DescriptionView &&
+                  nouvellePage.runtimeType != FinCoursView)
+              ? FooterWidget(
+                  courseTitle: coursSelectionne.cours.titre,
+                  pageNumber: currentPage,
+                  coursViewModel: coursViewModel,
+                  cours: coursSelectionne.cours,
+                )
+              : null,
+        );
+      },
     );
   }
 }
@@ -113,10 +160,10 @@ class HeaderWidget extends StatelessWidget {
   final double? progression;
 
   const HeaderWidget({
-    super.key,
+    Key? key,
     required this.cours,
     this.progression,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -150,12 +197,14 @@ class FooterWidget extends StatelessWidget {
   final String courseTitle;
   final int pageNumber;
   final CoursViewModel coursViewModel;
+  final Cours cours;
 
   const FooterWidget({
     super.key,
     required this.courseTitle,
     required this.pageNumber,
     required this.coursViewModel,
+    required this.cours,
   });
 
   @override
@@ -182,7 +231,7 @@ class FooterWidget extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.arrow_right, size: 28),
             onPressed: () {
-              coursViewModel.changementPageSuivante();
+              coursViewModel.changementPageSuivante(cours);
             },
           ),
         ],

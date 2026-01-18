@@ -46,11 +46,13 @@ class DescriptionView extends StatelessWidget {
               style: const TextStyle(fontSize: 18),
             ),
             const SizedBox(height: 24),
+            // ✅ Section objectifs supprimée car n'existe plus
             const SizedBox(height: 32),
+            // Bouton pour commencer le cours
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  coursViewModel.changementPageSuivante();
+                  coursViewModel.changementPageSuivante(cours);
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(

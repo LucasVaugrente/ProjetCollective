@@ -1,6 +1,7 @@
+import 'package:flutter/foundation.dart';
+
 import '../database_helper.dart';
 import '../models/cours.dart';
-import '../models/page.dart';
 
 class CoursRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
@@ -20,10 +21,14 @@ class CoursRepository {
   }
 
   Future<List<Cours>> getAll() async {
-    print("Récupération de tous les cours depuis la base de données");
+    if (kDebugMode) {
+      print("Récupération de tous les cours depuis la base de données");
+    }
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('cours');
-    print("Nombre de cours récupérés depuis la base de données : ${maps.length}");
+    if (kDebugMode) {
+      print("Nombre de cours récupérés depuis la base de données : ${maps.length}");
+    }
     return List.generate(maps.length, (i) {
       return Cours.fromMap(maps[i]);
     });
@@ -41,18 +46,6 @@ class CoursRepository {
       return cours;
     }
     return null;
-  }
-
-  Future<List<Page>> _getPagesByCoursId(int coursId) async {
-    final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'page',
-      where: 'id_cours = ?',
-      whereArgs: [coursId],
-    );
-    return List.generate(maps.length, (i) {
-      return Page.fromMap(maps[i]);
-    });
   }
 
   Future<int> update(Cours cours) async {

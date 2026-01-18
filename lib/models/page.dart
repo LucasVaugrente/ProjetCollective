@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 class Page {
   int? id;
   String? description;
@@ -32,7 +34,9 @@ class Page {
         final decoded = jsonDecode(map['medias'] as String) as List;
         mediaList = decoded.map((m) => MediaItem.fromJson(m)).toList();
       } catch (e) {
-        print("Erreur parsing medias JSON: $e");
+        if (kDebugMode) {
+          print("Erreur parsing medias JSON: $e");
+        }
         mediaList = null;
       }
     }
@@ -55,7 +59,9 @@ class Page {
           final decoded = jsonDecode(json['medias']) as List;
           mediaList = decoded.map((m) => MediaItem.fromJson(m)).toList();
         } catch (e) {
-          print("Erreur parsing medias JSON string: $e");
+          if (kDebugMode) {
+            print("Erreur parsing medias JSON string: $e");
+          }
         }
       } else if (json['medias'] is List) {
         // Si c'est déjà une liste

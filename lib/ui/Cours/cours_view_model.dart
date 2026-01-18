@@ -7,6 +7,10 @@ import 'package:factoscope/models/cours.dart';
 class CoursViewModel extends ChangeNotifier {
   CoursViewModel();
 
+  // Information de la page actuelle
+  // 0 : Page de description
+  // 1-nbPage : Page de contenu
+  // >nbPage : Page de jeu
   int page = 0;
 
   final pageRepository = PageRepository();
@@ -29,10 +33,26 @@ class CoursViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changementPageSuivante() async {
-    page++;
-    await pageRepository.setPageVisite(page);
-    notifyListeners();
+  Future<void> changementPageSuivante(Cours cours) async {
+    final nbPages = await getNombrePageDeContenu(cours);
+    final nbJeux = await getNombrePageDeJeu(cours);
+    // Total: description(0) + pages(nbPages) + transition(1) + qcm(nbJeux) + fin(1)
+    final totalPages =
+        nbPages + nbJeux + 2; // +2 c'est pour la transition et la page de fin
+
+    if (page < totalPages) {
+      page++;
+
+      // Marquer la page comme visitée seulement si c'est une page de contenu (pas description, pas transition, pas jeu)
+      if (page > 0 && page <= nbPages) {
+        final pages = await pageRepository.getPagesByCourseId(cours.id!);
+        if (page - 1 < pages.length) {
+          await pageRepository.setPageVisite(pages[page - 1].id!);
+        }
+      }
+
+      notifyListeners();
+    }
   }
 
   void changementPagePrecedente() {
@@ -43,7 +63,9 @@ class CoursViewModel extends ChangeNotifier {
   }
 
   Future<double> getProgressionActuelle(Cours cours) async {
-    return await progressionUseCase.calculerProgressionActuelleCours(cours.id!, page) / 100;
+    return await progressionUseCase.calculerProgressionActuelleCours(
+            cours.id!, page) /
+        100;
   }
 
   Future<void> loadContenu(Cours cours) async {
