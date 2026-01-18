@@ -92,6 +92,45 @@ Future<void> insertModule1() async {
     ],
   );
   await pageRepository.create(page3);
+
+  await _insertQCMForCours1(coursId);
+}
+
+Future<void> _insertQCMForCours1(int coursId) async {
+  final db = await DatabaseHelper.instance.database;
+
+  // QCM 1
+  await db.insert('qcm', {
+    'question': "Quel est le principal indicateur de la fiabilité d'une source d'information ?",
+    'rep1': 'Sa popularité sur les réseaux sociaux',
+    'rep2': 'La vérifiabilité des informations par d\'autres sources fiables',
+    'rep3': 'Le nombre de commentaires sous l\'article',
+    'rep4': 'Le design du site web',
+    'soluce': 2,
+    'id_cours': coursId,
+  });
+
+  // QCM 2
+  await db.insert('qcm', {
+    'question': 'Quelle est la meilleure manière de vérifier une information trouvée en ligne ?',
+    'rep1': 'La partager immédiatement avec ses amis',
+    'rep2': 'Consulter plusieurs sources fiables et vérifier la cohérence de l\'information',
+    'rep3': 'Faire confiance à la première source trouvée',
+    'rep4': 'Vérifier si l\'information est amusante avant de la croire',
+    'soluce': 2,
+    'id_cours': coursId,
+  });
+
+  // QCM 3
+  await db.insert('qcm', {
+    'question': 'Quel est un signe révélateur d\'une fausse information ?',
+    'rep1': 'Elle provient d\'un média reconnu et sérieux',
+    'rep2': 'Elle utilise un ton sensationnaliste et manque de sources vérifiables',
+    'rep3': 'Elle cite plusieurs experts et références',
+    'rep4': 'Elle est reprise par plusieurs médias de confiance',
+    'soluce': 2,
+    'id_cours': coursId,
+  });
 }
 
 Future<void> insertModule2() async {
@@ -149,9 +188,9 @@ Future<void> insertSampleData() async {
   await DatabaseHelper.instance.resetDB();
 
   await insertModule1();
-  await insertModule2();
-  await insertModule3();
-  await insertModule4();
+  // await insertModule2();
+  // await insertModule3();
+  // await insertModule4();
 
   // Init du singleton CoursSelectionne
   CoursSelectionne coursSelectionne = CoursSelectionne.instance;
