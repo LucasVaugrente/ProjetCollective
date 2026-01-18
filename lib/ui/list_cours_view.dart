@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/list_cours_view_model.dart';
-import 'package:factoscope/models/page.dart';  // ✅ Import corrigé
+import 'package:factoscope/models/page.dart';
 import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_image_widget.dart';
 import 'package:factoscope/ui/Cours/cours_view.dart';
 import 'package:factoscope/ui/cours_selectionne.dart';

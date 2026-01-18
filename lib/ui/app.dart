@@ -4,6 +4,7 @@ import 'package:factoscope/ui/LaunchScreen/launch_screen_view.dart';
 import 'package:factoscope/ui/list_module_view.dart';
 import 'package:factoscope/ui/Cours/cours_view.dart';
 import 'package:factoscope/ui/all_cours_view.dart';
+import 'list_cours_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -25,6 +26,10 @@ final router = GoRouter(
             final coursId = int.parse(state.pathParameters['coursId']!);
             return CoursView(coursId: coursId);
           },
+        ),
+        GoRoute(
+          path: '/list_cours',
+          builder: (context, state) => ListCoursView(),
         ),
       ],
     ),
