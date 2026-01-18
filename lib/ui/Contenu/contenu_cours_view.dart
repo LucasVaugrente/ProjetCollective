@@ -69,7 +69,7 @@ class ContenuCoursView extends StatelessWidget {
                   child: Text("Le Media n'a pas le bon type !"),
                 );
               }
-            }).toList(),
+            }),
           if (page.medias == null || page.medias!.isEmpty)
             const Padding(
               padding: EdgeInsets.all(16.0),
