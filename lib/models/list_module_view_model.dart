@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/logic/progression_use_case.dart';
 import 'package:factoscope/models/module.dart';
@@ -14,7 +15,9 @@ class ListModuleViewModel with ChangeNotifier {
       listModule = await ModuleRepository().getAll();
       notifyListeners();
     } catch (e) {
-      print("Erreur lors de la récupération des modules : $e");
+      if (kDebugMode) {
+        print("Erreur lors de la récupération des modules : $e");
+      }
     }
   }
 

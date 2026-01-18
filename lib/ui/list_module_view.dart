@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/module.dart';
-import 'package:factoscope/ui/list_cours_view.dart';
 import 'package:factoscope/ui/module_selectionne.dart';
-
-import '../models/list_module_view_model.dart';
-
+import 'package:factoscope/models/list_module_view_model.dart';
 import 'package:go_router/go_router.dart';
 
 // Widget de la page d'accueil/Liste des modules
@@ -15,7 +12,7 @@ class ListModulesView extends StatefulWidget {
   State<ListModulesView> createState() => _ListModulesViewState();
 }
 
-// State du widget d'affichage de la liste des modules( page d'accueil )
+// State du widget d'affichage de la liste des modules (page d'accueil)
 class _ListModulesViewState extends State<ListModulesView> {
   ListModuleViewModel listModuleViewModel = ListModuleViewModel();
 
@@ -84,7 +81,7 @@ class _ListModulesViewState extends State<ListModulesView> {
   }
 }
 
-// Widget représentant l'header d'un module dans la liste des modules.
+// Widget représentant l'header d'un module dans la liste des modules
 SizedBox listModuleItem(Module item, BuildContext context) {
   return SizedBox(
     child: InkWell(
@@ -96,8 +93,76 @@ SizedBox listModuleItem(Module item, BuildContext context) {
       ),
       onTap: () {
         ModuleSelectionne.instance.moduleSelectionne = item;
-        GoRouter.of(context).go('/module');
+        GoRouter.of(context).push('/list_cours');
       },
+    ),
+  );
+}
+
+SizedBox moduleHeader(Module module, double? progress) {
+  return SizedBox(
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+      margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: const Color.fromARGB(255, 236, 187, 139),
+      ),
+      child: Row(
+        children: [
+          // Image du module
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              module.urlImg,
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 80,
+                  height: 80,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.image_not_supported, size: 40),
+                );
+              },
+            ),
+          ),
+          const Spacer(),
+          Column(
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+                child: Text(
+                  module.titre,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.clip,
+                ),
+              ),
+              SizedBox(
+                width: 200,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 6,
+                    color: const Color.fromARGB(255, 90, 230, 220),
+                    backgroundColor: const Color.fromARGB(255, 175, 240, 235),
+                  ),
+                ),
+              )
+            ],
+          ),
+          const Spacer()
+        ],
+      ),
     ),
   );
 }
@@ -106,79 +171,62 @@ SizedBox listModuleItem(Module item, BuildContext context) {
 SizedBox headerAvancement() {
   return SizedBox(
     child: Container(
-        //Gestion de l'espace entre le contenu et la bordure interieure du widget
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-        //Gestion de l'espace entre l'exterieur du widget et les widgets adjacents
-        margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-        //Décoration de la bordure
-        decoration: BoxDecoration(
-          //Gestion de l'angle de la bordure
-          borderRadius: BorderRadius.circular(12),
-          color: const Color.fromARGB(255, 219, 218, 215),
-        ),
-        child: Row(
-          children: [
-            Container(
-              //Gestion de l'espace entre le contenu et la bordure interieure du widget
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-              //Gestion de l'espace entre l'exterieur du widget et les widgets adjacents
-              margin:
-                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
-              //Colonne contenant le texte du header
-              child: const Column(
-                children: [
-                  //Titre
-                  Text(
-                    "Votre Avancement",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  // Message d'encouragement (faire detection en fonction du pourcentage)
-                  // Text("Vous êtes bientôt au bout, "),
-                  // Text("bientôt la certification")
-                ],
-              ),
-            ),
-
-            const Spacer(),
-
-            // On utilise un stack pour mettre le pourcentage au dessus d'une icône
-            Stack(
-              alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: const Color.fromARGB(255, 219, 218, 215),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+            child: const Column(
               children: [
-                // Icône : Attention ce n'est pas la bonne icône pour l'instant
-                const Icon(
-                  Icons.bookmark,
-                  size: 140,
-                  color: Color.fromARGB(255, 3, 47, 122),
+                Text(
+                  "Votre Avancement",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-
-                //Affichage du pourcentage d'avancement
-                FutureBuilder(
-                    // Permet d'attendre le calcul de progression
-                    future: ListModuleViewModel().getProgressionGlobale(),
-                    builder: (context, snapshot) {
-                      String progress = "";
-                      if (snapshot.hasData) {
-                        progress = snapshot.data.toString();
-                      }
-
-                      return Text(
-                        "$progress%",
-                        style: const TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      );
-                    }),
               ],
             ),
-          ],
-        )),
+          ),
+          const Spacer(),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              const Icon(
+                Icons.bookmark,
+                size: 140,
+                color: Color.fromARGB(255, 3, 47, 122),
+              ),
+              FutureBuilder(
+                future: ListModuleViewModel().getProgressionGlobale(),
+                builder: (context, snapshot) {
+                  String progress = "";
+                  if (snapshot.hasData) {
+                    progress = snapshot.data.toString();
+                  }
+
+                  return Text(
+                    "$progress%",
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
   );
 }
