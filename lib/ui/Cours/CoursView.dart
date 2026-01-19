@@ -6,6 +6,7 @@ import 'package:seriouse_game/ui/Cours/CoursViewModel.dart';
 import 'package:seriouse_game/ui/Description/DescriptionView.dart';
 import 'package:seriouse_game/ui/Contenu/ContenuCoursView.dart';
 import 'package:seriouse_game/ui/QCM/JeuQCMView.dart';
+import 'package:seriouse_game/ui/Cloze/ClozePage.dart';
 
 
 import 'package:seriouse_game/ui/CoursSelectionne.dart';
@@ -42,7 +43,29 @@ class CoursView extends StatelessWidget {
       //print("Chargement de contenu");
     } else if (page<=nbPageCours + nbPageJeu) {
       // Page jeu 
-      nouvellePage = JeuQCMView(cours: coursSelectionne.cours, selectedPageIndex: page - nbPageCours - 1);
+      int nbPageCours = await coursViewModel.getNombrePageDeContenu(coursSelectionne.cours);
+      int nbPageJeu = await coursViewModel.getNombrePageDeJeu(coursSelectionne.cours);
+      int page = coursViewModel.page;
+
+      Widget nouvellePage = const Text("PB lors du chargement de la page de cours");
+
+      if (page == 0) {
+        nouvellePage = DescriptionView(cours: coursSelectionne.cours, coursViewModel: coursViewModel);
+      } else if (page <= nbPageCours) {
+        nouvellePage = ContenuCoursView(cours: coursSelectionne.cours, selectedPageIndex: page - 1);
+      } else if (page <= nbPageCours + nbPageJeu) {
+        int indexJeu = page - nbPageCours - 1;
+        int nbQCM = await coursViewModel.qcmRepository.getAllIdByCoursId(coursSelectionne.cours.id!).then((lst) => lst.length);
+
+        if (indexJeu < nbQCM) {
+          nouvellePage = JeuQCMView(cours: coursSelectionne.cours, selectedPageIndex: indexJeu);
+        } else {
+          nouvellePage = ClozePage(
+            coursId: coursSelectionne.cours.id!,
+            key: UniqueKey(),
+          );
+        }
+
     } else {
       // Redirection vers la page de module
       GoRouter.of(context).go('/module');

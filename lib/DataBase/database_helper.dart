@@ -74,30 +74,6 @@ class DatabaseHelper {
 ''');
 
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS MotsCroises (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_minijeu INTEGER NOT NULL,
-        taille_grille TEXT NOT NULL,
-        description TEXT,
-        FOREIGN KEY (id_minijeu) REFERENCES MiniJeu (id) ON DELETE CASCADE
-
-      );
-    ''');
-
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS Mot (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_motscroises INTEGER NOT NULL,
-        mot TEXT NOT NULL,
-        indice TEXT NOT NULL,
-        direction TEXT NOT NULL,
-        position_depart_x INTEGER NOT NULL,
-        position_depart_y INTEGER NOT NULL,
-        FOREIGN KEY (id_motscroises) REFERENCES MotsCroises (id) ON DELETE CASCADE
-      );
-    ''');
-
-    await db.execute('''
   CREATE TABLE IF NOT EXISTS MediaCours (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_page INTEGER NOT NULL,
@@ -123,7 +99,7 @@ CREATE TABLE Question(
    PRIMARY KEY(idQuestion)
 );''');
 
-  await db.execute('''CREATE TABLE QuestionImg(
+    await db.execute('''CREATE TABLE QuestionImg(
    idQuestion INTEGER,
    urlImage TEXT NOT NULL,
    caption TEXT NOT NULL,
@@ -131,14 +107,14 @@ CREATE TABLE Question(
    FOREIGN KEY(idQuestion) REFERENCES Question(idQuestion)
 );''');
 
-  await db.execute('''CREATE TABLE QuestionText(
+    await db.execute('''CREATE TABLE QuestionText(
    idQuestion INTEGER,
    txt TEXT NOT NULL,
    PRIMARY KEY(idQuestion),
    FOREIGN KEY(idQuestion) REFERENCES Question(idQuestion)
 );''');
 
-  await db.execute('''CREATE TABLE QCM(
+    await db.execute('''CREATE TABLE QCM(
    idQCM INTEGER,
    numSolution INTEGER NOT NULL,
    idCours INTEGER NOT NULL,
@@ -149,14 +125,14 @@ CREATE TABLE Question(
    FOREIGN KEY(idQuestion) REFERENCES Question(idQuestion)
 );''');
 
-  await db.execute('''CREATE TABLE Reponse(
+    await db.execute('''CREATE TABLE Reponse(
    idReponse INTEGER,
    idQCM INTEGER NOT NULL,
    PRIMARY KEY(idReponse),
    FOREIGN KEY(idQCM) REFERENCES QCM(idQCM)
 );''');
 
-  await db.execute('''CREATE TABLE ReponseImg(
+    await db.execute('''CREATE TABLE ReponseImg(
    idReponse INTEGER,
    urlImage TEXT NOT NULL,
    caption TEXT NOT NULL,
@@ -164,13 +140,21 @@ CREATE TABLE Question(
    FOREIGN KEY(idReponse) REFERENCES Reponse(idReponse)
 );''');
 
-  await db.execute('''CREATE TABLE ReponseText(
+    await db.execute('''CREATE TABLE ReponseText(
    idReponse INTEGER,
    txt TEXT NOT NULL,
    PRIMARY KEY(idReponse),
    FOREIGN KEY(idReponse) REFERENCES Reponse(idReponse)
 );''');
 
+    await db.execute('''
+  CREATE TABLE Cloze(
+     idCloze INTEGER PRIMARY KEY AUTOINCREMENT,
+     phrase TEXT NOT NULL,      
+     idCours INTEGER NOT NULL,
+     FOREIGN KEY(idCours) REFERENCES cours(id)
+  );
+''');
 
   }
 

@@ -5,6 +5,8 @@ import 'package:seriouse_game/repositories/QCM/QCMRepository.dart';
 import 'package:seriouse_game/repositories/mediaCoursRepository.dart';
 import 'package:seriouse_game/repositories/pageRepository.dart';
 import 'package:seriouse_game/models/cours.dart';
+import '../repositories/Cloze/clozeRepository.dart';
+import '../models/Cloze/cloze_model.dart';
 
 class CoursViewModel extends ChangeNotifier{
   CoursViewModel();
@@ -53,7 +55,14 @@ class CoursViewModel extends ChangeNotifier{
       notifyListeners();
     }
   }
-  
+
+  final clozeRepository = ClozeRepository();
+
+  Future<int> getNombrePageDeJeu(Cours cours) async {
+    int nbQCM = await qcmRepository.getAllIdByCoursId(cours.id!).then((lstIdPageJeu) => lstIdPageJeu.length);
+    int nbCloze = await getNombrePageDeCloze(cours);
+    return nbQCM + nbCloze;
+  }
   Future<double> getProgressionActuelle(Cours cours) async {
     return await progressionUseCase.calculerProgressionActuelleCours(cours.id!, page)/100;
   }

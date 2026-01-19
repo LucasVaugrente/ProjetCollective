@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:seriouse_game/repositories/coursRepository.dart';
 import 'package:seriouse_game/repositories/moduleRepository.dart';
 import 'package:seriouse_game/repositories/pageRepository.dart';
+import 'package:seriouse_game/models/cours.dart';
 
 class ProgressionUseCase {
   final pageRepository = PageRepository();
@@ -100,5 +101,8 @@ class ProgressionUseCase {
       }
       return 0;
     }
+  }
+  int getNombreTexteATrous(Cours cours) {
+    return 1;
   }
 }
