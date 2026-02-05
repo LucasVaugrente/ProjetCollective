@@ -55,7 +55,7 @@ class ListCoursViewModel with ChangeNotifier {
 
     try {
       final response = await http
-          .get(Uri.parse('${AppConfig.apiBaseUrl}/api/cours/$coursId'));
+          .get(Uri.parse('${AppConfig.effectiveApiUrl}/api/cours/$coursId'));
       if (response.statusCode == 200) {
         final courseData = jsonDecode(response.body);
 
