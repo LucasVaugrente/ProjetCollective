@@ -62,6 +62,13 @@ class _AllCoursViewState extends State<AllCoursView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tous les Cours'),
+        centerTitle: true,
+        backgroundColor: const Color.fromRGBO(255, 255, 255, 1.0),
+        titleTextStyle: const TextStyle(
+          fontSize: 30,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -75,13 +82,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                     title: Text(cours.titre),
                     subtitle: Text(cours.contenu),
                     onTap: () {
-                      if (kDebugMode) {
-                        print("Cours sélectionné : ${cours.titre}");
-                      }
                       CoursSelectionne.instance.setCours(cours);
-                      if (kDebugMode) {
-                        print("Navigation vers /cours/${cours.id}");
-                      }
                       GoRouter.of(context).go('/cours/${cours.id}');
                     },
                   ),

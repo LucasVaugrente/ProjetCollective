@@ -1,3 +1,4 @@
+import 'package:factoscope/ui/validation_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:factoscope/ui/LaunchScreen/launch_screen_view.dart';
@@ -30,6 +31,10 @@ final router = GoRouter(
         GoRoute(
           path: '/list_cours',
           builder: (context, state) => ListCoursView(),
+        ),
+        GoRoute(
+          path: '/validation',
+          builder: (context, state) => const ValidationView(),
         ),
       ],
     ),
@@ -69,6 +74,8 @@ class _AppState extends State<App> {
         context.go('/cours');
         break;
       case 2:
+        context.go('/validation');
+        break;
       default:
         context.go('/');
         break;
