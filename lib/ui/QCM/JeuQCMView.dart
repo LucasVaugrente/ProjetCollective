@@ -1,152 +1,179 @@
 import 'package:flutter/material.dart';
-import 'package:seriouse_game/models/QCM/question.dart';
-import 'package:seriouse_game/models/QCM/reponse.dart';
-import 'package:seriouse_game/models/cours.dart';
+import 'package:provider/provider.dart';
 import 'JeuQCMViewModel.dart';
+import 'package:seriouse_game/models/cours.dart';
 
-class JeuQCMView extends StatefulWidget {
+class JeuQCMView extends StatelessWidget {
   final Cours cours;
-  final int selectedPageIndex;
 
-  const JeuQCMView({super.key, required this.cours, required this.selectedPageIndex});
-
-  @override
-  _JeuQCMViewState createState() => _JeuQCMViewState();
-}
-
-class _JeuQCMViewState extends State<JeuQCMView> {
-  int? _selectedAnswer;
-  bool _validated = false;
-  int _currentQuestionIndex = 0;
-  int _score = 0;
-  late List<int?> _answers;
-  late int _totalQuestions;
-
-  @override
-  void initState() {
-    super.initState();
-    _answers = [];
-  }
-
-  void _nextQuestion() {
-    if (_selectedAnswer != null) {
-      _answers.add(_selectedAnswer);
-      setState(() {
-        _currentQuestionIndex++;
-        _selectedAnswer = null;
-        _validated = false;
-      });
-    }
-  }
-
-  void _previousQuestion() {
-    if (_currentQuestionIndex > 0) {
-      setState(() {
-        _currentQuestionIndex--;
-        _selectedAnswer = _answers[_currentQuestionIndex];
-        _validated = false;
-      });
-    }
-  }
+  const JeuQCMView({super.key, required this.cours});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Jeu QCM")),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: JeuQCMViewModel().recupererQCM(widget.cours, _currentQuestionIndex),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("QCM indisponible pour ce cours"));
+    return ChangeNotifierProvider(
+      create: (_) => JeuQCMViewModel()..chargerQCM(cours),
+      child: Consumer<JeuQCMViewModel>(
+        builder: (context, vm, child) {
+          if (vm.isLoading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
 
-          var data = snapshot.data!;
-          Question question = data["question"];
-          List<Reponse> reponses = data["options"];
-          int correctAnswer = data["correctAnswer"];
-          _totalQuestions = data["totalQuestions"];
+          if (vm.hasError || vm.controller == null) {
+            return const Scaffold(
+              body: Center(child: Text("Impossible de charger le QCM")),
+            );
+          }
 
-          dynamic questionText = question.type == "text" ? question.text : question.imageUrl;
-          List<dynamic> reponseText = reponses.map((r) => r.type == "text" ? r.text : r.imageUrl).toList();
+          if (vm.isFinished) {
+            return _buildResultPage(context, vm);
+          }
 
-          return Column(
-            children: [
-              _buildQuestionWidget(questionText),
-              ...List.generate(reponseText.length, (index) => _buildAnswerWidget(reponseText[index], index + 1, correctAnswer)),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _selectedAnswer == null ? null : () => setState(() => _validated = true),
-                child: const Text("Valider"),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: _currentQuestionIndex > 0 ? _previousQuestion : null,
-                    child: const Text("Précédent"),
-                  ),
-                  ElevatedButton(
-                    onPressed: _validated ? () {
-                      if (_selectedAnswer == correctAnswer) _score++;
-                      if (_currentQuestionIndex + 1 < _totalQuestions) {
-                        _nextQuestion();
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text("Résultat"),
-                            content: Text("Score : $_score / $_totalQuestions"),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("OK"),
-                              )
-                            ],
-                          ),
-                        );
-                      }
-                    } : null,
-                    child: const Text("Suivant"),
-                  ),
-                ],
-              ),
-            ],
-          );
+          return _buildQuestionPage(context, vm);
         },
       ),
     );
   }
 
-  Widget _buildQuestionWidget(dynamic question) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: question is String
-          ? Text(question, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
-          : Image.network(question),
+  // --- PAGE QUESTION ---
+  Widget _buildQuestionPage(BuildContext context, JeuQCMViewModel vm) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("QCM"),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Progression
+            Text(
+              "Question ${vm.currentIndex + 1} / ${vm.totalQuestions}",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Question
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                vm.questionText,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Message Bonne/Mauvaise réponse
+            if (vm.isCorrect != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  vm.isCorrect! ? "Bonne réponse !" : "Mauvaise réponse...",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: vm.isCorrect! ? Colors.green : Colors.red,
+                  ),
+                ),
+              ),
+
+            // Réponses
+            Expanded(
+              child: ListView.builder(
+                itemCount: vm.options.length,
+                itemBuilder: (context, i) {
+                  final isSelected = vm.selectedAnswer == i;
+                  final isCorrect = vm.controller!.currentQuestion.soluce == i;
+
+                  Color tileColor = Colors.white;
+
+                  if (vm.isCorrect != null && isSelected) {
+                    tileColor = vm.isCorrect! ? Colors.green.shade200 : Colors.red.shade200;
+                  }
+
+                  return Card(
+                    color: tileColor,
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        vm.options[i],
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      onTap: () {
+                        if (vm.isCorrect == null) {
+                          vm.selectAnswer(i);
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Bouton précédent uniquement
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                ElevatedButton(
+                  onPressed: vm.currentIndex > 0 ? vm.previous : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade300,
+                    foregroundColor: Colors.black,
+                  ),
+                  child: const Text("Précédent"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildAnswerWidget(dynamic answer, int index, int correctAnswer) {
-    Color? color;
-    if (_validated) {
-      if (index == correctAnswer) {
-        color = Colors.green;
-      } else if (index == _selectedAnswer) {
-        color = Colors.red;
-      }
-    }
+  // --- PAGE RESULTAT ---
+  Widget _buildResultPage(BuildContext context, JeuQCMViewModel vm) {
+    final score = vm.getScore();
 
-    return ListTile(
-      title: answer is String ? Text(answer) : Image.network(answer),
-      leading: Radio<int>(
-        value: index,
-        groupValue: _selectedAnswer,
-        onChanged: _validated ? null : (int? value) => setState(() => _selectedAnswer = value),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Résultat")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Votre score",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "$score / ${vm.totalQuestions}",
+              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              onPressed: vm.restart,
+              child: const Text("Recommencer"),
+            ),
+            const SizedBox(height: 10),
+
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Retour"),
+            ),
+          ],
+        ),
       ),
-      tileColor: color,
     );
   }
 }

@@ -1,32 +1,79 @@
 import 'package:flutter/foundation.dart';
 import 'package:seriouse_game/models/QCM/qcm.dart';
-import 'package:seriouse_game/models/QCM/question.dart';
-import 'package:seriouse_game/models/QCM/reponse.dart';
 import 'package:seriouse_game/models/cours.dart';
 import 'package:seriouse_game/repositories/QCM/QCMRepository.dart';
+import 'package:seriouse_game/repositories/QCM/qcm_controller.dart';
 
-class JeuQCMViewModel {
-  Future<Map<String, dynamic>> recupererQCM(Cours cours, int selectedPageIndex) async {
+class JeuQCMViewModel extends ChangeNotifier {
+  final QCMRepository _repo = QCMRepository();
+
+  QCMController? controller;
+  bool isLoading = true;
+  bool hasError = false;
+
+  Future<void> chargerQCM(Cours cours) async {
     try {
-      final qcmRepo = QCMRepository();
-      List<int> idQCMList = await qcmRepo.getAllIdByCoursId(cours.id!);
-      QCM? qcm = await qcmRepo.getById(idQCMList[selectedPageIndex]);
+      isLoading = true;
+      notifyListeners();
 
-      if (qcm == null || qcm.question == null || qcm.reponses == null) {
-        throw Exception("QCM incomplet ou invalide");
+      List<int> ids = await _repo.getAllIdByCoursId(cours.id!);
+      List<QCM> qcms = [];
+
+      for (int id in ids) {
+        QCM? q = await _repo.getById(id);
+        if (q != null) qcms.add(q);
       }
 
-      return {
-        "question": qcm.question,
-        "options": qcm.reponses,
-        "correctAnswer": qcm.numSolution,
-        "totalQuestions": idQCMList.length,
-      };
+      if (qcms.isEmpty) {
+        throw Exception("Aucun QCM trouvé");
+      }
+
+      controller = QCMController(qcms);
+      controller!.start();
+
+      isLoading = false;
+      notifyListeners();
     } catch (e) {
-      if (kDebugMode) {
-        print("Erreur lors du chargement du QCM : $e");
-      }
-      return {};
+      hasError = true;
+      isLoading = false;
+      notifyListeners();
     }
+  }
+
+  // --- Exposition des données à la vue ---
+  String get questionText => controller!.currentQuestion.question;
+
+  List<String> get options => controller!.currentQuestion.reponses;
+
+  int? get selectedAnswer => controller!.selectedAnswer;
+  int get currentIndex => controller!.currentIndex;
+  int get totalQuestions => controller!.qcmList.length;
+  bool get isFinished => controller!.state == QCMState.finished;
+
+  bool? get isCorrect => controller!.isCorrect;
+
+  // --- Actions utilisateur ---
+  Future<void> selectAnswer(int index) async {
+    controller!.selectAnswer(index);
+    notifyListeners();
+
+    // Attendre 1 seconde pour afficher "Bonne réponse / Mauvaise réponse"
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Passer automatiquement à la question suivante
+    controller!.next();
+    notifyListeners();
+  }
+
+  void previous() {
+    controller!.previous();
+    notifyListeners();
+  }
+
+  int getScore() => controller!.getScore();
+
+  void restart() {
+    controller!.restart();
+    notifyListeners();
   }
 }

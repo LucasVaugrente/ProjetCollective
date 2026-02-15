@@ -18,21 +18,18 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    //resetDatabase();
+
     return await openDatabase(
       path,
       version: 1,
-      onOpen: (db) async {
-        // Appeler _createDB pour recréer les tables si nécessaire
-        await _createDB(db, 1);
-      },
+      onCreate: _createDB,
     );
   }
 
-  // Crée les tables dans la base de données
+  // Création des tables
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS module (
+      CREATE TABLE module (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         urlImg TEXT NOT NULL,
         titre TEXT NOT NULL,
@@ -41,7 +38,7 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS cours (
+      CREATE TABLE cours (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         titre TEXT NOT NULL,
         contenu TEXT NOT NULL,
@@ -51,41 +48,40 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS page (
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-       description TEXT ,
-       ordre INTEGER NOT NULL,
-       urlAudio TEST DEFAULT "",
-       est_vue INTEGER DEFAULT 0,
-       id_cours INTEGER NOT NULL,
-       FOREIGN KEY (id_cours) REFERENCES cours (id) ON DELETE CASCADE ON UPDATE CASCADE
+      CREATE TABLE page (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT,
+        ordre INTEGER NOT NULL,
+        urlAudio TEXT DEFAULT "",
+        est_vue INTEGER DEFAULT 0,
+        id_cours INTEGER NOT NULL,
+        FOREIGN KEY (id_cours) REFERENCES cours (id) ON DELETE CASCADE
       );
     ''');
 
     await db.execute('''
-    CREATE TABLE IF NOT EXISTS MiniJeu (
-     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_cours INTEGER NOT NULL,
-    nom TEXT NOT NULL,
-    description TEXT,
-    progression INTEGER NOT NULL,
-    FOREIGN KEY (id_cours) REFERENCES cours (id)
-  );
-''');
+      CREATE TABLE MiniJeu (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_cours INTEGER NOT NULL,
+        nom TEXT NOT NULL,
+        description TEXT,
+        progression INTEGER NOT NULL,
+        FOREIGN KEY (id_cours) REFERENCES cours (id)
+      );
+    ''');
 
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS MotsCroises (
+      CREATE TABLE MotsCroises (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_minijeu INTEGER NOT NULL,
         taille_grille TEXT NOT NULL,
         description TEXT,
         FOREIGN KEY (id_minijeu) REFERENCES MiniJeu (id) ON DELETE CASCADE
-
       );
     ''');
 
     await db.execute('''
-      CREATE TABLE IF NOT EXISTS Mot (
+      CREATE TABLE Mot (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_motscroises INTEGER NOT NULL,
         mot TEXT NOT NULL,
@@ -98,95 +94,54 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-  CREATE TABLE IF NOT EXISTS MediaCours (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_page INTEGER NOT NULL,
-    ordre INTEGER NOT NULL,
-    url TEXT NOT NULL,
-    type TEXT NOT NULL,
-    caption TEXT,
-    FOREIGN KEY (id_page) REFERENCES page (id) ON DELETE CASCADE
-  );
-''');
+      CREATE TABLE MediaCours (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_page INTEGER NOT NULL,
+        ordre INTEGER NOT NULL,
+        url TEXT NOT NULL,
+        type TEXT NOT NULL,
+        caption TEXT,
+        FOREIGN KEY (id_page) REFERENCES page (id) ON DELETE CASCADE
+      );
+    ''');
+
     await db.execute('''
-    CREATE TABLE IF NOT EXISTS ObjectifCours (
+      CREATE TABLE ObjectifCours (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_cours INTEGER NOT NULL,
         description TEXT NOT NULL,
         FOREIGN KEY (id_cours) REFERENCES cours (id) ON DELETE CASCADE
-    );
-''');
+      );
+    ''');
 
+    // -------------------------------------------------------------------------
+    // NOUVELLE TABLE QCM — COMPATIBLE AVEC TON MODÈLE ET TON REPOSITORY
+    // -------------------------------------------------------------------------
     await db.execute('''
-CREATE TABLE Question(
-   idQuestion INTEGER,
-   PRIMARY KEY(idQuestion)
-);''');
-
-  await db.execute('''CREATE TABLE QuestionImg(
-   idQuestion INTEGER,
-   urlImage TEXT NOT NULL,
-   caption TEXT NOT NULL,
-   PRIMARY KEY(idQuestion),
-   FOREIGN KEY(idQuestion) REFERENCES Question(idQuestion)
-);''');
-
-  await db.execute('''CREATE TABLE QuestionText(
-   idQuestion INTEGER,
-   txt TEXT NOT NULL,
-   PRIMARY KEY(idQuestion),
-   FOREIGN KEY(idQuestion) REFERENCES Question(idQuestion)
-);''');
-
-  await db.execute('''CREATE TABLE QCM(
-   idQCM INTEGER,
-   numSolution INTEGER NOT NULL,
-   idCours INTEGER NOT NULL,
-   idQuestion INTEGER NOT NULL,
-   PRIMARY KEY(idQCM),
-   UNIQUE(idQuestion),
-   FOREIGN KEY(idCours) REFERENCES cours(id),
-   FOREIGN KEY(idQuestion) REFERENCES Question(idQuestion)
-);''');
-
-  await db.execute('''CREATE TABLE Reponse(
-   idReponse INTEGER,
-   idQCM INTEGER NOT NULL,
-   PRIMARY KEY(idReponse),
-   FOREIGN KEY(idQCM) REFERENCES QCM(idQCM)
-);''');
-
-  await db.execute('''CREATE TABLE ReponseImg(
-   idReponse INTEGER,
-   urlImage TEXT NOT NULL,
-   caption TEXT NOT NULL,
-   PRIMARY KEY(idReponse),
-   FOREIGN KEY(idReponse) REFERENCES Reponse(idReponse)
-);''');
-
-  await db.execute('''CREATE TABLE ReponseText(
-   idReponse INTEGER,
-   txt TEXT NOT NULL,
-   PRIMARY KEY(idReponse),
-   FOREIGN KEY(idReponse) REFERENCES Reponse(idReponse)
-);''');
-
-
+      CREATE TABLE qcm (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        question TEXT NOT NULL,
+        rep1 TEXT NOT NULL,
+        rep2 TEXT NOT NULL,
+        rep3 TEXT NOT NULL,
+        rep4 TEXT NOT NULL,
+        soluce INTEGER NOT NULL,
+        id_cours INTEGER NOT NULL,
+        FOREIGN KEY (id_cours) REFERENCES cours (id) ON DELETE CASCADE
+      );
+    ''');
   }
 
-  // Supprime la base de données et recrée les tables
+  // Supprime la base et recrée les tables
   Future<void> resetDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'app.db');
 
-    // Supprime la base de données existante
     await deleteDatabase(path);
-
-    // Rouvre la base de données pour recréer les tables
     _database = await _initDB('app.db');
   }
 
-  // Méthode pour fermer la base de données
+  // Fermer la base
   Future<void> close() async {
     final db = _database;
     if (db != null) {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import 'package:seriouse_game/ui/LaunchScreen/LaunchScreenView.dart';
 import 'package:seriouse_game/ui/ListCoursView.dart';
 import 'package:seriouse_game/ui/ListModuleView.dart';
 import 'package:seriouse_game/ui/Cours/CoursView.dart';
-import 'package:seriouse_game/ui/QCM/JeuQCMView.dart';
+import 'package:seriouse_game/ui/QCM/QCMGamePage.dart';
 
 import 'package:seriouse_game/models/cours.dart';
 
@@ -18,20 +19,33 @@ final router = GoRouter(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) => App(child: child),
       routes: [
-        GoRoute(path: '/', builder: (context, state) => const ListModulesView()),
-        GoRoute(path: '/module', builder: (context, state) => ListCoursView()),
-        GoRoute(path: '/cours', builder: (context, state) => CoursView()),
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const ListModulesView(),
+        ),
+        GoRoute(
+          path: '/module',
+          builder: (context, state) => ListCoursView(),
+        ),
+        GoRoute(
+          path: '/cours',
+          builder: (context, state) => CoursView(),
+        ),
+
+        // 🔥 Correction ici : plus de selectedPageIndex
         GoRoute(
           path: '/qcm',
           builder: (context, state) {
+            // Exemple de cours pour test
             final cours = Cours(
               id: 1,
               idModule: 1,
               titre: "Exemple de cours",
               contenu: "Contenu du cours pour test",
             );
-            final selectedPageIndex = 0;
-            return JeuQCMView(cours: cours, selectedPageIndex: selectedPageIndex);
+
+            // On appelle maintenant la nouvelle page QCM
+            return QCMGamePage(cours: cours);
           },
         ),
       ],
@@ -73,6 +87,7 @@ class _AppState extends State<App> {
         context.go('/qcm');
         break;
     }
+
     setState(() {
       currentIndex = index;
     });
@@ -134,6 +149,7 @@ class _AppState extends State<App> {
             ),
           ),
         ),
+
         if (showLaunchScreen) LaunchScreenView(),
       ],
     );
