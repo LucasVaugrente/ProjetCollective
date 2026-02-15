@@ -25,9 +25,6 @@ class _AllCoursViewState extends State<AllCoursView> {
   @override
   void initState() {
     super.initState();
-    if (kDebugMode) {
-      print("Initialisation de AllCoursView");
-    }
     _verifierConnexionApi();
     _loadCours();
   }
@@ -46,17 +43,9 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   Future<void> _loadCours() async {
     try {
-      if (kDebugMode) {
-        print("Chargement des cours...");
-      }
       final cours = await coursRepository.getAll();
       if (kDebugMode) {
         print("Nombre de cours chargés : ${cours.length}");
-      }
-      for (var c in cours) {
-        if (kDebugMode) {
-          print("Cours chargé : ${c.titre}");
-        }
       }
       setState(() {
         coursList = cours;
@@ -83,9 +72,6 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   @override
   Widget build(BuildContext context) {
-    if (kDebugMode) {
-      print("Construction de la vue AllCoursView");
-    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tous les Cours'),

@@ -209,12 +209,4 @@ Future<void> insertSampleData() async {
   if (lstModule.isNotEmpty) {
     moduleSelectionne.moduleSelectionne = lstModule[0];
   }
-
-  if (kDebugMode) {
-    print(moduleSelectionne);
-  }
-
-  if (kDebugMode) {
-    print('Toutes les données d\'exemple ont été insérées avec succès.');
-  }
 }

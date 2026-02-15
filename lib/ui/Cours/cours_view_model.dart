@@ -71,11 +71,5 @@ class CoursViewModel extends ChangeNotifier {
   Future<void> loadContenu(Cours cours) async {
     // Récupération des pages avec leurs médias déjà parsés
     cours.pages = await pageRepository.getPagesByCourseId(cours.id!);
-    if (kDebugMode) {
-      print("Nombre de pages récupérées : ${cours.pages?.length}");
-      for (var page in cours.pages ?? []) {
-        print("Page ${page.id} : ${page.medias?.length ?? 0} médias");
-      }
-    }
   }
 }

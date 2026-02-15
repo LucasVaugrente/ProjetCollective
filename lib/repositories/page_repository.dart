@@ -78,9 +78,6 @@ class PageRepository {
 
   Future<int> setPageVisite(int pageId) async {
     final db = await _dbHelper.database;
-    if (kDebugMode) {
-      print("Page $pageId visité");
-    }
     return await db.update(
       'page',
       {'est_vue': 1},

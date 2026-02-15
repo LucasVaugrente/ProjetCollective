@@ -2,7 +2,7 @@ import 'package:factoscope/models/page.dart';
 
 class Cours {
   int? id;
-  int idModule;
+  int? idModule;
   String titre;
   String contenu;
   String description;
@@ -11,7 +11,7 @@ class Cours {
 
   Cours({
     this.id,
-    required this.idModule,
+    this.idModule,
     required this.titre,
     required this.contenu,
     required this.description,
@@ -33,7 +33,7 @@ class Cours {
   factory Cours.fromMap(Map<String, dynamic> map) {
     return Cours(
       id: map['id'],
-      idModule: map['id_module'],
+      idModule: map['id_module'] as int?,
       titre: map['titre'],
       contenu: map['contenu'],
       description: map['description'],

@@ -70,11 +70,11 @@ class ContenuCoursView extends StatelessWidget {
                 );
               }
             }),
-          if (page.medias == null || page.medias!.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text("Aucun média disponible"),
-            ),
+          // if (page.medias == null || page.medias!.isEmpty)
+          //   const Padding(
+          //     padding: EdgeInsets.all(16.0),
+          //     child: Text("Aucun média disponible"),
+          //   ),
         ],
       ),
     );
