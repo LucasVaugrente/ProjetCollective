@@ -91,12 +91,13 @@ class JeuQCMView extends StatelessWidget {
                 itemCount: vm.options.length,
                 itemBuilder: (context, i) {
                   final isSelected = vm.selectedAnswer == i;
-                  final isCorrect = vm.controller!.currentQuestion.soluce == i;
 
                   Color tileColor = Colors.white;
 
                   if (vm.isCorrect != null && isSelected) {
-                    tileColor = vm.isCorrect! ? Colors.green.shade200 : Colors.red.shade200;
+                    tileColor = vm.isCorrect!
+                        ? Colors.green.shade200
+                        : Colors.red.shade200;
                   }
 
                   return Card(
@@ -109,7 +110,7 @@ class JeuQCMView extends StatelessWidget {
                         style: const TextStyle(fontSize: 16),
                       ),
                       onTap: () {
-                        if (vm.isCorrect == null) {
+                        if (vm.selectedAnswer == null) {
                           vm.selectAnswer(i);
                         }
                       },
@@ -121,10 +122,11 @@ class JeuQCMView extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // Bouton précédent uniquement
+            // Boutons navigation
             Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Bouton précédent
                 ElevatedButton(
                   onPressed: vm.currentIndex > 0 ? vm.previous : null,
                   style: ElevatedButton.styleFrom(
@@ -132,6 +134,20 @@ class JeuQCMView extends StatelessWidget {
                     foregroundColor: Colors.black,
                   ),
                   child: const Text("Précédent"),
+                ),
+
+                // Bouton suivant
+                ElevatedButton(
+                  onPressed: vm.selectedAnswer != null ? vm.next : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(
+                    vm.currentIndex == vm.totalQuestions - 1
+                        ? "Terminer"
+                        : "Suivant",
+                  ),
                 ),
               ],
             ),

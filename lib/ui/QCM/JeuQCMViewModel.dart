@@ -53,14 +53,12 @@ class JeuQCMViewModel extends ChangeNotifier {
   bool? get isCorrect => controller!.isCorrect;
 
   // --- Actions utilisateur ---
-  Future<void> selectAnswer(int index) async {
+  void selectAnswer(int index) {
     controller!.selectAnswer(index);
     notifyListeners();
+  }
 
-    // Attendre 1 seconde pour afficher "Bonne réponse / Mauvaise réponse"
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Passer automatiquement à la question suivante
+  void next() {
     controller!.next();
     notifyListeners();
   }
