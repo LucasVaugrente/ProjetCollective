@@ -44,11 +44,7 @@ L'application vise à développer l'esprit critique des citoyens en leur fournis
    ```sh
    git checkout dev
    ```
-3. **Installer les dépendances :**
-   ```sh
-   flutter pub get
-   ```
-4. **Run l'application en mode debug :**
+3. **Run l'application en mode debug :**
    ```sh
    flutter run
    ```
