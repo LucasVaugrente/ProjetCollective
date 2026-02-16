@@ -1,141 +1,186 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'jeu_qcm_view_model.dart'; // <-- CORRECT
 import 'package:factoscope/models/cours.dart';
-import 'jeu_qcm_view_model.dart';
 
-class JeuQCMView extends StatefulWidget {
+class JeuQCMView extends StatelessWidget {
   final Cours cours;
-  final int selectedPageIndex;
 
-  const JeuQCMView({
-    super.key,
-    required this.cours,
-    required this.selectedPageIndex,
-  });
-
-  @override
-  _JeuQCMViewState createState() => _JeuQCMViewState();
-}
-
-class _JeuQCMViewState extends State<JeuQCMView> {
-  int? _selectedAnswer;
-  bool _validated = false;
-
-  @override
-  void didUpdateWidget(covariant JeuQCMView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // Si la page sélectionnée change, réinitialiser l'état
-    if (oldWidget.selectedPageIndex != widget.selectedPageIndex) {
-      setState(() {
-        _selectedAnswer = null;
-        _validated = false;
-      });
-    }
-  }
+  const JeuQCMView({super.key, required this.cours});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: JeuQCMViewModel()
-          .recupererQCM(widget.cours, widget.selectedPageIndex),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Text("Erreur lors du chargement: ${snapshot.error}"),
-          );
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("Aucune donnée disponible"));
-        }
+    return ChangeNotifierProvider<JeuQCMViewModel>(
+      create: (_) => JeuQCMViewModel()..chargerQCM(cours),
+      child: Consumer<JeuQCMViewModel>(
+        builder: (context, vm, child) {
+          if (vm.isLoading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
 
-        var data = snapshot.data!;
+          if (vm.hasError || vm.controller == null) {
+            return const Scaffold(
+              body: Center(child: Text("Impossible de charger le QCM")),
+            );
+          }
 
-        // ✅ Données simplifiées
-        String questionText = data["question"] as String;
-        List<String> reponses = data["options"] as List<String>;
-        int correctAnswer = data["correctAnswer"] as int;
+          if (vm.isFinished) {
+            return _buildResultPage(context, vm);
+          }
 
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildQuestionWidget(questionText),
-              const SizedBox(height: 20),
-              ...List.generate(
-                reponses.length,
-                (index) => _buildAnswerWidget(
-                  reponses[index],
-                  index + 1,
-                  correctAnswer,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _selectedAnswer == null
-                      ? null
-                      : () {
-                          setState(() {
-                            _validated = true;
-                          });
-                        },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                    backgroundColor: const Color.fromRGBO(252, 179, 48, 1),
-                  ),
-                  child: const Text(
-                    "Valider",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildQuestionWidget(String question) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Text(
-        question,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          return _buildQuestionPage(context, vm);
+        },
       ),
     );
   }
 
-  Widget _buildAnswerWidget(String answer, int index, int correctAnswer) {
-    Color? color;
-    if (_validated) {
-      if (index == correctAnswer) {
-        color = Colors.green.withValues(alpha: 0.3);
-      } else if (index == _selectedAnswer) {
-        color = Colors.red.withValues(alpha: 0.3);
-      }
-    }
+  // --- PAGE QUESTION ---
+  Widget _buildQuestionPage(BuildContext context, JeuQCMViewModel vm) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("QCM"),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Question ${vm.currentIndex + 1} / ${vm.totalQuestions}",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      color: color,
-      child: ListTile(
-        title: Text(answer),
-        leading: Radio<int>(
-          value: index,
-          groupValue: _selectedAnswer,
-          onChanged: _validated
-              ? null
-              : (int? value) {
-                  setState(() {
-                    _selectedAnswer = value;
-                  });
+            const SizedBox(height: 20),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                vm.questionText,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            if (vm.isCorrect != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  vm.isCorrect! ? "Bonne réponse !" : "Mauvaise réponse...",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: vm.isCorrect! ? Colors.green : Colors.red,
+                  ),
+                ),
+              ),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: vm.options.length,
+                itemBuilder: (context, i) {
+                  final isSelected = vm.selectedAnswer == i;
+
+                  Color tileColor = Colors.white;
+
+                  if (vm.isCorrect != null && isSelected) {
+                    tileColor = vm.isCorrect!
+                        ? Colors.green.shade200
+                        : Colors.red.shade200;
+                  }
+
+                  return Card(
+                    color: tileColor,
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        vm.options[i],
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      onTap: () {
+                        if (vm.selectedAnswer == null) {
+                          vm.selectAnswer(i);
+                        }
+                      },
+                    ),
+                  );
                 },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: vm.currentIndex > 0 ? vm.previous : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade300,
+                    foregroundColor: Colors.black,
+                  ),
+                  child: const Text("Précédent"),
+                ),
+
+                ElevatedButton(
+                  onPressed: vm.selectedAnswer != null ? vm.next : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(
+                    vm.currentIndex == vm.totalQuestions - 1
+                        ? "Terminer"
+                        : "Suivant",
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- PAGE RESULTAT ---
+  Widget _buildResultPage(BuildContext context, JeuQCMViewModel vm) {
+    final score = vm.getScore();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Résultat")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Votre score",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "$score / ${vm.totalQuestions}",
+              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              onPressed: vm.restart,
+              child: const Text("Recommencer"),
+            ),
+            const SizedBox(height: 10),
+
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Retour"),
+            ),
+          ],
         ),
       ),
     );

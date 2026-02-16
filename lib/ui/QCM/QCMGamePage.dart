@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:seriouse_game/models/cours.dart';
+import 'package:factoscope/models/cours.dart';
+
 import 'JeuQCMViewModel.dart';
 import 'JeuQCMView.dart';
 

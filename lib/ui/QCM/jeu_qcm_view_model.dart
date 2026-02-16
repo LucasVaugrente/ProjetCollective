@@ -1,36 +1,78 @@
-import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
 import 'package:factoscope/models/cours.dart';
-import 'package:factoscope/repositories/QCM/qcm_repository.dart';
-import 'package:flutter/foundation.dart';
 
-class JeuQCMViewModel {
-  Future<Map<String, dynamic>> recupererQCM(
-      Cours cours, int selectedPageIndex) async {
+import 'package:factoscope/repositories/QCM/QCMRepository.dart';
+import 'package:factoscope/repositories/QCM/qcm_controller.dart';
+
+class JeuQCMViewModel extends ChangeNotifier {
+  final QCMRepository _repo = QCMRepository();
+
+  QCMController? controller;
+  bool isLoading = true;
+  bool hasError = false;
+
+  Future<void> chargerQCM(Cours cours) async {
     try {
-      final qcmRepo = QCMRepository();
+      isLoading = true;
+      notifyListeners();
 
-      // Récupérer tous les QCM du cours
-      List<QCM> qcmList = await qcmRepo.getAllByCoursId(cours.id!);
+      List<int> ids = await _repo.getAllIdByCoursId(cours.id!);
+      List<QCM> qcms = [];
 
-      // Vérifier que l'index est valide
-      if (selectedPageIndex >= qcmList.length) {
-        throw Exception("Index de QCM invalide");
+      for (int id in ids) {
+        QCM? q = await _repo.getById(id);
+        if (q != null) qcms.add(q);
       }
 
-      QCM qcm = qcmList[selectedPageIndex];
+      if (qcms.isEmpty) {
+        throw Exception("Aucun QCM trouvé");
+      }
 
-      // Retourner les données du QCM dans le format attendu par la vue
-      return {
-        "question": qcm.question,
-        "options": qcm.getReponses(),
-        "correctAnswer": qcm.soluce,
-      };
+      controller = QCMController(qcms);
+      controller!.start();
+
+      isLoading = false;
+      notifyListeners();
     } catch (e) {
-      if (kDebugMode) {
-        print("Erreur lors du chargement du QCM : $e");
-      }
-      return {};
+      hasError = true;
+      isLoading = false;
+      notifyListeners();
     }
+  }
+
+  // --- Exposition des données à la vue ---
+  String get questionText => controller!.currentQuestion.question;
+
+  List<String> get options => controller!.currentQuestion.reponses;
+
+  int? get selectedAnswer => controller!.selectedAnswer;
+  int get currentIndex => controller!.currentIndex;
+  int get totalQuestions => controller!.qcmList.length;
+  bool get isFinished => controller!.state == QCMState.finished;
+
+  bool? get isCorrect => controller!.isCorrect;
+
+  // --- Actions utilisateur ---
+  void selectAnswer(int index) {
+    controller!.selectAnswer(index);
+    notifyListeners();
+  }
+
+  void next() {
+    controller!.next();
+    notifyListeners();
+  }
+
+  void previous() {
+    controller!.previous();
+    notifyListeners();
+  }
+
+  int getScore() => controller!.getScore();
+
+  void restart() {
+    controller!.restart();
+    notifyListeners();
   }
 }
