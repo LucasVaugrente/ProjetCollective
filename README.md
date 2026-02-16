@@ -40,9 +40,9 @@ L'application vise à développer l'esprit critique des citoyens en leur fournis
    ```sh
    git clone https://github.com/LucasVaugrente/ProjetCollective.git
    ```
-2. **Placer la branche de développement** (souvent la plus à jour) :
+2. **Installer les dépendances :**
    ```sh
-   git checkout dev
+   flutter pub get
    ```
 3. **Run l'application en mode debug :**
    ```sh
