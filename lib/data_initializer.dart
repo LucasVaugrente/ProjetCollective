@@ -185,14 +185,23 @@ Future<void> insertModule4() async {
 }
 
 Future<void> insertSampleData() async {
-  await DatabaseHelper.instance.resetDB();
+  final hasData = await _checkIfDatabaseHasData();
 
-  await insertModule1();
-  // await insertModule2();
-  // await insertModule3();
-  // await insertModule4();
+  if (!hasData) {
+    if (kDebugMode) {
+      print('Première installation - Création des données de base');
+    }
 
-  // Init du singleton CoursSelectionne
+    await insertModule1();
+    // await insertModule2();
+    // await insertModule3();
+    // await insertModule4();
+  } else {
+    if (kDebugMode) {
+      print('Base de données existante chargée');
+    }
+  }
+
   CoursSelectionne coursSelectionne = CoursSelectionne.instance;
   List<Cours> lstCours = await coursRepository.getAll();
   if (lstCours.isNotEmpty) {
@@ -208,5 +217,35 @@ Future<void> insertSampleData() async {
   List<Module> lstModule = await moduleRepository.getAll();
   if (lstModule.isNotEmpty) {
     moduleSelectionne.moduleSelectionne = lstModule[0];
+  }
+}
+
+Future<bool> _checkIfDatabaseHasData() async {
+  try {
+    final cours = await coursRepository.getAll();
+    if (cours.isNotEmpty) {
+      return true;
+    }
+
+    final modules = await moduleRepository.getAll();
+    if (modules.isNotEmpty) {
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    if (kDebugMode) {
+      print('Erreur lors de la vérification de la BDD: $e');
+    }
+    return false;
+  }
+}
+
+Future<void> resetDatabaseForDebug() async {
+  await DatabaseHelper.instance.resetDB();
+  await insertModule1();
+
+  if (kDebugMode) {
+    print('Base de données réinitialisée');
   }
 }

@@ -92,38 +92,39 @@ class FinCoursView extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // Bouton retour au module
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // Retour à la liste des cours du module
-                  GoRouter.of(context).go('/list_cours');
-                },
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                label: const Text(
-                  "Retour au module",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 20,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  backgroundColor: const Color.fromRGBO(252, 179, 48, 1),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
+            // // Bouton retour au module
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: ElevatedButton.icon(
+            //     onPressed: () {
+            //       // Retour à la liste des cours du module
+            //       GoRouter.of(context).go('/list_cours');
+            //     },
+            //     icon: const Icon(Icons.arrow_back, color: Colors.white),
+            //     label: const Text(
+            //       "Retour au module",
+            //       style: TextStyle(
+            //         fontSize: 20,
+            //         fontWeight: FontWeight.bold,
+            //         color: Colors.white,
+            //       ),
+            //     ),
+            //     style: ElevatedButton.styleFrom(
+            //       padding: const EdgeInsets.symmetric(
+            //         horizontal: 32,
+            //         vertical: 20,
+            //       ),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       backgroundColor: const Color.fromRGBO(252, 179, 48, 1),
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
 
             // Bouton retour à l'accueil (optionnel)
+
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(

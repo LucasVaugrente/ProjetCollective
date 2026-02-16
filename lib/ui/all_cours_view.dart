@@ -109,7 +109,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                     icon: const Icon(Icons.cloud_download),
                     label: Text(
                       _apiConnectee
-                          ? 'Télécharger des cours depuis le serveur'
+                          ? 'Télécharger des cours'
                           : 'API non disponible',
                     ),
                     style: ElevatedButton.styleFrom(
