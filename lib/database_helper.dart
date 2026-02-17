@@ -76,6 +76,21 @@ class DatabaseHelper {
         FOREIGN KEY (id_cours) REFERENCES cours (id) ON DELETE CASCADE
       );
     ''');
+
+    await db.execute('''
+  CREATE TABLE Cloze(
+     idCloze INTEGER PRIMARY KEY AUTOINCREMENT,
+     phrase TEXT NOT NULL,      
+     idCours INTEGER NOT NULL,
+     rep1 TEXT NOT NULL,
+     rep2 TEXT NOT NULL,
+     rep3 TEXT NOT NULL,
+     rep4 TEXT NOT NULL,
+     soluce INTEGER NOT NULL,
+     FOREIGN KEY(idCours) REFERENCES cours(id)
+  );
+''');
+
   }
 
   Future<void> resetDB() async {

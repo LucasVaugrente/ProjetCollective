@@ -12,6 +12,7 @@ import '../../models/cours.dart';
 import '../../repositories/QCM/fin_cours_view.dart';
 import '../../repositories/QCM/transition_qcm_view.dart';
 import '../../repositories/cours_repository.dart';
+import '../Cloze/cloze_page.dart';
 
 class CoursView extends StatefulWidget {
   final int coursId;
@@ -77,20 +78,26 @@ class _CoursViewState extends State<CoursView> {
     int nbPageCours = coursSelectionne.cours.pages?.length ?? 0;
     int currentPage = coursViewModel.page;
 
-    return FutureBuilder<int>(
-      future: coursViewModel.getNombrePageDeJeu(coursSelectionne.cours),
-      builder: (context, qcmSnapshot) {
-        if (!qcmSnapshot.hasData) {
+    return FutureBuilder<List<int>>(
+      future: Future.wait([
+        coursViewModel.getNombrePageQCM(coursSelectionne.cours),
+        coursViewModel.getNombrePageCloze(coursSelectionne.cours),
+      ]),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        int nbQCM = qcmSnapshot.data!;
+        int nbQCM = snapshot.data![0];
+        int nbCloze = snapshot.data![1];
         int transitionPage = nbPageCours + 1; // Page juste après le contenu
         int firstQCMPage = transitionPage + 1;
         int lastQCMPage = firstQCMPage + nbQCM - 1;
-        int finPage = lastQCMPage + 1;
+        int firstClozePage = lastQCMPage + 1;
+        int lastClozePage = firstClozePage + nbCloze - 1;
+        int finPage = lastClozePage + 1;
 
         Widget nouvellePage;
 
@@ -119,7 +126,25 @@ class _CoursViewState extends State<CoursView> {
             cours: coursSelectionne.cours,
             selectedPageIndex: qcmIndex,
           );
-        } else if (currentPage == finPage) {
+        } else if (currentPage >= firstClozePage &&
+            currentPage <= lastClozePage) {
+
+          int clozeIndex = currentPage - firstClozePage;
+
+          nouvellePage = ClozePage(
+            coursId: coursSelectionne.cours.id!,
+            clozeIndex: clozeIndex,
+            onNext: clozeIndex < nbCloze - 1
+                ? () => setState(() => currentPage++)
+                : null,
+            onPrevious: clozeIndex > 0
+                ? () => setState(() => currentPage--)
+                : null,
+            key: ValueKey('cloze_$clozeIndex'),
+          );
+
+
+      } else if (currentPage == finPage) {
           // ✅ Page de fin de cours
           nouvellePage = FinCoursView(cours: coursSelectionne.cours);
         } else {

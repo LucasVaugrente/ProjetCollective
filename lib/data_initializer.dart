@@ -11,6 +11,9 @@ import 'package:factoscope/database_helper.dart';
 import 'models/cours.dart';
 import 'models/page.dart';
 
+import './repositories/Cloze/cloze_repository.dart';
+import './models/Cloze/cloze_page.dart';
+
 final moduleRepository = ModuleRepository();
 final coursRepository = CoursRepository();
 final pageRepository = PageRepository();
@@ -94,6 +97,44 @@ Future<void> insertModule1() async {
   await pageRepository.create(page3);
 
   await _insertQCMForCours1(coursId);
+  await _insertClozeCours1(coursId);
+}
+
+Future<void> _insertClozeCours1(int coursId) async {
+  final repo = ClozeRepository();
+
+  await repo.insert(
+    ClozeQuestion(
+      phrase: "Le principal indicateur de la fiabilité d'une source d'information est la __________ des informations par d'autres sources fiables.",
+      rep1: "popularité sur les réseaux sociaux",
+      rep2: "vérifiabilité",
+      rep3: "nombre de commentaires sous l\'article",
+      rep4: "design du site web",
+      soluce: 2,
+      idCours: coursId),
+  );
+
+  await repo.insert(
+    ClozeQuestion(
+      phrase: "La meilleure manière de vérifier une information trouvée en ligne est de __________ plusieurs sources fiables et vérifier la cohérence de l'information.",
+      rep1: "la partager immédiatement avec ses amis",
+      rep2: "consulter",
+      rep3: "faire confiance à la première source trouvée",
+      rep4: "vérifier si l\'information est amusante avant de la croire",
+      soluce: 2,
+      idCours: coursId),
+    );
+
+  await repo.insert(
+    ClozeQuestion(
+      phrase: "Un signe révélateur d'une fausse information est qu'elle __________ un ton sensationnaliste et manque de sources vérifiables.",
+      rep1: "provient d\'un média reconnu et sérieux",
+      rep2: "utilise",
+      rep3: "cite plusieurs experts et références",
+      rep4: "est reprise par plusieurs médias de confiance",
+      soluce: 2,
+      idCours: coursId),
+    );
 }
 
 Future<void> _insertQCMForCours1(int coursId) async {

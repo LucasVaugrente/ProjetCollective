@@ -3,10 +3,15 @@ import 'package:factoscope/repositories/module_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:flutter/foundation.dart';
 
+import '../data_initializer.dart';
+import '../models/cours.dart';
+import '../repositories/Cloze/cloze_repository.dart';
+
 class ProgressionUseCase {
   final pageRepository = PageRepository();
   final coursRepository = CoursRepository();
   final moduleRepository = ModuleRepository();
+  final ClozeRepository _repository = ClozeRepository();
 
   ProgressionUseCase();
 
@@ -84,6 +89,12 @@ class ProgressionUseCase {
       }
       return 0;
     }
+  }
+
+  Future<int> getNombrePageDeCloze(Cours cours) async {
+    final clozes =
+    await _repository.getByCoursId(cours.id!);
+    return clozes.length;
   }
 
   // Méthode pour récupérer le pourcentage de pages vues pour un cours donné en passant l'ID du cours en paramètre

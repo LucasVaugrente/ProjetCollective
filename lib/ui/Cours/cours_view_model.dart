@@ -4,6 +4,9 @@ import 'package:factoscope/repositories/QCM/qcm_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/models/cours.dart';
 
+import '../../logic/progression_use_case.dart';
+import '../../repositories/Cloze/cloze_repository.dart';
+
 class CoursViewModel extends ChangeNotifier {
   CoursViewModel();
 
@@ -22,9 +25,14 @@ class CoursViewModel extends ChangeNotifier {
     return lstPage.length;
   }
 
-  Future<int> getNombrePageDeJeu(Cours cours) async {
-    final lstIdPageJeu = await qcmRepository.getAllIdByCoursId(cours.id!);
-    return lstIdPageJeu.length;
+  Future<int> getNombrePageQCM(Cours cours) async {
+    int nbQCM = await qcmRepository.getAllIdByCoursId(cours.id!).then((lstIdPageJeu) => lstIdPageJeu.length);
+    return nbQCM;
+  }
+
+  Future<int> getNombrePageCloze(Cours cours) async {
+    int nbCloze = await progressionUseCase.getNombrePageDeCloze(cours);
+    return nbCloze;
   }
 
   Future<void> setIndexPageVisite(Cours cours) async {
@@ -35,7 +43,8 @@ class CoursViewModel extends ChangeNotifier {
 
   Future<void> changementPageSuivante(Cours cours) async {
     final nbPages = await getNombrePageDeContenu(cours);
-    final nbJeux = await getNombrePageDeJeu(cours);
+    int nbJeux = await getNombrePageQCM(cours);
+    nbJeux += await getNombrePageCloze(cours);
     // Total: description(0) + pages(nbPages) + transition(1) + qcm(nbJeux) + fin(1)
     final totalPages =
         nbPages + nbJeux + 2; // +2 c'est pour la transition et la page de fin
@@ -61,6 +70,8 @@ class CoursViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  final clozeRepository = ClozeRepository();
 
   Future<double> getProgressionActuelle(Cours cours) async {
     return await progressionUseCase.calculerProgressionActuelleCours(
