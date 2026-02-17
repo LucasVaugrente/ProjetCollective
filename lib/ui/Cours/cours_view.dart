@@ -124,7 +124,7 @@ class _CoursViewState extends State<CoursView> {
           int qcmIndex = currentPage - firstQCMPage;
           nouvellePage = JeuQCMView(
             cours: coursSelectionne.cours,
-            selectedPageIndex: qcmIndex,
+            // selectedPageIndex: qcmIndex,
           );
         } else if (currentPage >= firstClozePage &&
             currentPage <= lastClozePage) {

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
 import 'package:factoscope/models/cours.dart';
 
-import 'package:factoscope/repositories/QCM/QCMRepository.dart';
+import 'package:factoscope/repositories/QCM/qcm_repository.dart';
 import 'package:factoscope/repositories/QCM/qcm_controller.dart';
 
 class JeuQCMViewModel extends ChangeNotifier {
@@ -44,7 +44,7 @@ class JeuQCMViewModel extends ChangeNotifier {
   // --- Exposition des données à la vue ---
   String get questionText => controller!.currentQuestion.question;
 
-  List<String> get options => controller!.currentQuestion.reponses;
+  List<String> get options => controller!.currentQuestion.getReponses();
 
   int? get selectedAnswer => controller!.selectedAnswer;
   int get currentIndex => controller!.currentIndex;

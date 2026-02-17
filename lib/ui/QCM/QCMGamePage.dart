@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:factoscope/models/cours.dart';
 
-import 'JeuQCMViewModel.dart';
-import 'JeuQCMView.dart';
+import 'jeu_qcm_view_model.dart';
+import 'jeu_qcm_view.dart';
 
 class QCMGamePage extends StatelessWidget {
   final Cours cours;
