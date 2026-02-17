@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../config.dart';
 
 class ApiService {
@@ -7,19 +8,31 @@ class ApiService {
   factory ApiService() => _instance;
   ApiService._internal();
 
-  // Récupérer tous les cours disponibles sur le serveur
   Future<List<CoursDistant>> getCoursDisponibles() async {
     try {
       final response = await http.get(
         Uri.parse('${AppConfig.effectiveApiUrl}/api/cours'),
         headers: {'Content-Type': 'application/json'},
-      );
+      ).timeout(const Duration(seconds: AppConfig.apiTimeout));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => CoursDistant.fromJson(json)).toList();
+        final coursList = <CoursDistant>[];
+        for (var jsonItem in data) {
+          try {
+            final cours = CoursDistant.fromJson(jsonItem);
+            coursList.add(cours);
+          } catch (e) {
+            if (kDebugMode) {
+              print('Erreur parsing cours: $e');
+              print('   JSON: $jsonItem');
+            }
+          }
+        }
+
+        return coursList;
       } else {
-        throw Exception('Erreur lors de la récupération des cours: ${response.statusCode}');
+        throw Exception('Erreur HTTP ${response.statusCode}: ${response.body}');
       }
     } catch (e) {
       throw Exception('Erreur de connexion à l\'API: $e');
@@ -32,7 +45,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse('${AppConfig.effectiveApiUrl}/api/cours/$coursId'),
         headers: {'Content-Type': 'application/json'},
-      );
+      ).timeout(const Duration(seconds: AppConfig.apiTimeout));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -41,7 +54,7 @@ class ApiService {
         final pagesResponse = await http.get(
           Uri.parse('${AppConfig.effectiveApiUrl}/api/pages'),
           headers: {'Content-Type': 'application/json'},
-        );
+        ).timeout(const Duration(seconds: AppConfig.apiTimeout));
 
         List<PageDistante> pages = [];
         if (pagesResponse.statusCode == 200) {
@@ -54,7 +67,7 @@ class ApiService {
 
         return CoursComplet.fromJson(data, pages);
       } else {
-        throw Exception('Erreur lors de la récupération du cours: ${response.statusCode}');
+        throw Exception('Erreur HTTP ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Erreur de connexion à l\'API: $e');
@@ -69,7 +82,9 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 5));
 
-      return response.statusCode == 200;
+      final connected = response.statusCode == 200;
+
+      return connected;
     } catch (e) {
       return false;
     }
@@ -93,11 +108,11 @@ class CoursDistant {
 
   factory CoursDistant.fromJson(Map<String, dynamic> json) {
     return CoursDistant(
-      id: json['id'],
-      titre: json['titre'] ?? '',
-      description: json['description'] ?? '',
-      contenu: json['contenu'] ?? '',
-      idModule: json['id_module'],
+      id: json['id'] as int,
+      titre: json['titre']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      contenu: json['contenu']?.toString() ?? '',
+      idModule: json['id_module'] as int?,
     );
   }
 }
@@ -119,11 +134,11 @@ class PageDistante {
 
   factory PageDistante.fromJson(Map<String, dynamic> json) {
     return PageDistante(
-      id: json['id'],
-      description: json['description'] ?? '',
-      medias: json['medias'] ?? '',
-      estVue: json['est_vue'] ?? 0,
-      idCours: json['id_cours'],
+      id: json['id'] as int,
+      description: json['description']?.toString() ?? '',
+      medias: json['medias']?.toString() ?? '',
+      estVue: (json['est_vue'] as int?) ?? 0,
+      idCours: json['id_cours'] as int,
     );
   }
 }

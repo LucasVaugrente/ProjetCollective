@@ -172,7 +172,7 @@ class ValidationView extends StatelessWidget {
                   disabledBackgroundColor: Colors.grey[300],
                 ),
                 child: const Text(
-                  "Bientôt disponible",
+                  "Commencer",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

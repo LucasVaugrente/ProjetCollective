@@ -15,10 +15,7 @@ class CoursSelectionne with ChangeNotifier {
   );
 
   void setCours(Cours nouveauCours) {
-    if (kDebugMode) {
-      print("Mise à jour du cours sélectionné : ${nouveauCours.titre}");
-    }
-    cours = nouveauCours; // FIX : c'était "cours = cours" avant
+    cours = nouveauCours;
     notifyListeners();
   }
 }

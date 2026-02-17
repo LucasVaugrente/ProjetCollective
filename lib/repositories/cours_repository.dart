@@ -21,14 +21,8 @@ class CoursRepository {
   }
 
   Future<List<Cours>> getAll() async {
-    if (kDebugMode) {
-      print("Récupération de tous les cours depuis la base de données");
-    }
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('cours');
-    if (kDebugMode) {
-      print("Nombre de cours récupérés depuis la base de données : ${maps.length}");
-    }
     return List.generate(maps.length, (i) {
       return Cours.fromMap(maps[i]);
     });
