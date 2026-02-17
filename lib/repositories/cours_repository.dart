@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 import '../database_helper.dart';
 import '../models/cours.dart';

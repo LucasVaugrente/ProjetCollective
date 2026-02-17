@@ -4,7 +4,6 @@ import 'package:factoscope/repositories/QCM/qcm_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/models/cours.dart';
 
-import '../../logic/progression_use_case.dart';
 import '../../repositories/Cloze/cloze_repository.dart';
 
 class CoursViewModel extends ChangeNotifier {

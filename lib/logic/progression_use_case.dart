@@ -3,7 +3,6 @@ import 'package:factoscope/repositories/module_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:flutter/foundation.dart';
 
-import '../data_initializer.dart';
 import '../models/cours.dart';
 import '../repositories/Cloze/cloze_repository.dart';
 
