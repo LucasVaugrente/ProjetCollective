@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:seriouse_game/ui/AboutView.dart';
 import 'package:seriouse_game/ui/LaunchScreen/LaunchScreenView.dart';
 import 'package:seriouse_game/ui/ListCoursView.dart';
 import 'package:seriouse_game/ui/ListModuleView.dart';
@@ -18,6 +19,7 @@ final router = GoRouter(
         GoRoute(path: '/', builder: (context, state) => const ListModulesView()),
         GoRoute(path: '/module', builder: (context, state) => ListCoursView()),
         GoRoute(path: '/cours', builder: (context, state) => CoursView()),
+        GoRoute(path: '/about', builder: (context, state) => const AboutView()),
       ],
     ),
   ],

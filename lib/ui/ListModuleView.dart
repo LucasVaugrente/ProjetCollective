@@ -42,24 +42,26 @@ class _ListModulesViewState extends State<ListModulesView> {
           children: [
         
             //Affiche Overview en gras à gauche
-            Align(
-              alignment: Alignment.centerLeft,
-              child :
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                  child: 
-                    const Text(
-                      "Accueil",
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                      textAlign: TextAlign.left,
-                                  
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Accueil",
+                    style: TextStyle(
+                      fontSize: 35,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
-                ),
-            ), 
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.info_outline, size: 30),
+                    onPressed: () => context.push('/about'),
+                  ),
+                ],
+              ),
+            ),
         
             headerAvancement(), 
 
