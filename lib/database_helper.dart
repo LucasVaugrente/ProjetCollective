@@ -78,7 +78,7 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-  CREATE TABLE Cloze(
+  CREATE TABLE IF NOT EXISTS Cloze (
      idCloze INTEGER PRIMARY KEY AUTOINCREMENT,
      phrase TEXT NOT NULL,      
      idCours INTEGER NOT NULL,
