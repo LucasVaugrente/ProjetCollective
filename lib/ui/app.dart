@@ -1,3 +1,4 @@
+import 'package:factoscope/ui/validation_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:factoscope/ui/LaunchScreen/launch_screen_view.dart';
@@ -5,11 +6,7 @@ import 'package:factoscope/ui/list_module_view.dart';
 import 'package:factoscope/ui/Cours/cours_view.dart';
 import 'package:factoscope/ui/all_cours_view.dart';
 import 'list_cours_view.dart';
-import 'package:seriouse_game/ui/AboutView.dart';
-import 'package:seriouse_game/ui/LaunchScreen/LaunchScreenView.dart';
-import 'package:seriouse_game/ui/ListCoursView.dart';
-import 'package:seriouse_game/ui/ListModuleView.dart';
-import 'package:seriouse_game/ui/Cours/CoursView.dart';
+import 'package:factoscope/ui/AboutView.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -40,9 +37,6 @@ final router = GoRouter(
           path: '/validation',
           builder: (context, state) => const ValidationView(),
         ),
-        GoRoute(path: '/', builder: (context, state) => const ListModulesView()),
-        GoRoute(path: '/module', builder: (context, state) => ListCoursView()),
-        GoRoute(path: '/cours', builder: (context, state) => CoursView()),
         GoRoute(path: '/about', builder: (context, state) => const AboutView()),
       ],
     ),
