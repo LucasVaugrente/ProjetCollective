@@ -138,7 +138,6 @@ class _AllCoursViewState extends State<AllCoursView> {
             ),
           ),
 
-          // Divider pour séparer le bouton de la liste
           const Divider(height: 1),
 
           // Liste des cours

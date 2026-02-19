@@ -50,6 +50,9 @@ class _ListModulesViewState extends State<ListModulesView> {
                 ],
               ),
             ),
+
+            const Divider(height: 1),
+
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
@@ -58,7 +61,7 @@ class _ListModulesViewState extends State<ListModulesView> {
                 child: const Text(
                   "Tableau de bord",
                   style: TextStyle(
-                    fontSize: 35,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -67,14 +70,16 @@ class _ListModulesViewState extends State<ListModulesView> {
               ),
             ),
             headerAvancement(), // Appel à headerAvancement
-            // Affiche Modules en gras à gauche
+
+            const Divider(height: 1),
+
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
                 margin:
                     const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                 child: const Text(
-                  "Cours :",
+                  "Cours récemment vus :",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -82,16 +87,6 @@ class _ListModulesViewState extends State<ListModulesView> {
                   ),
                   textAlign: TextAlign.left,
                 ),
-              ),
-            ),
-            // Affichage de la liste des modules
-            Expanded(
-              child: ListView.builder(
-                itemCount: listModuleViewModel.listModule.length,
-                itemBuilder: (context, index) {
-                  final item = listModuleViewModel.listModule[index];
-                  return listModuleItem(item, context);
-                },
               ),
             ),
           ],
