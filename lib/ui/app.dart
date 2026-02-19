@@ -99,8 +99,8 @@ class _AppState extends State<App> {
               children: [
                 Image.asset(
                   'lib/assets/logo-factoscope_seul_2.png',
-                  height: 40,
-                  width: 190,
+                  height: 75,
+                  width: 350,
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(width: 10),
