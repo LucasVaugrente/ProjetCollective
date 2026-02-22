@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../services/cloze_service.dart';
 import '../../models/Cloze/cloze_page.dart';
+import 'cloze_result_page.dart';
 
 class ClozePage extends StatefulWidget {
   final int coursId;
-  final int clozeIndex;
-  final VoidCallback? onNext;
-  final VoidCallback? onPrevious;
+
 
   const ClozePage({
     super.key,
     required this.coursId,
-    required this.clozeIndex,
-    this.onNext,
-    this.onPrevious,
+
   });
 
   @override
@@ -26,6 +23,9 @@ class _ClozePageState extends State<ClozePage> {
   String? selectedAnswer;
   String feedback = '';
   bool? isCorrect;
+  int score = 0;
+  bool isFinished = false;
+  int currentIndex = 0;
 
   final double buttonWidth = 140;
   final double buttonHeight = 45;
@@ -45,12 +45,20 @@ class _ClozePageState extends State<ClozePage> {
   }
 
   Widget _buildAnswer(String answer) {
-    final bool isSelected = selectedAnswer == answer;
+    Color bgColor = Colors.grey[200]!;
+    if (selectedAnswer != null) {
+      if (selectedAnswer != null && answer == selectedAnswer) {
+        bgColor = isCorrect! ? Colors.green[200]! : Colors.red[200]!;
+      }
+    }
 
     return GestureDetector(
-      onTap: () {
+      onTap: selectedAnswer != null
+          ? null
+          : () {
         setState(() {
           selectedAnswer = answer;
+          _validerReponse();
         });
       },
       child: Container(
@@ -58,7 +66,7 @@ class _ClozePageState extends State<ClozePage> {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: bgColor,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
@@ -68,7 +76,9 @@ class _ClozePageState extends State<ClozePage> {
               height: 18,
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF292466) : Colors.grey,
+                color: selectedAnswer == answer
+                    ? (isCorrect! ? Colors.green : Colors.red)
+                    : Colors.grey,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -88,15 +98,9 @@ class _ClozePageState extends State<ClozePage> {
   }
 
   void _validerReponse() {
-    if (selectedAnswer == null) {
-      setState(() {
-        isCorrect = false;
-        feedback = 'Veuillez choisir une réponse';
-      });
-      return;
-    }
+    if (selectedAnswer == null)  return;
 
-    final question = questions[widget.clozeIndex];
+    final question = questions[currentIndex];
     String soluce;
     switch (question.soluce) {
       case 1:
@@ -120,6 +124,9 @@ class _ClozePageState extends State<ClozePage> {
     setState(() {
       isCorrect = ok;
       feedback = ok ? 'Bonne réponse' : 'Mauvaise réponse';
+      if (ok) {
+        score++;
+      }
     });
   }
 
@@ -130,8 +137,43 @@ class _ClozePageState extends State<ClozePage> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
+    if (isFinished) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Résultat")),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Votre score",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "$score / ${questions.length}",
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    score = 0;
+                    isFinished = false;
+                    selectedAnswer = null;
+                    isCorrect = null;
+                  });
+                },
+                child: const Text("Recommencer"),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-    final question = questions[widget.clozeIndex];
+    final question = questions[currentIndex];
     final List<String> propositions = [
       question.rep1,
       question.rep2,
@@ -140,7 +182,10 @@ class _ClozePageState extends State<ClozePage> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Texte à trous')),
+      appBar: AppBar(
+          title: const Text('Texte à trous'),
+          centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -157,45 +202,24 @@ class _ClozePageState extends State<ClozePage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    if (isCorrect != null)
+                      Text(
+                        isCorrect! ? "Bonne réponse" : "Mauvaise réponse",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isCorrect! ? Colors.green : Colors.red,
+                        ),
+                      ),
                     const SizedBox(height: 12),
                     ...propositions.map(_buildAnswer),
-                    const SizedBox(height: 12),
                   ],
                 ),
               ),
             ),
-            SizedBox(
-              width: buttonWidth,
-              height: buttonHeight,
-              child: ElevatedButton(
-                style: buttonStyle,
-                onPressed: _validerReponse,
-                child: const Text('Valider'),
-              ),
-            ),
 
-            const SizedBox(height: 8),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isCorrect == null
-                    ? Colors.transparent
-                    : isCorrect!
-                        ? Colors.green[200]
-                        : Colors.red[200],
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                feedback,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
 
-            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -204,7 +228,15 @@ class _ClozePageState extends State<ClozePage> {
                   height: buttonHeight,
                   child: ElevatedButton(
                     style: buttonStyle,
-                    onPressed: widget.onPrevious,
+                    onPressed: currentIndex > 0
+                        ? () {
+                      setState(() {
+                        currentIndex--;
+                        selectedAnswer = null;
+                        isCorrect = null;
+                      });
+                    }
+                        : null,
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -221,16 +253,39 @@ class _ClozePageState extends State<ClozePage> {
                   height: buttonHeight,
                   child: ElevatedButton(
                     style: buttonStyle,
-                    onPressed: widget.onNext,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Suivant'),
-                        SizedBox(width: 4),
-                        Icon(Icons.arrow_forward,
+                    onPressed: () {
+                      if (currentIndex >= questions.length - 1) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ClozeResultPage(
+                              score: score,
+                              totalQuestions: questions.length,
+                              coursId: widget.coursId,
+                            ),
+                          ),
+                        );
+
+                      } else {
+                        setState(() {
+                          currentIndex++;
+                          selectedAnswer = null;
+                          isCorrect = null;
+                        });
+                      }
+                    },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            currentIndex >= questions.length - 1
+                              ? 'Terminer'
+                              : 'Suivant',),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.arrow_forward,
                             size: 14, color: Color(0xFF292466)),
-                      ],
-                    ),
+                        ],
+                      ),
                   ),
                 ),
               ],
