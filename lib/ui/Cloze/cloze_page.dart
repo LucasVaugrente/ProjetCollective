@@ -45,11 +45,9 @@ class _ClozePageState extends State<ClozePage> {
   }
 
   Widget _buildAnswer(String answer) {
-    Color bgColor = Colors.grey[200]!;
-    if (selectedAnswer != null) {
+    Color bgColor = Colors.white;
       if (selectedAnswer != null && answer == selectedAnswer) {
         bgColor = isCorrect! ? Colors.green[200]! : Colors.red[200]!;
-      }
     }
 
     return GestureDetector(
@@ -67,22 +65,8 @@ class _ClozePageState extends State<ClozePage> {
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Row(
-          children: [
-            Container(
-              width: 18,
-              height: 18,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: selectedAnswer == answer
-                    ? (isCorrect! ? Colors.green : Colors.red)
-                    : Colors.grey,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            Expanded(
               child: Text(
                 answer,
                 style: const TextStyle(
@@ -90,9 +74,6 @@ class _ClozePageState extends State<ClozePage> {
                   color: Colors.black87,
                 ),
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
