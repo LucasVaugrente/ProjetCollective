@@ -4,7 +4,7 @@ import 'qcm_officiel_view_model.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
 
-// 👉 Page succès (déjà créée)
+
 import 'package:factoscope/ui/QCM/page_succes_qcm.dart';
 
 class QCMOfficielView extends StatelessWidget {

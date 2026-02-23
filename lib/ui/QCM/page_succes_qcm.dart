@@ -96,7 +96,6 @@ class _PageSuccesQCMState extends State<PageSuccesQCM> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Ici tu feras la génération du certificat plus tard
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Informations validées !"),

@@ -126,7 +126,7 @@ class _CoursViewState extends State<CoursView> {
 
           nouvellePage = ClozePage(
             coursId: coursSelectionne.cours.id!,
-            clozeIndex: clozeIndex, // AJOUT : paramètre obligatoire
+            clozeIndex: clozeIndex, // AJOUT : paramètre obligatoire (Ayoub)
             key: ValueKey('cloze_$clozeIndex'),
           );
 
@@ -165,11 +165,7 @@ class _CoursViewState extends State<CoursView> {
       },
     );
   }
-} // AJOUT : cette accolade manquait et cassait tout
-
-// ------------------------------------------------------------
-// WIDGETS QUI ÉTAIENT INVISIBLES À CAUSE DE L’ACCOLADE MANQUANTE
-// ------------------------------------------------------------
+}
 
 class HeaderWidget extends StatelessWidget {
   final Cours cours;

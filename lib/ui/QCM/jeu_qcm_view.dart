@@ -150,7 +150,7 @@ class JeuQCMView extends StatelessWidget {
     );
   }
 
-  // --- PAGE RESULTAT ---
+
   Widget _buildResultPage(BuildContext context, JeuQCMViewModel vm) {
     final score = vm.getScore();
 
