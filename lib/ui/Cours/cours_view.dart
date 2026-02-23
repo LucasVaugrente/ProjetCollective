@@ -133,13 +133,6 @@ class _CoursViewState extends State<CoursView> {
 
           nouvellePage = ClozePage(
             coursId: coursSelectionne.cours.id!,
-            clozeIndex: clozeIndex,
-            onNext: clozeIndex < nbCloze - 1
-                ? () => setState(() => currentPage++)
-                : null,
-            onPrevious: clozeIndex > 0
-                ? () => setState(() => currentPage--)
-                : null,
             key: ValueKey('cloze_$clozeIndex'),
           );
 
