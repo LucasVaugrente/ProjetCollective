@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'jeu_qcm_view_model.dart'; // <-- CORRECT
+import 'jeu_qcm_view_model.dart';
 import 'package:factoscope/models/cours.dart';
 
 class JeuQCMView extends StatelessWidget {
@@ -174,12 +174,8 @@ class JeuQCMView extends StatelessWidget {
               onPressed: vm.restart,
               child: const Text("Recommencer"),
             ),
-            const SizedBox(height: 10),
 
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Retour"),
-            ),
+
           ],
         ),
       ),

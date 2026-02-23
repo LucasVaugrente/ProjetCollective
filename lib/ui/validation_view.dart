@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:factoscope/ui/QCM/qcm_officiel_view.dart';
+import 'package:factoscope/ui/cours_selectionne.dart'; // AJOUT
 
 class ValidationView extends StatelessWidget {
   const ValidationView({super.key});
@@ -28,7 +30,6 @@ class ValidationView extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Titre
             const Text(
               "Test de Validation",
               style: TextStyle(
@@ -40,7 +41,6 @@ class ValidationView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Sous-titre
             const Text(
               "Obtenez votre validation officielle",
               style: TextStyle(
@@ -64,7 +64,6 @@ class ValidationView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Score requis
                   _buildInfoRow(
                     Icons.stars,
                     "Score requis",
@@ -73,7 +72,6 @@ class ValidationView extends StatelessWidget {
                   ),
                   const Divider(height: 32),
 
-                  // Type de test
                   _buildInfoRow(
                     Icons.quiz,
                     "Type de test",
@@ -155,11 +153,20 @@ class ValidationView extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // Bouton (désactivé pour l'instant)
+            // Bouton ACTIVÉ
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: null, // Désactivé pour l'instant
+                onPressed: () {
+                  final cours = CoursSelectionne.instance.cours; // AJOUT
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => QCMOfficielView(cours: cours), // AJOUT
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
@@ -168,8 +175,7 @@ class ValidationView extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: Colors.grey,
-                  disabledBackgroundColor: Colors.grey[300],
+                  backgroundColor: const Color.fromARGB(255, 3, 47, 122),
                 ),
                 child: const Text(
                   "Commencer",
@@ -182,7 +188,6 @@ class ValidationView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-
           ],
         ),
       ),
