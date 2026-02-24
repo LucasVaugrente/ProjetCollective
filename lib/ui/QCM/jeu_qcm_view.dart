@@ -118,28 +118,67 @@ class JeuQCMView extends StatelessWidget {
 
             const SizedBox(height: 10),
 
+            // --- BOUTONS JAUNES IDENTIQUES À TON IMAGE ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: vm.currentIndex > 0 ? vm.previous : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey.shade300,
-                    foregroundColor: Colors.black,
+                // --- BOUTON PRECEDENT ---
+                GestureDetector(
+                  onTap: vm.currentIndex > 0 ? vm.previous : null,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: vm.currentIndex > 0
+                          ? const Color(0xFFFFD54F)
+                          : const Color(0xFFFFECB3),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.orange.shade300),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.arrow_back, color: Colors.black87),
+                        SizedBox(width: 8),
+                        Text(
+                          "Précédent",
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: const Text("Précédent"),
                 ),
 
-                ElevatedButton(
-                  onPressed: vm.selectedAnswer != null ? vm.next : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: Text(
-                    vm.currentIndex == vm.totalQuestions - 1
-                        ? "Terminer"
-                        : "Suivant",
+                // --- BOUTON SUIVANT ---
+                GestureDetector(
+                  onTap: vm.selectedAnswer != null ? vm.next : null,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: vm.selectedAnswer != null
+                          ? const Color(0xFFFFD54F)
+                          : const Color(0xFFFFECB3),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.orange.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          vm.currentIndex == vm.totalQuestions - 1
+                              ? "Terminer"
+                              : "Suivant",
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward, color: Colors.black87),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -150,7 +189,7 @@ class JeuQCMView extends StatelessWidget {
     );
   }
 
-
+  // --- PAGE RESULTAT ---
   Widget _buildResultPage(BuildContext context, JeuQCMViewModel vm) {
     final score = vm.getScore();
 
@@ -174,8 +213,6 @@ class JeuQCMView extends StatelessWidget {
               onPressed: vm.restart,
               child: const Text("Recommencer"),
             ),
-
-
           ],
         ),
       ),
