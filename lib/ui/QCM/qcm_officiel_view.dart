@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import 'qcm_officiel_view_model.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
-
-
 import 'package:factoscope/ui/QCM/page_succes_qcm.dart';
 
 class QCMOfficielView extends StatelessWidget {
@@ -18,7 +16,6 @@ class QCMOfficielView extends StatelessWidget {
       create: (_) {
         final vm = QCMOfficielViewModel();
 
-        // 👉 Redirection quand score = 100%
         vm.onSuccess = () {
           Navigator.push(
             context,
@@ -26,7 +23,6 @@ class QCMOfficielView extends StatelessWidget {
           );
         };
 
-        // 👉 Redirection quand score < 100%
         vm.onFailure = (score) {
           Navigator.push(
             context,
@@ -151,36 +147,65 @@ class QCMOfficielView extends StatelessWidget {
 
           const SizedBox(height: 20),
 
+          // --- BOUTONS JAUNES ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ElevatedButton(
-                onPressed: vm.currentIndex == 0 ? null : vm.previous,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                  vm.currentIndex == 0 ? Colors.grey : Colors.blueGrey,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                ),
-                child: const Text(
-                  "Précédent",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+              GestureDetector(
+                onTap: vm.currentIndex > 0 ? vm.previous : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: vm.currentIndex > 0
+                        ? const Color(0xFFFFD54F)
+                        : const Color(0xFFFFECB3),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.orange.shade300),
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.arrow_back, color: Colors.black87),
+                      SizedBox(width: 8),
+                      Text(
+                        "Précédent",
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
-              ElevatedButton(
-                onPressed: vm.selectedIndex == null ? null : vm.next,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                  vm.selectedIndex == null ? Colors.grey : Colors.blue,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                ),
-                child: Text(
-                  vm.currentIndex == vm.totalQuestions - 1
-                      ? "Terminer"
-                      : "Suivant",
-                  style: const TextStyle(fontSize: 16, color: Colors.white),
+              GestureDetector(
+                onTap: vm.selectedIndex != null ? vm.next : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: vm.selectedIndex != null
+                        ? const Color(0xFFFFD54F)
+                        : const Color(0xFFFFECB3),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.orange.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        vm.currentIndex == vm.totalQuestions - 1
+                            ? "Terminer"
+                            : "Suivant",
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward, color: Colors.black87),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -192,7 +217,7 @@ class QCMOfficielView extends StatelessWidget {
 }
 
 //
-//  PAGE ECHEC DÉTAILLÉE
+//  PAGE D’ÉCHEC PROFESSIONNELLE
 //
 
 class PageEchecDetaillee extends StatelessWidget {
@@ -209,125 +234,164 @@ class PageEchecDetaillee extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<int> wrongIndexes = [];
+
+    for (int i = 0; i < qcms.length; i++) {
+      if (userAnswers[i] != qcms[i].soluce) {
+        wrongIndexes.add(i);
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Résultat du QCM officiel")),
+      appBar: AppBar(
+        title: const Text("Analyse des erreurs"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 2,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Vous étiez proche !",
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+        child: wrongIndexes.isEmpty
+            ? _buildPerfectScore()
+            : _buildWrongAnswersList(wrongIndexes),
+      ),
+    );
+  }
 
-            const SizedBox(height: 10),
+  Widget _buildPerfectScore() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.emoji_events, color: Colors.amber, size: 80),
+          SizedBox(height: 20),
+          Text(
+            "Aucune erreur !",
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 10),
+          Text(
+            "Vous avez répondu correctement à toutes les questions.",
+            style: TextStyle(fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
 
-            Text(
-              "Score : ${(score * 100).toStringAsFixed(0)}%",
-              style: const TextStyle(fontSize: 20),
-            ),
+  Widget _buildWrongAnswersList(List<int> wrongIndexes) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Vous avez ${wrongIndexes.length} erreur(s)",
+          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
 
-            const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
-            const Text(
-              "Analyse de vos réponses",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: wrongIndexes.length,
+            itemBuilder: (context, index) {
+              final qIndex = wrongIndexes[index];
+              final q = qcms[qIndex];
+              final user = userAnswers[qIndex];
+              final correct = q.soluce;
 
-            const SizedBox(height: 10),
-
-            Expanded(
-              child: ListView.builder(
-                itemCount: qcms.length,
-                itemBuilder: (context, index) {
-                  final q = qcms[index];
-                  final user = userAnswers[index];
-                  final correct = q.soluce;
-
-                  final bool isCorrect = user == correct;
-
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              return Card(
+                elevation: 3,
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
+                          const Icon(Icons.close, color: Colors.red, size: 26),
+                          const SizedBox(width: 8),
                           Text(
-                            "Question ${index + 1}",
+                            "Question ${qIndex + 1}",
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 6),
-
-                          Text(
-                            q.question,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          Row(
-                            children: [
-                              const Text("Votre réponse : ",
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
-                              Text(
-                                user != null
-                                    ? q.getReponses()[user]
-                                    : "Aucune réponse",
-                                style: TextStyle(
-                                  color: isCorrect ? Colors.green : Colors.red,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 4),
-
-                          Row(
-                            children: [
-                              const Text("Bonne réponse : ",
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
-                              Text(
-                                q.getReponses()[correct],
-                                style: const TextStyle(color: Colors.green),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: isCorrect
-                                  ? Colors.green.withOpacity(0.2)
-                                  : Colors.red.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              isCorrect ? "Correct" : "Incorrect",
-                              style: TextStyle(
-                                color: isCorrect ? Colors.green : Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+
+                      const SizedBox(height: 12),
+
+                      Text(
+                        q.question,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "Votre réponse : ${user != null ? q.getReponses()[user] : "Aucune"}",
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle, color: Colors.green),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "Bonne réponse : ${q.getReponses()[correct]}",
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
-      ),
+      ],
     );
   }
 }

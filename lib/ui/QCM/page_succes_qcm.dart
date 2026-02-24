@@ -8,12 +8,10 @@ class PageSuccesQCM extends StatefulWidget {
 }
 
 class _PageSuccesQCMState extends State<PageSuccesQCM> {
-  final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController nomCtrl = TextEditingController();
-  final TextEditingController prenomCtrl = TextEditingController();
-  final TextEditingController dateCtrl = TextEditingController();
-  final TextEditingController emailCtrl = TextEditingController();
+  final TextEditingController nomController = TextEditingController();
+  final TextEditingController prenomController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -21,101 +19,83 @@ class _PageSuccesQCMState extends State<PageSuccesQCM> {
       appBar: AppBar(
         title: const Text("Certification"),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 2,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              const Text(
-                "Félicitations ! 🎉\nVous avez obtenu 100% au QCM officiel.\n"
-                    "Veuillez renseigner vos informations pour générer votre certificat.",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
+        child: ListView(
+          children: [
+            const Text(
+              "Félicitations ! 🎉",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
 
-              SizedBox(height: 30),
+            const Text(
+              "Vous avez obtenu 100% au QCM officiel.\nVeuillez renseigner vos informations pour générer votre certificat.",
+              style: TextStyle(fontSize: 16),
+            ),
 
-              TextFormField(
-                controller: nomCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Nom",
-                  border: OutlineInputBorder(),
+            const SizedBox(height: 30),
+
+            _buildInput("Nom", nomController),
+            _buildInput("Prénom", prenomController),
+            _buildInput("Date de naissance (JJ/MM/AAAA)", dateController),
+            _buildInput("Email", emailController),
+
+            const SizedBox(height: 30),
+
+            // --- BOUTON JAUNE IDENTIQUE AUX AUTRES ---
+            GestureDetector(
+              onTap: () {
+                // TODO: action pour générer le certificat
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFD54F),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.orange.shade300),
                 ),
-                validator: (v) =>
-                v == null || v.isEmpty ? "Veuillez entrer votre nom" : null,
-              ),
-
-              SizedBox(height: 20),
-
-              TextFormField(
-                controller: prenomCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Prénom",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.isEmpty
-                    ? "Veuillez entrer votre prénom"
-                    : null,
-              ),
-
-              SizedBox(height: 20),
-
-              TextFormField(
-                controller: dateCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Date de naissance (JJ/MM/AAAA)",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => v == null || v.isEmpty
-                    ? "Veuillez entrer votre date de naissance"
-                    : null,
-              ),
-
-              SizedBox(height: 20),
-
-              TextFormField(
-                controller: emailCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Email",
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) {
-                  if (v == null || v.isEmpty) {
-                    return "Veuillez entrer un email";
-                  }
-                  if (!v.contains("@")) {
-                    return "Email invalide";
-                  }
-                  return null;
-                },
-              ),
-
-              SizedBox(height: 30),
-
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Informations validées !"),
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
-                ),
-                child: const Text(
-                  "Valider et générer le certificat",
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                child: const Center(
+                  child: Text(
+                    "Valider et générer le certificat",
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildInput(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.grey.shade100,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade400),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
     );
   }
 }
