@@ -117,7 +117,7 @@ class ValidationView extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildRule("📚", "Complétez tous les modules avant de passer le test"),
                   _buildRule("✅", "Vous devez obtenir 100% de bonnes réponses"),
-                  _buildRule("⏱️", "Le test se fera sous ... minutes"),
+                  _buildRule("⏱️", "Le test se fera sous 30 minutes"),
                   _buildRule("🏆", "Une fois validé, vous recevrez votre certification"),
                 ],
               ),
