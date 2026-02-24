@@ -92,58 +92,23 @@ class FinCoursView extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // // Bouton retour au module
-            // SizedBox(
-            //   width: double.infinity,
-            //   child: ElevatedButton.icon(
-            //     onPressed: () {
-            //       // Retour à la liste des cours du module
-            //       GoRouter.of(context).go('/list_cours');
-            //     },
-            //     icon: const Icon(Icons.arrow_back, color: Colors.white),
-            //     label: const Text(
-            //       "Retour au module",
-            //       style: TextStyle(
-            //         fontSize: 20,
-            //         fontWeight: FontWeight.bold,
-            //         color: Colors.white,
-            //       ),
-            //     ),
-            //     style: ElevatedButton.styleFrom(
-            //       padding: const EdgeInsets.symmetric(
-            //         horizontal: 32,
-            //         vertical: 20,
-            //       ),
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(12),
-            //       ),
-            //       backgroundColor: const Color.fromRGBO(252, 179, 48, 1),
-            //     ),
-            //   ),
-            // ),
-            // const SizedBox(height: 16),
-
-            // Bouton retour à l'accueil (optionnel)
-
+            // Bouton retour à la liste des cours
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
+              child: ElevatedButton.icon(
                 onPressed: () {
-                  // Retour à l'accueil
-                  GoRouter.of(context).go('/');
+                  GoRouter.of(context).go('/cours');
                 },
-                icon: const Icon(
-                  Icons.home,
-                  color: Color.fromARGB(255, 3, 47, 122),
-                ),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 label: const Text(
-                  "Retour à l'accueil",
+                  "Retour à la liste des cours",
                   style: TextStyle(
-                    fontSize: 18,
-                    color: Color.fromARGB(255, 3, 47, 122),
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                style: OutlinedButton.styleFrom(
+                style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 20,
@@ -151,13 +116,12 @@ class FinCoursView extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  side: const BorderSide(
-                    color: Color.fromARGB(255, 3, 47, 122),
-                    width: 2,
-                  ),
+                  backgroundColor: const Color.fromRGBO(252, 179, 48, 1),
                 ),
               ),
             ),
+
+            const SizedBox(height: 16),
           ],
         ),
       ),
