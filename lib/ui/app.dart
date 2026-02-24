@@ -6,7 +6,7 @@ import 'package:factoscope/ui/list_module_view.dart';
 import 'package:factoscope/ui/Cours/cours_view.dart';
 import 'package:factoscope/ui/all_cours_view.dart';
 import 'list_cours_view.dart';
-import 'package:factoscope/ui/AboutView.dart';
+import 'package:factoscope/ui/about_view.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -19,9 +19,13 @@ final router = GoRouter(
       builder: (context, state, child) => App(child: child),
       routes: [
         GoRoute(
-            path: '/', builder: (context, state) => const ListModulesView()),
+          path: '/',
+          builder: (context, state) => const ListModulesView(),
+        ),
         GoRoute(
-            path: '/cours', builder: (context, state) => const AllCoursView()),
+          path: '/cours',
+          builder: (context, state) => const AllCoursView(),
+        ),
         GoRoute(
           path: '/cours/:coursId',
           builder: (context, state) {
@@ -37,7 +41,10 @@ final router = GoRouter(
           path: '/validation',
           builder: (context, state) => const ValidationView(),
         ),
-        GoRoute(path: '/about', builder: (context, state) => const AboutView()),
+        GoRoute(
+          path: '/about',
+          builder: (context, state) => const AboutView(),
+        ),
       ],
     ),
   ],
@@ -53,21 +60,26 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  int currentIndex = 0;
   bool showLaunchScreen = true;
 
   @override
   void initState() {
     super.initState();
-
     Future.delayed(const Duration(milliseconds: 4000), () {
-      setState(() {
-        showLaunchScreen = false;
-      });
+      if (mounted) {
+        setState(() => showLaunchScreen = false);
+      }
     });
   }
 
-  void changeTab(int index) {
+  /// Détermine l'index actif de la navbar en fonction de la route courante.
+  int _indexFromLocation(String location) {
+    if (location.startsWith('/cours')) return 1;
+    if (location.startsWith('/validation')) return 2;
+    return 0;
+  }
+
+  void _changeTab(BuildContext context, int index) {
     switch (index) {
       case 0:
         context.go('/');
@@ -80,15 +92,16 @@ class _AppState extends State<App> {
         break;
       default:
         context.go('/');
-        break;
     }
-    setState(() {
-      currentIndex = index;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // On lit la route courante depuis GoRouter pour garder la navbar en sync
+    // même lors des navigations internes (ex: /cours/42).
+    final location = GoRouterState.of(context).matchedLocation;
+    final currentIndex = _indexFromLocation(location);
+
     return Stack(
       children: [
         Scaffold(
@@ -118,7 +131,7 @@ class _AppState extends State<App> {
               ),
             ),
             child: BottomNavigationBar(
-              onTap: changeTab,
+              onTap: (index) => _changeTab(context, index),
               backgroundColor: Colors.transparent,
               currentIndex: currentIndex,
               unselectedItemColor: Colors.white,
@@ -148,72 +161,3 @@ class _AppState extends State<App> {
     );
   }
 }
-
-/*
-class App extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<App> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _pages = [
-    Center(child: Text('Page Home')),
-    Center(child: Text('Page Modules')),
-    Center(child: Text('Page Certification')),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'lib/data/AppData/facto-logo.png',
-                height: 40, // Ajuste la hauteur
-                fit: BoxFit.contain, // Garde les proportions
-              ),
-              const SizedBox(width: 10), // Espace entre l'image et le texte
-              const Text('Factoscope'),
-            ],
-          ),
-          centerTitle: true,
-        ),
-        body: _pages[_selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'Modules',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.verified),
-              label: 'Certification',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: const Color.fromRGBO(252, 179, 48, 1),
-          onTap: _onItemTapped,
-        ),
-      ),
-    );
-  }
-}
-
-
-*/

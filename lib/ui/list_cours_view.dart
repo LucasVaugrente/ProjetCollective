@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:factoscope/models/list_cours_view_model.dart';
 import 'package:factoscope/models/page.dart';
 import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_image_widget.dart';
-import 'package:factoscope/ui/Cours/cours_view.dart';
 import 'package:factoscope/ui/cours_selectionne.dart';
 
 import '../models/cours.dart';
@@ -133,10 +132,10 @@ SizedBox moduleHeader(Module module, double? progress) {
             Column(
               children: [
                 Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
-                  margin:
-                  const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 5.0, vertical: 5.0),
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 5.0, vertical: 5.0),
                   child: Text(
                     module.titre,
                     style: const TextStyle(
@@ -171,27 +170,85 @@ SizedBox moduleHeader(Module module, double? progress) {
 SizedBox listItem(Cours cours, BuildContext context) {
   return SizedBox(
     child: InkWell(
-        child: Container(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-          margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-          child: FutureBuilder(
-              future: ListCoursViewModel().getProgressionCours(cours),
-              builder: (context, snapshot) {
-                return Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 20.0),
+      onTap: () {
+        CoursSelectionne.instance.setCours(cours);
+        GoRouter.of(context).go('/cours/${cours.id}');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+        margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+        child: FutureBuilder(
+          future: ListCoursViewModel().getProgressionCours(cours),
+          builder: (context, snapshot) {
+            final double? progression = snapshot.data;
+            return Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 15.0, vertical: 20.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: const Color.fromARGB(255, 235, 235, 235),
+              ),
+              child: Row(
+                children: [
+                  // Icône du cours
+                  Container(
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: const Color.fromARGB(255, 235, 235, 235),
+                      color: const Color.fromARGB(255, 236, 187, 139),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: HeaderWidget(
-                        cours: cours, progression: snapshot.data));
-              }),
+                    child: const Icon(Icons.school,
+                        color: Colors.white, size: 26),
+                  ),
+                  const SizedBox(width: 14),
+                  // Titre + barre de progression
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          cours.titre,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (cours.contenu.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            cours.contenu,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black54),
+                          ),
+                        ],
+                        const SizedBox(height: 10),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: progression ?? 0.0,
+                            minHeight: 5,
+                            color: const Color.fromARGB(255, 90, 230, 220),
+                            backgroundColor:
+                            const Color.fromARGB(255, 175, 240, 235),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Icon(Icons.arrow_forward_ios,
+                      size: 14, color: Colors.grey),
+                ],
+              ),
+            );
+          },
         ),
-        onTap: () {
-          CoursSelectionne.instance.cours = cours;
-          GoRouter.of(context).go('/cours');
-        }),
+      ),
+    ),
   );
 }
