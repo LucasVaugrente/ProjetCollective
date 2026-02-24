@@ -126,7 +126,6 @@ class _CoursViewState extends State<CoursView> {
 
           nouvellePage = ClozePage(
             coursId: coursSelectionne.cours.id!,
-            clozeIndex: clozeIndex, // AJOUT : paramètre obligatoire (Ayoub)
             key: ValueKey('cloze_$clozeIndex'),
           );
 
