@@ -16,30 +16,33 @@ class ContenuImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: Column(
-        children: [
-          Image.asset(
-            media.url,
-            width: width,
-            height: height,
-            fit: BoxFit.cover,
-            semanticLabel: media.caption,
-            errorBuilder: (context, error, stackTrace) {
-              return const Icon(Icons.broken_image, size: 50, color: Colors.grey);
-            },
-          ),
-          if (media.caption != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                media.caption!,
-                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-                textAlign: TextAlign.center,
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Center(
+          child: Column(
+            children: [
+              Image.asset(
+                media.url,
+                width: width,
+                height: height,
+                fit: BoxFit.cover,
+                semanticLabel: media.caption,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.broken_image,
+                      size: 50, color: Colors.grey);
+                },
               ),
-            ),
-        ],
-      ),
-    );
+              if (media.caption != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    media.caption!,
+                    style: const TextStyle(
+                        fontSize: 12, fontStyle: FontStyle.italic),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+            ],
+          ),
+        ));
   }
 }

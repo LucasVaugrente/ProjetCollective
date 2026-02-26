@@ -1,3 +1,4 @@
+import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_audio_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/cours.dart';
@@ -47,7 +48,6 @@ class ContenuCoursView extends StatelessWidget {
               if (kDebugMode) {
                 print("Media url: ${media.url}, type: ${media.type}");
               }
-
               if (media.type == "image") {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -57,6 +57,11 @@ class ContenuCoursView extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ContenuVideoWidget(data: media),
+                );
+              } else if (media.type == "audio") {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ContenuAudioWidget(urlAudio: media.url,),
                 );
               } else if (media.type == "text") {
                 return Padding(
@@ -70,11 +75,6 @@ class ContenuCoursView extends StatelessWidget {
                 );
               }
             }),
-          // if (page.medias == null || page.medias!.isEmpty)
-          //   const Padding(
-          //     padding: EdgeInsets.all(16.0),
-          //     child: Text("Aucun média disponible"),
-          //   ),
         ],
       ),
     );

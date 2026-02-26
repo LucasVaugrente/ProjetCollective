@@ -1,6 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
-import 'package:factoscope/models/page.dart';  // ✅ Import corrigé
+import 'package:factoscope/models/page.dart';
 import 'package:video_player/video_player.dart';
 
 class ContenuCoursViewModel {

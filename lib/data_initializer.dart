@@ -98,6 +98,70 @@ Future<void> insertModule1() async {
 
   await _insertQCMForCours1(coursId);
   await _insertClozeCours1(coursId);
+
+  Cours cours2 = Cours(
+      idModule: moduleId,
+      titre: 'COURS 2',
+      contenu: 'Comprendre le cours 2',
+      description: 'Description du cours 2 oui oui oui.');
+  final coursId2 = await coursRepository.create(cours2);
+
+  Page page11 = Page(
+    idCours: coursId2,
+    description: "Description 1",
+    medias: [
+      MediaItem(
+        ordre: 1,
+        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+        type: 'text',
+      ),
+      MediaItem(
+        ordre: 2,
+        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.jpg',
+        type: 'image',
+        caption: 'Journaliste réalisant une interview',
+      ),
+    ],
+  );
+  await pageRepository.create(page11);
+
+  Page page22 = Page(
+    idCours: coursId2,
+    description: "Description 2",
+    medias: [
+      MediaItem(
+        ordre: 1,
+        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+        type: 'text',
+      ),
+      MediaItem(
+        ordre: 2,
+        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.mp3',
+        type: 'audio',
+        caption: 'Illustration des sources primaires et secondaires',
+      ),
+    ],
+  );
+  await pageRepository.create(page22);
+
+  Page page33 = Page(
+    idCours: coursId2,
+    description: "Comment vérifier la fiabilité d'une source ?",
+    medias: [
+      MediaItem(
+        ordre: 1,
+        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+        type: 'text',
+      ),
+      MediaItem(
+        ordre: 2,
+        url: 'lib/data/AppData/Module1/Cours2/genre_opinion.mp4',
+        type: 'video',
+        caption: 'Techniques de vérification des fake news',
+      ),
+    ],
+  );
+  await pageRepository.create(page33);
 }
 
 Future<void> _insertClozeCours1(int coursId) async {
@@ -207,21 +271,6 @@ Future<void> insertModule3() async {
 
   Cours cours = Cours(
       idModule: moduleId, titre: 'Déontologie', contenu: '', description: '');
-  await coursRepository.create(cours);
-}
-
-Future<void> insertModule4() async {
-  final module = Module(
-      titre: 'Pour aller plus loin',
-      urlImg: 'assets/facto-societe.png',
-      description: 'Toutes les références et ressources en relation avec l\'EMI.');
-  final moduleId = await moduleRepository.create(module);
-
-  Cours cours = Cours(
-      idModule: moduleId,
-      titre: 'Références bibliographiques',
-      contenu: '',
-      description: '');
   await coursRepository.create(cours);
 }
 
