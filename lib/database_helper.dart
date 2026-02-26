@@ -55,6 +55,7 @@ class DatabaseHelper {
       CREATE TABLE IF NOT EXISTS page (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         description TEXT,
+        contenu TEXT,
         medias TEXT,
         est_vue INTEGER DEFAULT 0,
         id_cours INTEGER NOT NULL,
