@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/page.dart';
 
@@ -15,13 +17,15 @@ class ContenuImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fichier = File(media.url);
+
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0),
         child: Center(
           child: Column(
             children: [
-              Image.asset(
-                media.url,
+            Image.file(
+                fichier,
                 width: width,
                 height: height,
                 fit: BoxFit.cover,

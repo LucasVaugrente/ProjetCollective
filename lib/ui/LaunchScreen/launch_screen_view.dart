@@ -41,7 +41,9 @@ class _LaunchScreenViewState extends State<LaunchScreenView>
     ));
 
     Future.delayed(const Duration(seconds: 2), () {
-      _controller.forward();
+      if (mounted) {
+        _controller.forward();
+      }
     });
   }
 

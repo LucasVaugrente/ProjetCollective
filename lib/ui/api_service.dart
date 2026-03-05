@@ -13,7 +13,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse('${AppConfig.effectiveApiUrl}/api/cours'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: AppConfig.apiTimeout));
+      ).timeout(Duration(seconds: AppConfig.apiTimeout));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -45,7 +45,7 @@ class ApiService {
       final response = await http.get(
         Uri.parse('${AppConfig.effectiveApiUrl}/api/cours/$coursId'),
         headers: {'Content-Type': 'application/json'},
-      ).timeout(const Duration(seconds: AppConfig.apiTimeout));
+      ).timeout(Duration(seconds: AppConfig.apiTimeout));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -54,7 +54,7 @@ class ApiService {
         final pagesResponse = await http.get(
           Uri.parse('${AppConfig.effectiveApiUrl}/api/pages'),
           headers: {'Content-Type': 'application/json'},
-        ).timeout(const Duration(seconds: AppConfig.apiTimeout));
+        ).timeout(Duration(seconds: AppConfig.apiTimeout));
 
         List<PageDistante> pages = [];
         if (pagesResponse.statusCode == 200) {
@@ -96,14 +96,14 @@ class CoursDistant {
   final String titre;
   final String description;
   final String contenu;
-  final int? idModule;
+  final int idModule;
 
   CoursDistant({
     required this.id,
     required this.titre,
     required this.description,
     required this.contenu,
-    this.idModule,
+    required this.idModule,
   });
 
   factory CoursDistant.fromJson(Map<String, dynamic> json) {
@@ -112,14 +112,15 @@ class CoursDistant {
       titre: json['titre']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       contenu: json['contenu']?.toString() ?? '',
-      idModule: json['id_module'] as int?,
-    );
+      idModule: (json['id_module'] as int?) ?? 0,
+      );
   }
 }
 
 class PageDistante {
   final int id;
   final String description;
+  final String contenu;
   final String medias;
   final int estVue;
   final int idCours;
@@ -127,6 +128,7 @@ class PageDistante {
   PageDistante({
     required this.id,
     required this.description,
+    required this.contenu,
     required this.medias,
     required this.estVue,
     required this.idCours,
@@ -136,6 +138,7 @@ class PageDistante {
     return PageDistante(
       id: json['id'] as int,
       description: json['description']?.toString() ?? '',
+      contenu: json['content'] as String? ?? '',
       medias: json['medias']?.toString() ?? '',
       estVue: (json['est_vue'] as int?) ?? 0,
       idCours: json['id_cours'] as int,

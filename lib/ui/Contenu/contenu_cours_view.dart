@@ -33,16 +33,25 @@ class ContenuCoursView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Affichage de la description de la page
           if (page.description != null)
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Text(
                 page.description!,
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-          // Affichage des médias
+
+          if (page.contenu != null && page.contenu!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Text(
+                page.contenu!,
+                style: const TextStyle(fontSize: 15, height: 1.6),
+              ),
+            ),
+
+          // Médias
           if (page.medias != null && page.medias!.isNotEmpty)
             ...page.medias!.map((media) {
               if (kDebugMode) {

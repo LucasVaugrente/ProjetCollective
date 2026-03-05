@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 class Page {
   int? id;
   String? description;
+  String? contenu;
   int idCours;
   int estVue;
   List<MediaItem>? medias;
@@ -12,6 +13,7 @@ class Page {
   Page({
     this.id,
     this.description,
+    this.contenu,
     required this.idCours,
     this.estVue = 0,
     this.medias,
@@ -21,6 +23,7 @@ class Page {
     return {
       'id': id,
       'description': description,
+      'contenu': contenu,
       'id_cours': idCours,
       'est_vue': estVue,
       'medias': medias != null ? jsonEncode(medias!.map((m) => m.toJson()).toList()) : null,
@@ -44,6 +47,7 @@ class Page {
     return Page(
       id: map['id'],
       description: map['description'],
+      contenu: map['contenu'],
       idCours: map['id_cours'],
       estVue: map['est_vue'] ?? 0,
       medias: mediaList,
@@ -72,6 +76,7 @@ class Page {
     return Page(
       id: json['id'],
       description: json['description'],
+      contenu: json['content'],
       idCours: json['id_cours'],
       estVue: json['est_vue'] ?? 0,
       medias: mediaList,

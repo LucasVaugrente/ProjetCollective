@@ -9,7 +9,6 @@ import 'package:factoscope/ui/cours_selectionne.dart';
 import 'package:flutter/foundation.dart';
 import 'package:factoscope/database_helper.dart';
 import 'models/cours.dart';
-import 'models/page.dart';
 
 import './repositories/Cloze/cloze_repository.dart';
 import './models/Cloze/cloze_page.dart';
@@ -29,139 +28,139 @@ Future<void> insertModule1() async {
       description: moduleData['description']);
   final moduleId = await moduleRepository.create(module);
 
-  Cours cours = Cours(
-      idModule: moduleId,
-      titre: 'Les sources d\'informations',
-      contenu: 'Comprendre et évaluer les sources d\'information.',
-      description: 'Description des sources d\'informations.');
-  final coursId = await coursRepository.create(cours);
-
-  // Page 1 : Introduction aux sources d'information
-  Page page1 = Page(
-    idCours: coursId,
-    description: "Qu'est-ce qu'une source d'information ?",
-    medias: [
-      MediaItem(
-        ordre: 1,
-        url: 'lib/data/AppData/Module1/Cours1/source_information_definition.txt',
-        type: 'text',
-      ),
-      MediaItem(
-        ordre: 2,
-        url: 'lib/data/AppData/Module1/Cours1/journaliste_interview.jpg',
-        type: 'image',
-        caption: 'Journaliste réalisant une interview',
-      ),
-    ],
-  );
-  await pageRepository.create(page1);
-
-  // Page 2 : Les différentes sources
-  Page page2 = Page(
-    idCours: coursId,
-    description: "Types de sources d'information",
-    medias: [
-      MediaItem(
-        ordre: 1,
-        url: 'lib/data/AppData/Module1/Cours1/types_sources.txt',
-        type: 'text',
-      ),
-      MediaItem(
-        ordre: 2,
-        url: 'lib/data/AppData/Module1/Cours1/source_primaire_secondaire.png',
-        type: 'image',
-        caption: 'Illustration des sources primaires et secondaires',
-      ),
-    ],
-  );
-  await pageRepository.create(page2);
-
-  // Page 3 : Évaluer la crédibilité d'une source
-  Page page3 = Page(
-    idCours: coursId,
-    description: "Comment vérifier la fiabilité d'une source ?",
-    medias: [
-      MediaItem(
-        ordre: 1,
-        url: 'lib/data/AppData/Module1/Cours1/evaluer_sources.txt',
-        type: 'text',
-      ),
-      MediaItem(
-        ordre: 2,
-        url: 'lib/data/AppData/Module1/Cours1/fake_news_verification.png',
-        type: 'image',
-        caption: 'Techniques de vérification des fake news',
-      ),
-    ],
-  );
-  await pageRepository.create(page3);
-
-  await _insertQCMForCours1(coursId);
-  await _insertClozeCours1(coursId);
-
-  Cours cours2 = Cours(
-      idModule: moduleId,
-      titre: 'COURS 2',
-      contenu: 'Comprendre le cours 2',
-      description: 'Description du cours 2 oui oui oui.');
-  final coursId2 = await coursRepository.create(cours2);
-
-  Page page11 = Page(
-    idCours: coursId2,
-    description: "Description 1",
-    medias: [
-      MediaItem(
-        ordre: 1,
-        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
-        type: 'text',
-      ),
-      MediaItem(
-        ordre: 2,
-        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.jpg',
-        type: 'image',
-        caption: 'Journaliste réalisant une interview',
-      ),
-    ],
-  );
-  await pageRepository.create(page11);
-
-  Page page22 = Page(
-    idCours: coursId2,
-    description: "Description 2",
-    medias: [
-      MediaItem(
-        ordre: 1,
-        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
-        type: 'text',
-      ),
-      MediaItem(
-        ordre: 2,
-        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.mp3',
-        type: 'audio',
-        caption: 'Illustration des sources primaires et secondaires',
-      ),
-    ],
-  );
-  await pageRepository.create(page22);
-
-  Page page33 = Page(
-    idCours: coursId2,
-    description: "Comment vérifier la fiabilité d'une source ?",
-    medias: [
-      MediaItem(
-        ordre: 1,
-        url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
-        type: 'text',
-      ),
-      MediaItem(
-        ordre: 2,
-        url: 'lib/data/AppData/Module1/Cours2/genre_opinion.mp4',
-        type: 'video',
-        caption: 'Techniques de vérification des fake news',
-      ),
-    ],
-  );
-  await pageRepository.create(page33);
+  // Cours cours = Cours(
+  //     idModule: moduleId,
+  //     titre: 'Les sources d\'informations',
+  //     contenu: 'Comprendre et évaluer les sources d\'information.',
+  //     description: 'Description des sources d\'informations.');
+  // final coursId = await coursRepository.create(cours);
+  //
+  // // Page 1 : Introduction aux sources d'information
+  // Page page1 = Page(
+  //   idCours: coursId,
+  //   description: "Qu'est-ce qu'une source d'information ?",
+  //   medias: [
+  //     MediaItem(
+  //       ordre: 1,
+  //       url: 'lib/data/AppData/Module1/Cours1/source_information_definition.txt',
+  //       type: 'text',
+  //     ),
+  //     MediaItem(
+  //       ordre: 2,
+  //       url: 'lib/data/AppData/Module1/Cours1/journaliste_interview.jpg',
+  //       type: 'image',
+  //       caption: 'Journaliste réalisant une interview',
+  //     ),
+  //   ],
+  // );
+  // await pageRepository.create(page1);
+  //
+  // // Page 2 : Les différentes sources
+  // Page page2 = Page(
+  //   idCours: coursId,
+  //   description: "Types de sources d'information",
+  //   medias: [
+  //     MediaItem(
+  //       ordre: 1,
+  //       url: 'lib/data/AppData/Module1/Cours1/types_sources.txt',
+  //       type: 'text',
+  //     ),
+  //     MediaItem(
+  //       ordre: 2,
+  //       url: 'lib/data/AppData/Module1/Cours1/source_primaire_secondaire.png',
+  //       type: 'image',
+  //       caption: 'Illustration des sources primaires et secondaires',
+  //     ),
+  //   ],
+  // );
+  // await pageRepository.create(page2);
+  //
+  // // Page 3 : Évaluer la crédibilité d'une source
+  // Page page3 = Page(
+  //   idCours: coursId,
+  //   description: "Comment vérifier la fiabilité d'une source ?",
+  //   medias: [
+  //     MediaItem(
+  //       ordre: 1,
+  //       url: 'lib/data/AppData/Module1/Cours1/evaluer_sources.txt',
+  //       type: 'text',
+  //     ),
+  //     MediaItem(
+  //       ordre: 2,
+  //       url: 'lib/data/AppData/Module1/Cours1/fake_news_verification.png',
+  //       type: 'image',
+  //       caption: 'Techniques de vérification des fake news',
+  //     ),
+  //   ],
+  // );
+  // await pageRepository.create(page3);
+  //
+  // await _insertQCMForCours1(coursId);
+  // await _insertClozeCours1(coursId);
+  //
+  // Cours cours2 = Cours(
+  //     idModule: moduleId,
+  //     titre: 'COURS 2',
+  //     contenu: 'Comprendre le cours 2',
+  //     description: 'Description du cours 2 oui oui oui.');
+  // final coursId2 = await coursRepository.create(cours2);
+  //
+  // Page page11 = Page(
+  //   idCours: coursId2,
+  //   description: "Description 1",
+  //   medias: [
+  //     MediaItem(
+  //       ordre: 1,
+  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+  //       type: 'text',
+  //     ),
+  //     MediaItem(
+  //       ordre: 2,
+  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.jpg',
+  //       type: 'image',
+  //       caption: 'Journaliste réalisant une interview',
+  //     ),
+  //   ],
+  // );
+  // await pageRepository.create(page11);
+  //
+  // Page page22 = Page(
+  //   idCours: coursId2,
+  //   description: "Description 2",
+  //   medias: [
+  //     MediaItem(
+  //       ordre: 1,
+  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+  //       type: 'text',
+  //     ),
+  //     MediaItem(
+  //       ordre: 2,
+  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.mp3',
+  //       type: 'audio',
+  //       caption: 'Illustration des sources primaires et secondaires',
+  //     ),
+  //   ],
+  // );
+  // await pageRepository.create(page22);
+  //
+  // Page page33 = Page(
+  //   idCours: coursId2,
+  //   description: "Comment vérifier la fiabilité d'une source ?",
+  //   medias: [
+  //     MediaItem(
+  //       ordre: 1,
+  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+  //       type: 'text',
+  //     ),
+  //     MediaItem(
+  //       ordre: 2,
+  //       url: 'lib/data/AppData/Module1/Cours2/genre_opinion.mp4',
+  //       type: 'video',
+  //       caption: 'Techniques de vérification des fake news',
+  //     ),
+  //   ],
+  // );
+  // await pageRepository.create(page33);
 }
 
 Future<void> _insertClozeCours1(int coursId) async {
@@ -283,9 +282,8 @@ Future<void> insertSampleData() async {
     }
 
     await insertModule1();
-    // await insertModule2();
-    // await insertModule3();
-    // await insertModule4();
+    await insertModule2();
+    await insertModule3();
   } else {
     if (kDebugMode) {
       print('Base de données existante chargée');

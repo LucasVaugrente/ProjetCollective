@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:factoscope/service_locator.dart';
 import 'data_initializer.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'ui/app.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   setupLocator();
   runApp(const MainApp());
 }
@@ -15,7 +17,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-        future: insertSampleData(),
+        // future: insertSampleData(),
+        future: resetDatabaseForDebug(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return MaterialApp.router(

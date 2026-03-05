@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:factoscope/models/cours.dart';
@@ -6,7 +8,11 @@ import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/models/page.dart';
 import 'package:factoscope/ui/cours_selectionne.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
+import '../config.dart';
 import 'api_service.dart';
 
 class AllCoursView extends StatefulWidget {
@@ -35,21 +41,21 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   Future<void> _initialiserPage() async {
     setState(() => _isLoading = true);
-    await Future.wait([
-      _verifierConnexionApi(),
-      _chargerCoursLocaux(),
-    ]);
+
+    await _verifierConnexionApi();
+    await _chargerCoursLocaux();
+
     if (_apiConnectee) {
       await _chargerCoursDistants();
     }
+
     if (mounted) setState(() => _isLoading = false);
   }
 
   Future<void> _verifierConnexionApi() async {
     final connectee = await _apiService.testConnection();
-    if (mounted) {
-      setState(() => _apiConnectee = connectee);
-    }
+    _apiConnectee = connectee;
+    if (mounted) setState(() {});
   }
 
   Future<void> _chargerCoursLocaux() async {
@@ -219,6 +225,7 @@ class _AllCoursViewState extends State<AllCoursView> {
   }
 
   Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
+    print('📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
     final pageRepository = PageRepository();
 
     final coursLocal = Cours(
@@ -229,49 +236,139 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
 
     final coursIdLocal = await _coursRepository.create(coursLocal);
+    print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
 
+    final dossierCours = await _creerDossierCours(
+      idModule: coursComplet.cours.idModule,
+      idCours: coursIdLocal,
+    );
+
+    final List<String> tousLesMedias = [];
+    for (final page in coursComplet.pages) {
+      print('   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
+      if (page.medias.isNotEmpty) {
+        final noms = page.medias.split('@')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        print('   └─ Médias extraits: $noms');
+        tousLesMedias.addAll(noms);
+      }
+    }
+
+    print('🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
+
+    // Télécharger tous les médias en parallèle
+    await _telechargerTousLesMediasDuCours(
+      idModule: coursComplet.cours.idModule,
+      idCours: coursIdLocal,
+      nomsMedias: tousLesMedias,
+      dossierCours: dossierCours,
+    );
+
+    // Sauvegarder les pages en BDD locale
     for (final pageDistante in coursComplet.pages) {
       final List<MediaItem> mediasList = [];
-      if (pageDistante.medias.isNotEmpty) {
-        final urls = pageDistante.medias.split('@');
-        for (int i = 0; i < urls.length; i++) {
-          final url = urls[i].trim();
-          if (url.isNotEmpty) {
-            String typeMedia = 'text';
-            if (url.endsWith('.jpg') ||
-                url.endsWith('.jpeg') ||
-                url.endsWith('.png') ||
-                url.endsWith('.gif') ||
-                url.endsWith('.webp')) {
-              typeMedia = 'image';
-            } else if (url.endsWith('.mp4') ||
-                url.endsWith('.webm') ||
-                url.endsWith('.avi')) {
-              typeMedia = 'video';
-            } else if (url.endsWith('.mp3') ||
-                url.endsWith('.wav') ||
-                url.endsWith('.ogg')) {
-              typeMedia = 'audio';
-            }
 
-            mediasList.add(MediaItem(
-              ordre: i + 1,
-              url: url,
-              type: typeMedia,
-              caption: '',
-            ));
+      if (pageDistante.medias.isNotEmpty) {
+        final noms = pageDistante.medias.split('@')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
+        for (int i = 0; i < noms.length; i++) {
+          final nomFichier = noms[i];
+          String typeMedia = 'text';
+          final ext = nomFichier.split('.').last.toLowerCase();
+          if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) {
+            typeMedia = 'image';
+          } else if (['mp4', 'webm', 'avi'].contains(ext)) {
+            typeMedia = 'video';
+          } else if (['mp3', 'wav', 'ogg'].contains(ext)) {
+            typeMedia = 'audio';
           }
+
+          final cheminLocal = path.join(dossierCours.path, nomFichier);
+          print('   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
+
+          mediasList.add(MediaItem(
+            ordre: i + 1,
+            url: cheminLocal,
+            type: typeMedia,
+            caption: '',
+          ));
         }
       }
 
       final pageLocale = Page(
         idCours: coursIdLocal,
         description: pageDistante.description,
+        contenu: pageDistante.contenu,
         medias: mediasList,
       );
 
       await pageRepository.create(pageLocale);
+      print('   ✅ Page "${pageDistante.description}" sauvegardée');
     }
+
+    print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
+  }
+
+  Future<Directory> _creerDossierCours({
+    required int idModule,
+    required int idCours,
+  }) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final dossier = Directory(
+      path.join(appDir.path, 'AppData', 'Module$idModule', 'Cours$idCours'),
+    );
+    if (!await dossier.exists()) {
+      await dossier.create(recursive: true);
+    }
+    return dossier;
+  }
+
+  Future<void> _telechargerTousLesMediasDuCours({
+    required int idModule,
+    required int idCours,
+    required List<String> nomsMedias,
+    required Directory dossierCours,
+  }) async {
+    final String baseUrl =
+        '${AppConfig.urlMedias}/AppData/Module$idModule/Cours$idCours';
+    print('🌐 Base URL médias: $baseUrl');
+
+    if (nomsMedias.isEmpty) {
+      print('⚠️  Aucun média à télécharger');
+      return;
+    }
+
+    final futures = nomsMedias.map((nomFichier) async {
+      final urlComplete = '$baseUrl/$nomFichier';
+      final fichier = File(path.join(dossierCours.path, nomFichier));
+
+      if (await fichier.exists()) {
+        print('⏭️  $nomFichier déjà présent, skip');
+        return;
+      }
+
+      print('⬇️  Téléchargement: $urlComplete');
+      try {
+        final response = await http.get(Uri.parse(urlComplete));
+        print('   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
+        if (response.statusCode == 200) {
+          await fichier.writeAsBytes(response.bodyBytes);
+          print('   └─ ✅ Sauvegardé: ${fichier.path}');
+        } else {
+          print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
+        }
+      } catch (e) {
+        print('   └─ ❌ Erreur pour $nomFichier: $e');
+      }
+    });
+
+    await Future.wait(futures);
+    print('✅ Tous les médias téléchargés');
   }
 
   void _afficherPopupSucces(String titreCours) {
