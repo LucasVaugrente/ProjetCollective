@@ -134,8 +134,8 @@ class JeuQCMView extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(color: Colors.orange.shade300),
                     ),
-                    child: Row(
-                      children: const [
+                    child: const Row(
+                      children: [
                         Icon(Icons.arrow_back, color: Colors.black87),
                         SizedBox(width: 8),
                         Text(

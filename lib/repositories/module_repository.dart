@@ -5,9 +5,9 @@ class ModuleRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // --- CRUD Methods ---
-  Future<int> create(Module Module) async {
+  Future<int> create(Module module) async {
     final db = await _dbHelper.database;
-    return await db.insert('module', Module.toMap());
+    return await db.insert('module', module.toMap());
   }
 
   Future<Module?> getById(int id) async {
@@ -30,13 +30,13 @@ class ModuleRepository {
     return result.map((map) => Module.fromMap(map)).toList();
   }
 
-  Future<int> update(Module Module) async {
+  Future<int> update(Module module) async {
     final db = await _dbHelper.database;
     return await db.update(
       'module',
-      Module.toMap(),
+      module.toMap(),
       where: 'id = ?',
-      whereArgs: [Module.id],
+      whereArgs: [module.id],
     );
   }
 

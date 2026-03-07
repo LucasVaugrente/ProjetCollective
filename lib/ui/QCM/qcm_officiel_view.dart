@@ -75,7 +75,7 @@ class QCMOfficielView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -122,7 +122,7 @@ class QCMOfficielView extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.blue.withOpacity(0.15)
+                          ? Colors.blue.withValues(alpha: 0.15)
                           : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
@@ -162,8 +162,8 @@ class QCMOfficielView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.orange.shade300),
                   ),
-                  child: Row(
-                    children: const [
+                  child: const Row(
+                    children: [
                       Icon(Icons.arrow_back, color: Colors.black87),
                       SizedBox(width: 8),
                       Text(
@@ -259,10 +259,10 @@ class PageEchecDetaillee extends StatelessWidget {
   }
 
   Widget _buildPerfectScore() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children: [
           Icon(Icons.emoji_events, color: Colors.amber, size: 80),
           SizedBox(height: 20),
           Text(
@@ -340,7 +340,7 @@ class PageEchecDetaillee extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.15),
+                          color: Colors.red.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -365,7 +365,7 @@ class PageEchecDetaillee extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.15),
+                          color: Colors.green.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(

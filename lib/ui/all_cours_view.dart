@@ -118,7 +118,6 @@ class _AllCoursViewState extends State<AllCoursView> {
     }
   }
 
-
   Future<void> _toutTelecharger() async {
     final coursATelechargement = _coursDistants
         .where((c) => !_titresTelecharges.contains(c.titre))
@@ -225,7 +224,9 @@ class _AllCoursViewState extends State<AllCoursView> {
   }
 
   Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
-    print('📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
+    if (kDebugMode) {
+      print('📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
+    }
     final pageRepository = PageRepository();
 
     final coursLocal = Cours(
@@ -236,7 +237,9 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
 
     final coursIdLocal = await _coursRepository.create(coursLocal);
-    print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
+    if (kDebugMode) {
+      print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
+    }
 
     final dossierCours = await _creerDossierCours(
       idModule: coursComplet.cours.idModule,
@@ -245,18 +248,24 @@ class _AllCoursViewState extends State<AllCoursView> {
 
     final List<String> tousLesMedias = [];
     for (final page in coursComplet.pages) {
-      print('   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
+      if (kDebugMode) {
+        print('   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
+      }
       if (page.medias.isNotEmpty) {
         final noms = page.medias.split('@')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
-        print('   └─ Médias extraits: $noms');
+        if (kDebugMode) {
+          print('   └─ Médias extraits: $noms');
+        }
         tousLesMedias.addAll(noms);
       }
     }
 
-    print('🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
+    if (kDebugMode) {
+      print('🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
+    }
 
     // Télécharger tous les médias en parallèle
     await _telechargerTousLesMediasDuCours(
@@ -289,7 +298,9 @@ class _AllCoursViewState extends State<AllCoursView> {
           }
 
           final cheminLocal = path.join(dossierCours.path, nomFichier);
-          print('   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
+          if (kDebugMode) {
+            print('   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
+          }
 
           mediasList.add(MediaItem(
             ordre: i + 1,
@@ -308,16 +319,17 @@ class _AllCoursViewState extends State<AllCoursView> {
       );
 
       await pageRepository.create(pageLocale);
-      print('   ✅ Page "${pageDistante.description}" sauvegardée');
+      if (kDebugMode) {
+        print('   ✅ Page "${pageDistante.description}" sauvegardée');
+      }
     }
 
-    print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
+    if (kDebugMode) {
+      print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
+    }
   }
 
-  Future<Directory> _creerDossierCours({
-    required int idModule,
-    required int idCours,
-  }) async {
+  Future<Directory> _creerDossierCours({required int idModule, required int idCours, }) async {
     final appDir = await getApplicationDocumentsDirectory();
     final dossier = Directory(
       path.join(appDir.path, 'AppData', 'Module$idModule', 'Cours$idCours'),
@@ -328,18 +340,17 @@ class _AllCoursViewState extends State<AllCoursView> {
     return dossier;
   }
 
-  Future<void> _telechargerTousLesMediasDuCours({
-    required int idModule,
-    required int idCours,
-    required List<String> nomsMedias,
-    required Directory dossierCours,
-  }) async {
+  Future<void> _telechargerTousLesMediasDuCours({required int idModule, required int idCours, required List<String> nomsMedias, required Directory dossierCours, }) async {
     final String baseUrl =
         '${AppConfig.urlMedias}/AppData/Module$idModule/Cours$idCours';
-    print('🌐 Base URL médias: $baseUrl');
+    if (kDebugMode) {
+      print('🌐 Base URL médias: $baseUrl');
+    }
 
     if (nomsMedias.isEmpty) {
-      print('⚠️  Aucun média à télécharger');
+      if (kDebugMode) {
+        print('⚠️  Aucun média à télécharger');
+      }
       return;
     }
 
@@ -348,27 +359,41 @@ class _AllCoursViewState extends State<AllCoursView> {
       final fichier = File(path.join(dossierCours.path, nomFichier));
 
       if (await fichier.exists()) {
-        print('⏭️  $nomFichier déjà présent, skip');
+        if (kDebugMode) {
+          print('⏭️  $nomFichier déjà présent, skip');
+        }
         return;
       }
 
-      print('⬇️  Téléchargement: $urlComplete');
+      if (kDebugMode) {
+        print('⬇️  Téléchargement: $urlComplete');
+      }
       try {
         final response = await http.get(Uri.parse(urlComplete));
-        print('   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
+        if (kDebugMode) {
+          print('   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
+        }
         if (response.statusCode == 200) {
           await fichier.writeAsBytes(response.bodyBytes);
-          print('   └─ ✅ Sauvegardé: ${fichier.path}');
+          if (kDebugMode) {
+            print('   └─ ✅ Sauvegardé: ${fichier.path}');
+          }
         } else {
-          print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
+          if (kDebugMode) {
+            print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
+          }
         }
       } catch (e) {
-        print('   └─ ❌ Erreur pour $nomFichier: $e');
+        if (kDebugMode) {
+          print('   └─ ❌ Erreur pour $nomFichier: $e');
+        }
       }
     });
 
     await Future.wait(futures);
-    print('✅ Tous les médias téléchargés');
+    if (kDebugMode) {
+      print('✅ Tous les médias téléchargés');
+    }
   }
 
   void _afficherPopupSucces(String titreCours) {

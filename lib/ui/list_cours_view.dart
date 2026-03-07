@@ -1,5 +1,3 @@
-// ignore_for_file: must_be_immutable
-
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/list_cours_view_model.dart';
 import 'package:factoscope/models/page.dart';
@@ -13,34 +11,29 @@ import 'module_selectionne.dart';
 import 'package:go_router/go_router.dart';
 
 class ListCoursView extends StatefulWidget {
-  ListCoursViewModel listCours = ListCoursViewModel();
-  ModuleSelectionne moduleSelectionne = ModuleSelectionne();
+  final ListCoursViewModel listCours = ListCoursViewModel();
+  final ModuleSelectionne moduleSelectionne = ModuleSelectionne();
 
   ListCoursView({super.key});
 
   @override
-  State<ListCoursView> createState() =>
-      ListCoursViewState(listCours, moduleSelectionne);
+  State<ListCoursView> createState() => ListCoursViewState();
 }
 
 class ListCoursViewState extends State<ListCoursView> {
-  late ListCoursViewModel listCours;
-  late ModuleSelectionne moduleSelectionne;
-
-  ListCoursViewState(this.listCours, this.moduleSelectionne);
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-        listenable: moduleSelectionne,
+        listenable: widget.moduleSelectionne,
         builder: (context, child) {
           int size = 0;
-          Module module = moduleSelectionne.moduleSelectionne;
-          listCours.getCours(module.id);
-          size = moduleSelectionne.coursDuModule.length;
+          Module module = widget.moduleSelectionne.moduleSelectionne;
+          widget.listCours.getCours(module.id);
+          size = widget.moduleSelectionne.coursDuModule.length;
 
           return ListenableBuilder(
-              listenable: listCours,
+              listenable: widget.listCours,
               builder: (context, child) {
                 return Column(
                   children: [
@@ -92,7 +85,7 @@ class ListCoursViewState extends State<ListCoursView> {
                             );
                           } else {
                             final item =
-                            moduleSelectionne.coursDuModule[index - 1];
+                            widget.moduleSelectionne.coursDuModule[index - 1];
                             return listItem(item, context);
                           }
                         },

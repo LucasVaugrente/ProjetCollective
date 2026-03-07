@@ -196,7 +196,7 @@ class HeaderWidget extends StatelessWidget {
               value: progression,
               minHeight: 6,
               color: Colors.teal,
-              backgroundColor: Colors.teal.withOpacity(0.2),
+              backgroundColor: Colors.teal.withValues(alpha: 0.2),
             ),
           ),
       ],

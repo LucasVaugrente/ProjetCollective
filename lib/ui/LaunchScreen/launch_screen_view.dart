@@ -6,10 +6,10 @@ class LaunchScreenView extends StatefulWidget {
   const LaunchScreenView({super.key});
 
   @override
-  _LaunchScreenViewState createState() => _LaunchScreenViewState();
+  LaunchScreenViewState createState() => LaunchScreenViewState();
 }
 
-class _LaunchScreenViewState extends State<LaunchScreenView>
+class LaunchScreenViewState extends State<LaunchScreenView>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
