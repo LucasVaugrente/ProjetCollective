@@ -1,5 +1,3 @@
-// ignore_for_file: must_be_immutable
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/ui/Cours/cours_view_model.dart';
@@ -77,10 +75,11 @@ class _CoursViewState extends State<CoursView> {
     int nbPageCours = coursSelectionne.cours.pages?.length ?? 0;
     int currentPage = coursViewModel.page;
 
-    return FutureBuilder<List<int>>(
+    return FutureBuilder<List<dynamic>>(
       future: Future.wait([
         coursViewModel.getNombrePageQCM(coursSelectionne.cours),
         coursViewModel.getNombrePageCloze(coursSelectionne.cours),
+        coursViewModel.getTypeJeu(coursSelectionne.cours.id!), // ← ajout
       ]),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -89,8 +88,10 @@ class _CoursViewState extends State<CoursView> {
           );
         }
 
-        int nbQCM = snapshot.data![0];
-        int nbCloze = snapshot.data![1];
+        int nbQCM = snapshot.data![0] as int;
+        int nbCloze = snapshot.data![1] as int;
+        String typeJeu = snapshot.data![2] as String;
+
         int transitionPage = nbPageCours + 1;
         int firstQCMPage = transitionPage + 1;
         int lastQCMPage = firstQCMPage + nbQCM - 1;
@@ -116,25 +117,32 @@ class _CoursViewState extends State<CoursView> {
             coursViewModel: coursViewModel,
           );
         } else if (currentPage >= firstQCMPage && currentPage <= lastQCMPage) {
-          nouvellePage = JeuQCMView(
-            cours: coursSelectionne.cours,
-          );
-        } else if (currentPage >= firstClozePage &&
-            currentPage <= lastClozePage) {
-
-          int clozeIndex = currentPage - firstClozePage;
-
-          nouvellePage = ClozePage(
-            coursId: coursSelectionne.cours.id!,
-            key: ValueKey('cloze_$clozeIndex'),
-          );
-
+          if (typeJeu == 'qcm') {
+            nouvellePage = JeuQCMView(cours: coursSelectionne.cours);
+          } else if (typeJeu == 'cloze') {
+            int clozeIndex = currentPage - firstQCMPage;
+            nouvellePage = ClozePage(
+              coursId: coursSelectionne.cours.id!,
+              key: ValueKey('cloze_$clozeIndex'),
+            );
+          } else {
+            nouvellePage = const Center(child: Text("Aucun jeu disponible"));
+          }
+        } else if (currentPage >= firstClozePage && currentPage <= lastClozePage) {
+          if (typeJeu == 'cloze') {
+            int clozeIndex = currentPage - firstClozePage;
+            nouvellePage = ClozePage(
+              coursId: coursSelectionne.cours.id!,
+              key: ValueKey('cloze_$clozeIndex'),
+            );
+          } else {
+            nouvellePage = const Center(child: Text("Aucun jeu disponible"));
+          }
         } else if (currentPage == finPage) {
           nouvellePage = FinCoursView(cours: coursSelectionne.cours);
         } else {
           nouvellePage = const Center(child: Text("Page introuvable"));
         }
-
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.white,

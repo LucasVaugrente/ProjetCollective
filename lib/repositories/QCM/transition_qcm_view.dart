@@ -59,7 +59,7 @@ class TransitionQCMView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "📋 Règles du QCM",
+                    "📋 Règles du jeu",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -129,7 +129,7 @@ class TransitionQCMView extends StatelessWidget {
                   backgroundColor: const Color.fromRGBO(252, 179, 48, 1),
                 ),
                 child: const Text(
-                  "Commencer le QCM",
+                  "Commencer le jeu",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

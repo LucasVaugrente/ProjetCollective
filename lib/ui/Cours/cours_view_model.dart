@@ -4,6 +4,7 @@ import 'package:factoscope/repositories/QCM/qcm_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/models/cours.dart';
 
+import '../../database_helper.dart';
 import '../../repositories/Cloze/cloze_repository.dart';
 
 class CoursViewModel extends ChangeNotifier {
@@ -81,5 +82,27 @@ class CoursViewModel extends ChangeNotifier {
   Future<void> loadContenu(Cours cours) async {
     // Récupération des pages avec leurs médias déjà parsés
     cours.pages = await pageRepository.getPagesByCourseId(cours.id!);
+  }
+
+  Future<String> getTypeJeu(int coursId) async {
+    final db = await DatabaseHelper.instance.database;
+
+    final qcmResult = await db.query(
+      'qcm',
+      where: 'id_cours = ?',
+      whereArgs: [coursId],
+      limit: 1,
+    );
+    if (qcmResult.isNotEmpty) return 'qcm';
+
+    final clozeResult = await db.query(
+      'Cloze',
+      where: 'idCours = ?',
+      whereArgs: [coursId],
+      limit: 1,
+    );
+    if (clozeResult.isNotEmpty) return 'cloze';
+
+    return 'aucun';
   }
 }

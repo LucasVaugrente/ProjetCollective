@@ -14,6 +14,10 @@ import 'package:path_provider/path_provider.dart';
 
 import '../config.dart';
 import 'api_service.dart';
+import '../models/QCM/qcm.dart';
+import '../models/Cloze/cloze_page.dart';
+import '../repositories/QCM/qcm_repository.dart';
+import '../repositories/Cloze/cloze_repository.dart';
 
 class AllCoursView extends StatefulWidget {
   const AllCoursView({super.key});
@@ -125,7 +129,6 @@ class _AllCoursViewState extends State<AllCoursView> {
 
     if (coursATelechargement.isEmpty) return;
 
-    // Marquer tous comme en cours
     setState(() {
       for (final c in coursATelechargement) {
         _coursEnCoursDeTelechargement.add(c.id);
@@ -169,6 +172,312 @@ class _AllCoursViewState extends State<AllCoursView> {
         ),
       );
     }
+  }
+
+  Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
+    if (kDebugMode) {
+      print('📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
+    }
+    final pageRepository = PageRepository();
+
+    final coursLocal = Cours(
+      idModule: coursComplet.cours.idModule,
+      titre: coursComplet.cours.titre,
+      contenu: coursComplet.cours.contenu,
+      description: coursComplet.cours.description,
+    );
+
+    final coursIdLocal = await _coursRepository.create(coursLocal);
+    if (kDebugMode) {
+      print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
+    }
+
+    final dossierCours = await _creerDossierCours(
+      idModule: coursComplet.cours.idModule,
+      idCours: coursIdLocal,
+    );
+
+    // ── Pages ──────────────────────────────────────────────────────────────
+    final List<String> tousLesMedias = [];
+    for (final page in coursComplet.pages) {
+      if (kDebugMode) {
+        print('   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
+      }
+      if (page.medias.isNotEmpty) {
+        final noms = page.medias.split('@')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        if (kDebugMode) print('   └─ Médias extraits: $noms');
+        tousLesMedias.addAll(noms);
+      }
+    }
+
+    if (kDebugMode) {
+      print('🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
+    }
+
+    await _telechargerTousLesMediasDuCours(
+      idModule: coursComplet.cours.idModule,
+      idCours: coursIdLocal,
+      nomsMedias: tousLesMedias,
+      dossierCours: dossierCours,
+    );
+
+    for (final pageDistante in coursComplet.pages) {
+      final List<MediaItem> mediasList = [];
+
+      if (pageDistante.medias.isNotEmpty) {
+        final noms = pageDistante.medias.split('@')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
+        for (int i = 0; i < noms.length; i++) {
+          final nomFichier = noms[i];
+          String typeMedia = 'text';
+          final ext = nomFichier.split('.').last.toLowerCase();
+          if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) {
+            typeMedia = 'image';
+          } else if (['mp4', 'webm', 'avi'].contains(ext)) {
+            typeMedia = 'video';
+          } else if (['mp3', 'wav', 'ogg'].contains(ext)) {
+            typeMedia = 'audio';
+          }
+
+          final cheminLocal = path.join(dossierCours.path, nomFichier);
+          if (kDebugMode) {
+            print('   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
+          }
+
+          mediasList.add(MediaItem(
+            ordre: i + 1,
+            url: cheminLocal,
+            type: typeMedia,
+            caption: '',
+          ));
+        }
+      }
+
+      final pageLocale = Page(
+        idCours: coursIdLocal,
+        description: pageDistante.description,
+        contenu: pageDistante.contenu,
+        medias: mediasList,
+      );
+
+      await pageRepository.create(pageLocale);
+      if (kDebugMode) {
+        print('   ✅ Page "${pageDistante.description}" sauvegardée');
+      }
+    }
+
+    // ── QCM ───────────────────────────────────────────────────────────────
+    await _sauvegarderQcm(
+      coursIdDistant: coursComplet.cours.id,
+      coursIdLocal: coursIdLocal,
+    );
+
+    // ── Cloze (texte à trou) ──────────────────────────────────────────────
+    await _sauvegarderCloze(
+      coursIdDistant: coursComplet.cours.id,
+      coursIdLocal: coursIdLocal,
+    );
+
+    if (kDebugMode) {
+      print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
+    }
+  }
+
+  /// Télécharge les QCM distants et les insère en BDD locale
+  Future<void> _sauvegarderQcm({
+    required int coursIdDistant,
+    required int coursIdLocal,
+  }) async {
+    try {
+      final qcmDistants = await _apiService.getQcmDuCours(coursIdDistant);
+
+      if (kDebugMode) {
+        print('🎯 QCM à sauvegarder: ${qcmDistants.length}');
+      }
+
+      if (qcmDistants.isEmpty) return;
+
+      final qcmRepository = QCMRepository();
+
+      for (final q in qcmDistants) {
+        final qcmLocal = QCM(
+          question: q.question,
+          rep1: q.rep1,
+          rep2: q.rep2,
+          rep3: q.rep3,
+          rep4: q.rep4,
+          soluce: q.soluce,
+          idCours: coursIdLocal,
+        );
+        await qcmRepository.insert(qcmLocal);
+        if (kDebugMode) {
+          print('   ✅ QCM inséré: "${q.question}"');
+        }
+      }
+    } catch (e) {
+      // On ne bloque pas le téléchargement du cours si les QCM échouent
+      if (kDebugMode) print('⚠️ Erreur sauvegarde QCM: $e');
+    }
+  }
+
+  /// Télécharge les Cloze distants et les insère en BDD locale
+  Future<void> _sauvegarderCloze({
+    required int coursIdDistant,
+    required int coursIdLocal,
+  }) async {
+    try {
+      final clozeDistants = await _apiService.getClozesDuCours(coursIdDistant);
+
+      if (kDebugMode) {
+        print('🧩 Cloze à sauvegarder: ${clozeDistants.length}');
+      }
+
+      if (clozeDistants.isEmpty) return;
+
+      final clozeRepository = ClozeRepository();
+
+      for (final c in clozeDistants) {
+        final clozeLocal = ClozeQuestion(
+          phrase: c.texte,
+          rep1: c.reponse1,
+          rep2: c.reponse2,
+          rep3: c.reponse3,
+          rep4: c.reponse4,
+          soluce: c.numeroReponseCorrecte,
+          idCours: coursIdLocal,
+        );
+        await clozeRepository.insert(clozeLocal);
+        if (kDebugMode) {
+          print('   ✅ Cloze inséré: "${c.texte.substring(0, c.texte.length.clamp(0, 40))}..."');
+        }
+      }
+    } catch (e) {
+      // On ne bloque pas le téléchargement du cours si les Cloze échouent
+      if (kDebugMode) print('⚠️ Erreur sauvegarde Cloze: $e');
+    }
+  }
+
+  Future<Directory> _creerDossierCours({
+    required int idModule,
+    required int idCours,
+  }) async {
+    final appDir = await getApplicationDocumentsDirectory();
+    final dossier = Directory(
+      path.join(appDir.path, 'AppData', 'Module$idModule', 'Cours$idCours'),
+    );
+    if (!await dossier.exists()) {
+      await dossier.create(recursive: true);
+    }
+    return dossier;
+  }
+
+  Future<void> _telechargerTousLesMediasDuCours({
+    required int idModule,
+    required int idCours,
+    required List<String> nomsMedias,
+    required Directory dossierCours,
+  }) async {
+    final String baseUrl =
+        '${AppConfig.urlMedias}/AppData/Module$idModule/Cours$idCours';
+    if (kDebugMode) print('🌐 Base URL médias: $baseUrl');
+
+    if (nomsMedias.isEmpty) {
+      if (kDebugMode) print('⚠️  Aucun média à télécharger');
+      return;
+    }
+
+    final futures = nomsMedias.map((nomFichier) async {
+      final urlComplete = '$baseUrl/$nomFichier';
+      final fichier = File(path.join(dossierCours.path, nomFichier));
+
+      if (await fichier.exists()) {
+        if (kDebugMode) print('⏭️  $nomFichier déjà présent, skip');
+        return;
+      }
+
+      if (kDebugMode) print('⬇️  Téléchargement: $urlComplete');
+      try {
+        final response = await http.get(Uri.parse(urlComplete));
+        if (kDebugMode) {
+          print('   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
+        }
+        if (response.statusCode == 200) {
+          await fichier.writeAsBytes(response.bodyBytes);
+          if (kDebugMode) print('   └─ ✅ Sauvegardé: ${fichier.path}');
+        } else {
+          if (kDebugMode) print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
+        }
+      } catch (e) {
+        if (kDebugMode) print('   └─ ❌ Erreur pour $nomFichier: $e');
+      }
+    });
+
+    await Future.wait(futures);
+    if (kDebugMode) print('✅ Tous les médias téléchargés');
+  }
+
+  void _afficherPopupSucces(String titreCours) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: const BoxDecoration(
+                  color: Colors.green,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 50),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Téléchargement réussi !',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '"$titreCours"',
+                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Le cours et ses jeux ont été ajoutés à votre bibliothèque',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('OK', style: TextStyle(fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _afficherPopupToutTelecharge(int nb) {
@@ -223,237 +532,6 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
   }
 
-  Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
-    if (kDebugMode) {
-      print('📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
-    }
-    final pageRepository = PageRepository();
-
-    final coursLocal = Cours(
-      idModule: coursComplet.cours.idModule,
-      titre: coursComplet.cours.titre,
-      contenu: coursComplet.cours.contenu,
-      description: coursComplet.cours.description,
-    );
-
-    final coursIdLocal = await _coursRepository.create(coursLocal);
-    if (kDebugMode) {
-      print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
-    }
-
-    final dossierCours = await _creerDossierCours(
-      idModule: coursComplet.cours.idModule,
-      idCours: coursIdLocal,
-    );
-
-    final List<String> tousLesMedias = [];
-    for (final page in coursComplet.pages) {
-      if (kDebugMode) {
-        print('   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
-      }
-      if (page.medias.isNotEmpty) {
-        final noms = page.medias.split('@')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
-        if (kDebugMode) {
-          print('   └─ Médias extraits: $noms');
-        }
-        tousLesMedias.addAll(noms);
-      }
-    }
-
-    if (kDebugMode) {
-      print('🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
-    }
-
-    // Télécharger tous les médias en parallèle
-    await _telechargerTousLesMediasDuCours(
-      idModule: coursComplet.cours.idModule,
-      idCours: coursIdLocal,
-      nomsMedias: tousLesMedias,
-      dossierCours: dossierCours,
-    );
-
-    // Sauvegarder les pages en BDD locale
-    for (final pageDistante in coursComplet.pages) {
-      final List<MediaItem> mediasList = [];
-
-      if (pageDistante.medias.isNotEmpty) {
-        final noms = pageDistante.medias.split('@')
-            .map((e) => e.trim())
-            .where((e) => e.isNotEmpty)
-            .toList();
-
-        for (int i = 0; i < noms.length; i++) {
-          final nomFichier = noms[i];
-          String typeMedia = 'text';
-          final ext = nomFichier.split('.').last.toLowerCase();
-          if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) {
-            typeMedia = 'image';
-          } else if (['mp4', 'webm', 'avi'].contains(ext)) {
-            typeMedia = 'video';
-          } else if (['mp3', 'wav', 'ogg'].contains(ext)) {
-            typeMedia = 'audio';
-          }
-
-          final cheminLocal = path.join(dossierCours.path, nomFichier);
-          if (kDebugMode) {
-            print('   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
-          }
-
-          mediasList.add(MediaItem(
-            ordre: i + 1,
-            url: cheminLocal,
-            type: typeMedia,
-            caption: '',
-          ));
-        }
-      }
-
-      final pageLocale = Page(
-        idCours: coursIdLocal,
-        description: pageDistante.description,
-        contenu: pageDistante.contenu,
-        medias: mediasList,
-      );
-
-      await pageRepository.create(pageLocale);
-      if (kDebugMode) {
-        print('   ✅ Page "${pageDistante.description}" sauvegardée');
-      }
-    }
-
-    if (kDebugMode) {
-      print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
-    }
-  }
-
-  Future<Directory> _creerDossierCours({required int idModule, required int idCours, }) async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final dossier = Directory(
-      path.join(appDir.path, 'AppData', 'Module$idModule', 'Cours$idCours'),
-    );
-    if (!await dossier.exists()) {
-      await dossier.create(recursive: true);
-    }
-    return dossier;
-  }
-
-  Future<void> _telechargerTousLesMediasDuCours({required int idModule, required int idCours, required List<String> nomsMedias, required Directory dossierCours, }) async {
-    final String baseUrl =
-        '${AppConfig.urlMedias}/AppData/Module$idModule/Cours$idCours';
-    if (kDebugMode) {
-      print('🌐 Base URL médias: $baseUrl');
-    }
-
-    if (nomsMedias.isEmpty) {
-      if (kDebugMode) {
-        print('⚠️  Aucun média à télécharger');
-      }
-      return;
-    }
-
-    final futures = nomsMedias.map((nomFichier) async {
-      final urlComplete = '$baseUrl/$nomFichier';
-      final fichier = File(path.join(dossierCours.path, nomFichier));
-
-      if (await fichier.exists()) {
-        if (kDebugMode) {
-          print('⏭️  $nomFichier déjà présent, skip');
-        }
-        return;
-      }
-
-      if (kDebugMode) {
-        print('⬇️  Téléchargement: $urlComplete');
-      }
-      try {
-        final response = await http.get(Uri.parse(urlComplete));
-        if (kDebugMode) {
-          print('   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
-        }
-        if (response.statusCode == 200) {
-          await fichier.writeAsBytes(response.bodyBytes);
-          if (kDebugMode) {
-            print('   └─ ✅ Sauvegardé: ${fichier.path}');
-          }
-        } else {
-          if (kDebugMode) {
-            print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
-          }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('   └─ ❌ Erreur pour $nomFichier: $e');
-        }
-      }
-    });
-
-    await Future.wait(futures);
-    if (kDebugMode) {
-      print('✅ Tous les médias téléchargés');
-    }
-  }
-
-  void _afficherPopupSucces(String titreCours) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 80,
-                height: 80,
-                decoration: const BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 50),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Téléchargement réussi !',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                '"$titreCours"',
-                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Le cours a été ajouté à votre bibliothèque',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: const Text('OK', style: TextStyle(fontSize: 16)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   bool _estTelecharge(String titre) => _titresTelecharges.contains(titre);
 
   Cours? _coursLocalPourTitre(String titre) {
@@ -464,13 +542,10 @@ class _AllCoursViewState extends State<AllCoursView> {
     }
   }
 
-  // Fusionne cours distants + cours locaux sans doublon
-  // Résultat : d'abord les téléchargés (en couleur), puis les non téléchargés (grisés)
   List<_CoursItem> get _listeUnifiee {
     final List<_CoursItem> telecharges = [];
     final List<_CoursItem> nonTelecharges = [];
 
-    // Cours distants
     for (final distant in _coursDistants) {
       if (_estTelecharge(distant.titre)) {
         final local = _coursLocalPourTitre(distant.titre);
@@ -482,7 +557,6 @@ class _AllCoursViewState extends State<AllCoursView> {
       }
     }
 
-    // Cours locaux sans correspondance distante (téléchargés mais API hors ligne, ou cours manuels)
     for (final local in _coursLocaux) {
       final dejaDans = telecharges.any((item) => item.titre == local.titre);
       if (!dejaDans) {
@@ -530,17 +604,12 @@ class _AllCoursViewState extends State<AllCoursView> {
             ? _buildEtatVide()
             : CustomScrollView(
           slivers: [
-            // En-tête de section : cours téléchargés
             if (nbTelecharges > 0)
               _buildSectionHeader(
                 'Téléchargés',
                 '$nbTelecharges cours',
                 Colors.black87,
               ),
-
-            // En-tête de section : cours disponibles en ligne
-            // (on l'insère dans la liste, pas ici — voir _buildItem)
-
             SliverPadding(
               padding: const EdgeInsets.only(
                   left: 16, right: 16, bottom: 24),
@@ -548,11 +617,10 @@ class _AllCoursViewState extends State<AllCoursView> {
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
                     final item = liste[index];
-
-                    // Insérer un séparateur de section avant le 1er cours non téléchargé
-                    final estPremierNonTelecharge = !item.estTelecharge &&
-                        (index == 0 ||
-                            liste[index - 1].estTelecharge);
+                    final estPremierNonTelecharge =
+                        !item.estTelecharge &&
+                            (index == 0 ||
+                                liste[index - 1].estTelecharge);
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,11 +731,9 @@ class _AllCoursViewState extends State<AllCoursView> {
         borderRadius: BorderRadius.circular(10),
         onTap: () {
           if (item.estTelecharge && item.coursLocal != null) {
-            // Naviguer vers le cours
             CoursSelectionne.instance.setCours(item.coursLocal!);
             GoRouter.of(context).go('/cours/${item.coursLocal!.id}');
           } else if (item.coursDistant != null && !enTelechargement) {
-            // Lancer le téléchargement directement
             _telechargerCours(item.coursDistant!);
           }
         },
@@ -675,7 +741,6 @@ class _AllCoursViewState extends State<AllCoursView> {
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
-              // Icône
               Container(
                 width: 50,
                 height: 50,
@@ -692,8 +757,6 @@ class _AllCoursViewState extends State<AllCoursView> {
                 ),
               ),
               const SizedBox(width: 14),
-
-              // Titre + description
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -725,10 +788,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                   ],
                 ),
               ),
-
               const SizedBox(width: 8),
-
-              // Action à droite
               if (item.estTelecharge)
                 const Icon(Icons.arrow_forward_ios,
                     size: 16, color: Colors.grey)
@@ -773,7 +833,6 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
   }
 }
-
 
 class _CoursItem {
   final String titre;
