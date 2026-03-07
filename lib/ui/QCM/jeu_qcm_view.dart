@@ -1,0 +1,221 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'jeu_qcm_view_model.dart';
+import 'package:factoscope/models/cours.dart';
+
+class JeuQCMView extends StatelessWidget {
+  final Cours cours;
+
+  const JeuQCMView({super.key, required this.cours});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<JeuQCMViewModel>(
+      create: (_) => JeuQCMViewModel()..chargerQCM(cours),
+      child: Consumer<JeuQCMViewModel>(
+        builder: (context, vm, child) {
+          if (vm.isLoading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (vm.hasError || vm.controller == null) {
+            return const Scaffold(
+              body: Center(child: Text("Impossible de charger le QCM")),
+            );
+          }
+
+          if (vm.isFinished) {
+            return _buildResultPage(context, vm);
+          }
+
+          return _buildQuestionPage(context, vm);
+        },
+      ),
+    );
+  }
+
+  // --- PAGE QUESTION ---
+  Widget _buildQuestionPage(BuildContext context, JeuQCMViewModel vm) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("QCM"),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Question ${vm.currentIndex + 1} / ${vm.totalQuestions}",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 20),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                vm.questionText,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            if (vm.isCorrect != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  vm.isCorrect! ? "Bonne réponse !" : "Mauvaise réponse...",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: vm.isCorrect! ? Colors.green : Colors.red,
+                  ),
+                ),
+              ),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: vm.options.length,
+                itemBuilder: (context, i) {
+                  final isSelected = vm.selectedAnswer == i;
+
+                  Color tileColor = Colors.white;
+
+                  if (vm.isCorrect != null && isSelected) {
+                    tileColor = vm.isCorrect!
+                        ? Colors.green.shade200
+                        : Colors.red.shade200;
+                  }
+
+                  return Card(
+                    color: tileColor,
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        vm.options[i],
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      onTap: () {
+                        if (vm.selectedAnswer == null) {
+                          vm.selectAnswer(i);
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // --- BOUTONS JAUNES IDENTIQUES À TON IMAGE ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // --- BOUTON PRECEDENT ---
+                GestureDetector(
+                  onTap: vm.currentIndex > 0 ? vm.previous : null,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: vm.currentIndex > 0
+                          ? const Color(0xFFFFD54F)
+                          : const Color(0xFFFFECB3),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.orange.shade300),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.arrow_back, color: Colors.black87),
+                        SizedBox(width: 8),
+                        Text(
+                          "Précédent",
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // --- BOUTON SUIVANT ---
+                GestureDetector(
+                  onTap: vm.selectedAnswer != null ? vm.next : null,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: vm.selectedAnswer != null
+                          ? const Color(0xFFFFD54F)
+                          : const Color(0xFFFFECB3),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.orange.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          vm.currentIndex == vm.totalQuestions - 1
+                              ? "Terminer"
+                              : "Suivant",
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward, color: Colors.black87),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- PAGE RESULTAT ---
+  Widget _buildResultPage(BuildContext context, JeuQCMViewModel vm) {
+    final score = vm.getScore();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Résultat")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Votre score",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "$score / ${vm.totalQuestions}",
+              style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              onPressed: vm.restart,
+              child: const Text("Recommencer"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
