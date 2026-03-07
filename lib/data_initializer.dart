@@ -1,17 +1,14 @@
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:factoscope/models/module.dart';
+import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/repositories/cours_repository.dart';
 import 'package:factoscope/repositories/module_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/ui/module_selectionne.dart';
 import 'package:factoscope/ui/cours_selectionne.dart';
-import 'package:flutter/foundation.dart';
 import 'package:factoscope/database_helper.dart';
-import 'models/cours.dart';
-
-import './repositories/Cloze/cloze_repository.dart';
-import './models/Cloze/cloze_page.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:convert';
 
 final moduleRepository = ModuleRepository();
 final coursRepository = CoursRepository();
@@ -26,7 +23,7 @@ Future<void> insertModule1() async {
       titre: moduleData['titre'],
       urlImg: moduleData['urlImg'] ?? 'assets/facto-societe.png',
       description: moduleData['description']);
-  final moduleId = await moduleRepository.create(module);
+  await moduleRepository.create(module);
 
   // Cours cours = Cours(
   //     idModule: moduleId,
@@ -163,114 +160,102 @@ Future<void> insertModule1() async {
   // await pageRepository.create(page33);
 }
 
-Future<void> _insertClozeCours1(int coursId) async {
-  final repo = ClozeRepository();
-
-  await repo.insert(
-    ClozeQuestion(
-      phrase: "Le principal indicateur de la fiabilité d'une source d'information est la __________ des informations par d'autres sources fiables.",
-      rep1: "popularité sur les réseaux sociaux",
-      rep2: "vérifiabilité",
-      rep3: "nombre de commentaires sous l\'article",
-      rep4: "design du site web",
-      soluce: 2,
-      idCours: coursId),
-  );
-
-  await repo.insert(
-    ClozeQuestion(
-      phrase: "La meilleure manière de vérifier une information trouvée en ligne est de __________ plusieurs sources fiables et vérifier la cohérence de l'information.",
-      rep1: "la partager immédiatement avec ses amis",
-      rep2: "consulter",
-      rep3: "faire confiance à la première source trouvée",
-      rep4: "vérifier si l\'information est amusante avant de la croire",
-      soluce: 2,
-      idCours: coursId),
-    );
-
-  await repo.insert(
-    ClozeQuestion(
-      phrase: "Un signe révélateur d'une fausse information est qu'elle __________ un ton sensationnaliste et manque de sources vérifiables.",
-      rep1: "provient d\'un média reconnu et sérieux",
-      rep2: "utilise",
-      rep3: "cite plusieurs experts et références",
-      rep4: "est reprise par plusieurs médias de confiance",
-      soluce: 2,
-      idCours: coursId),
-    );
-}
-
-Future<void> _insertQCMForCours1(int coursId) async {
-  final db = await DatabaseHelper.instance.database;
-
-  // QCM 1
-  await db.insert('qcm', {
-    'question': "Quel est le principal indicateur de la fiabilité d'une source d'information ?",
-    'rep1': 'Sa popularité sur les réseaux sociaux',
-    'rep2': 'La vérifiabilité des informations par d\'autres sources fiables',
-    'rep3': 'Le nombre de commentaires sous l\'article',
-    'rep4': 'Le design du site web',
-    'soluce': 2,
-    'id_cours': coursId,
-  });
-
-  // QCM 2
-  await db.insert('qcm', {
-    'question': 'Quelle est la meilleure manière de vérifier une information trouvée en ligne ?',
-    'rep1': 'La partager immédiatement avec ses amis',
-    'rep2': 'Consulter plusieurs sources fiables et vérifier la cohérence de l\'information',
-    'rep3': 'Faire confiance à la première source trouvée',
-    'rep4': 'Vérifier si l\'information est amusante avant de la croire',
-    'soluce': 2,
-    'id_cours': coursId,
-  });
-
-  // QCM 3
-  await db.insert('qcm', {
-    'question': 'Quel est un signe révélateur d\'une fausse information ?',
-    'rep1': 'Elle provient d\'un média reconnu et sérieux',
-    'rep2': 'Elle utilise un ton sensationnaliste et manque de sources vérifiables',
-    'rep3': 'Elle cite plusieurs experts et références',
-    'rep4': 'Elle est reprise par plusieurs médias de confiance',
-    'soluce': 2,
-    'id_cours': coursId,
-  });
-}
+// Future<void> _insertClozeCours1(int coursId) async {
+//   final repo = ClozeRepository();
+//
+//   await repo.insert(
+//     ClozeQuestion(
+//       phrase: "Le principal indicateur de la fiabilité d'une source d'information est la __________ des informations par d'autres sources fiables.",
+//       rep1: "popularité sur les réseaux sociaux",
+//       rep2: "vérifiabilité",
+//       rep3: "nombre de commentaires sous l\'article",
+//       rep4: "design du site web",
+//       soluce: 2,
+//       idCours: coursId),
+//   );
+//
+//   await repo.insert(
+//     ClozeQuestion(
+//       phrase: "La meilleure manière de vérifier une information trouvée en ligne est de __________ plusieurs sources fiables et vérifier la cohérence de l'information.",
+//       rep1: "la partager immédiatement avec ses amis",
+//       rep2: "consulter",
+//       rep3: "faire confiance à la première source trouvée",
+//       rep4: "vérifier si l\'information est amusante avant de la croire",
+//       soluce: 2,
+//       idCours: coursId),
+//     );
+//
+//   await repo.insert(
+//     ClozeQuestion(
+//       phrase: "Un signe révélateur d'une fausse information est qu'elle __________ un ton sensationnaliste et manque de sources vérifiables.",
+//       rep1: "provient d\'un média reconnu et sérieux",
+//       rep2: "utilise",
+//       rep3: "cite plusieurs experts et références",
+//       rep4: "est reprise par plusieurs médias de confiance",
+//       soluce: 2,
+//       idCours: coursId),
+//     );
+// }
+//
+// Future<void> _insertQCMForCours1(int coursId) async {
+//   final db = await DatabaseHelper.instance.database;
+//
+//   // QCM 1
+//   await db.insert('qcm', {
+//     'question': "Quel est le principal indicateur de la fiabilité d'une source d'information ?",
+//     'rep1': 'Sa popularité sur les réseaux sociaux',
+//     'rep2': 'La vérifiabilité des informations par d\'autres sources fiables',
+//     'rep3': 'Le nombre de commentaires sous l\'article',
+//     'rep4': 'Le design du site web',
+//     'soluce': 2,
+//     'id_cours': coursId,
+//   });
+//
+//   // QCM 2
+//   await db.insert('qcm', {
+//     'question': 'Quelle est la meilleure manière de vérifier une information trouvée en ligne ?',
+//     'rep1': 'La partager immédiatement avec ses amis',
+//     'rep2': 'Consulter plusieurs sources fiables et vérifier la cohérence de l\'information',
+//     'rep3': 'Faire confiance à la première source trouvée',
+//     'rep4': 'Vérifier si l\'information est amusante avant de la croire',
+//     'soluce': 2,
+//     'id_cours': coursId,
+//   });
+//
+//   // QCM 3
+//   await db.insert('qcm', {
+//     'question': 'Quel est un signe révélateur d\'une fausse information ?',
+//     'rep1': 'Elle provient d\'un média reconnu et sérieux',
+//     'rep2': 'Elle utilise un ton sensationnaliste et manque de sources vérifiables',
+//     'rep3': 'Elle cite plusieurs experts et références',
+//     'rep4': 'Elle est reprise par plusieurs médias de confiance',
+//     'soluce': 2,
+//     'id_cours': coursId,
+//   });
+// }
 
 Future<void> insertModule2() async {
+  final String response =
+  await rootBundle.loadString('lib/data/AppData/Module2/metadata.json');
+  final moduleData = await json.decode(response);
+
   final module = Module(
-      titre: 'Producteur de contenus',
-      urlImg: 'assets/facto-societe.png',
-      description:
-      'Grâce aux technologies modernes, tout le monde est aujourd\'hui en mesure de diffuser des informations et de produire des contenus.');
-  final moduleId = await moduleRepository.create(module);
-
-  Cours cours = Cours(
-      idModule: moduleId,
-      titre: 'Ethique professionnelle et personnelle',
-      contenu: '',
-      description: '');
-  await coursRepository.create(cours);
-
-  cours = Cours(
-      idModule: moduleId,
-      titre: 'Journalisme et production de contenus',
-      contenu: '',
-      description: '');
-  await coursRepository.create(cours);
+      titre: moduleData['titre'],
+      urlImg: moduleData['urlImg'] ?? 'assets/facto-societe.png',
+      description: moduleData['description']);
+  await moduleRepository.create(module);
 }
 
 Future<void> insertModule3() async {
-  final module = Module(
-      titre: 'Pros des médias',
-      urlImg: 'assets/facto-societe.png',
-      description:
-      'Les journalistes sont des professionnels de l\'information.');
-  final moduleId = await moduleRepository.create(module);
+  final String response =
+  await rootBundle.loadString('lib/data/AppData/Module3/metadata.json');
+  final moduleData = await json.decode(response);
 
-  Cours cours = Cours(
-      idModule: moduleId, titre: 'Déontologie', contenu: '', description: '');
-  await coursRepository.create(cours);
+  final module = Module(
+      titre: moduleData['titre'],
+      urlImg: moduleData['urlImg'] ?? 'assets/facto-societe.png',
+      description: moduleData['description']);
+  await moduleRepository.create(module);
 }
 
 Future<void> insertSampleData() async {
@@ -280,7 +265,6 @@ Future<void> insertSampleData() async {
     if (kDebugMode) {
       print('Première installation - Création des données de base');
     }
-
     await insertModule1();
     await insertModule2();
     await insertModule3();
@@ -332,6 +316,8 @@ Future<bool> _checkIfDatabaseHasData() async {
 Future<void> resetDatabaseForDebug() async {
   await DatabaseHelper.instance.resetDB();
   await insertModule1();
+  await insertModule2();
+  await insertModule3();
 
   if (kDebugMode) {
     print('Base de données réinitialisée');
