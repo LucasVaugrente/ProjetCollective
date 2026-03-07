@@ -102,11 +102,6 @@ class _ListModulesViewState extends State<ListModulesView> {
                 ),
               ),
 
-              // Liste des modules récents
-              ...listModuleViewModel.listModule
-                  .map((module) => listModuleItem(module, context))
-                  .toList(),
-
               const SizedBox(height: 30),
               const Divider(height: 1),
               const SizedBox(height: 20),
