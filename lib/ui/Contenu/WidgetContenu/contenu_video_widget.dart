@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:factoscope/ui/Contenu/contenu_cours_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:factoscope/models/page.dart';
@@ -26,8 +27,8 @@ class _ContenuVideoWidgetState extends State<ContenuVideoWidget> {
 
   Future<void> _initController() async {
     try {
-      await rootBundle.load(widget.data.url);
-      _controller = VideoPlayerController.asset(widget.data.url);
+      final ContenuCoursViewModel fileLoader = ContenuCoursViewModel();
+      _controller = await fileLoader.videoLoader(widget.data);
       await _controller.initialize();
       _controller.setLooping(true);
     } catch (_) {
@@ -53,7 +54,6 @@ class _ContenuVideoWidgetState extends State<ContenuVideoWidget> {
   }
 }
 
-
 class VideoPlayerScreen extends StatefulWidget {
   final VideoPlayerController controller;
 
@@ -70,7 +70,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   Duration _videoPosition = Duration.zero;
   double _volume = 0.5;
   bool _isFullscreen = false;
-  bool _showControls = true; // toujours visible en portrait mais bon... temporaire en fullscreen
+  bool _showControls =
+      true; // toujours visible en portrait mais bon... temporaire en fullscreen
   bool _hasStarted = false;
   Timer? _hideControlsTimer;
 

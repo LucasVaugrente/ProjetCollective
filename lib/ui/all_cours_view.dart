@@ -94,6 +94,9 @@ class _AllCoursViewState extends State<AllCoursView> {
   }
 
   Future<void> _telechargerCours(CoursDistant cours) async {
+    if (_coursEnCoursDeTelechargement.contains(cours.id)) return;
+    if (_titresTelecharges.contains(cours.titre)) return;
+
     setState(() => _coursEnCoursDeTelechargement.add(cours.id));
 
     try {
@@ -176,7 +179,8 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
     if (kDebugMode) {
-      print('📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
+      print(
+          '📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
     }
     final pageRepository = PageRepository();
 
@@ -194,17 +198,19 @@ class _AllCoursViewState extends State<AllCoursView> {
 
     final dossierCours = await _creerDossierCours(
       idModule: coursComplet.cours.idModule,
-      idCours: coursIdLocal,
+      idCours: coursComplet.cours.id,
     );
 
     // ── Pages ──────────────────────────────────────────────────────────────
     final List<String> tousLesMedias = [];
     for (final page in coursComplet.pages) {
       if (kDebugMode) {
-        print('   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
+        print(
+            '   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
       }
       if (page.medias.isNotEmpty) {
-        final noms = page.medias.split('@')
+        final noms = page.medias
+            .split('@')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
@@ -214,12 +220,13 @@ class _AllCoursViewState extends State<AllCoursView> {
     }
 
     if (kDebugMode) {
-      print('🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
+      print(
+          '🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
     }
 
     await _telechargerTousLesMediasDuCours(
       idModule: coursComplet.cours.idModule,
-      idCours: coursIdLocal,
+      idCoursDistant: coursComplet.cours.id,
       nomsMedias: tousLesMedias,
       dossierCours: dossierCours,
     );
@@ -228,7 +235,8 @@ class _AllCoursViewState extends State<AllCoursView> {
       final List<MediaItem> mediasList = [];
 
       if (pageDistante.medias.isNotEmpty) {
-        final noms = pageDistante.medias.split('@')
+        final noms = pageDistante.medias
+            .split('@')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
@@ -247,7 +255,8 @@ class _AllCoursViewState extends State<AllCoursView> {
 
           final cheminLocal = path.join(dossierCours.path, nomFichier);
           if (kDebugMode) {
-            print('   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
+            print(
+                '   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
           }
 
           mediasList.add(MediaItem(
@@ -354,7 +363,8 @@ class _AllCoursViewState extends State<AllCoursView> {
         );
         await clozeRepository.insert(clozeLocal);
         if (kDebugMode) {
-          print('   ✅ Cloze inséré: "${c.texte.substring(0, c.texte.length.clamp(0, 40))}..."');
+          print(
+              '   ✅ Cloze inséré: "${c.texte.substring(0, c.texte.length.clamp(0, 40))}..."');
         }
       }
     } catch (e) {
@@ -379,12 +389,12 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   Future<void> _telechargerTousLesMediasDuCours({
     required int idModule,
-    required int idCours,
+    required int idCoursDistant,
     required List<String> nomsMedias,
     required Directory dossierCours,
   }) async {
     final String baseUrl =
-        '${AppConfig.urlMedias}/AppData/Module$idModule/Cours$idCours';
+        '${AppConfig.urlMedias}/AppData/Module$idModule/Cours$idCoursDistant';
     if (kDebugMode) print('🌐 Base URL médias: $baseUrl');
 
     if (nomsMedias.isEmpty) {
@@ -405,13 +415,16 @@ class _AllCoursViewState extends State<AllCoursView> {
       try {
         final response = await http.get(Uri.parse(urlComplete));
         if (kDebugMode) {
-          print('   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
+          print(
+              '   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
         }
         if (response.statusCode == 200) {
           await fichier.writeAsBytes(response.bodyBytes);
           if (kDebugMode) print('   └─ ✅ Sauvegardé: ${fichier.path}');
         } else {
-          if (kDebugMode) print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
+          if (kDebugMode) {
+            print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
+          }
         }
       } catch (e) {
         if (kDebugMode) print('   └─ ❌ Erreur pour $nomFichier: $e');
@@ -451,7 +464,8 @@ class _AllCoursViewState extends State<AllCoursView> {
               const SizedBox(height: 12),
               Text(
                 '"$titreCours"',
-                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                style:
+                    const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
@@ -466,7 +480,8 @@ class _AllCoursViewState extends State<AllCoursView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -498,7 +513,8 @@ class _AllCoursViewState extends State<AllCoursView> {
                   color: Colors.green,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.cloud_done, color: Colors.white, size: 46),
+                child:
+                    const Icon(Icons.cloud_done, color: Colors.white, size: 46),
               ),
               const SizedBox(height: 20),
               const Text(
@@ -518,8 +534,8 @@ class _AllCoursViewState extends State<AllCoursView> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8)),
                 ),
@@ -599,55 +615,53 @@ class _AllCoursViewState extends State<AllCoursView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-        onRefresh: _rafraichir,
-        child: liste.isEmpty
-            ? _buildEtatVide()
-            : CustomScrollView(
-          slivers: [
-            if (nbTelecharges > 0)
-              _buildSectionHeader(
-                'Téléchargés',
-                '$nbTelecharges cours',
-                Colors.black87,
-              ),
-
-            if (!_apiConnectee && nbTelecharges > 0)
-              _buildBanniereHorsLigne(),
-
-            SliverPadding(
-              padding: const EdgeInsets.only(
-                  left: 16, right: 16, bottom: 24),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                    final item = liste[index];
-                    final estPremierNonTelecharge =
-                        !item.estTelecharge &&
-                            (index == 0 ||
-                                liste[index - 1].estTelecharge);
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (estPremierNonTelecharge) ...[
-                          if (nbTelecharges > 0)
-                            const SizedBox(height: 8),
-                          _buildSectionLabel(
-                            'Disponibles en ligne',
-                            '$nbDistants cours',
+              onRefresh: _rafraichir,
+              child: liste.isEmpty
+                  ? _buildEtatVide()
+                  : CustomScrollView(
+                      slivers: [
+                        if (nbTelecharges > 0)
+                          _buildSectionHeader(
+                            'Téléchargés',
+                            '$nbTelecharges cours',
+                            Colors.black87,
                           ),
-                        ],
-                        _buildCoursCard(item),
+                        if (!_apiConnectee && nbTelecharges > 0)
+                          _buildBanniereHorsLigne(),
+                        SliverPadding(
+                          padding: const EdgeInsets.only(
+                              left: 16, right: 16, bottom: 24),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final item = liste[index];
+                                final estPremierNonTelecharge =
+                                    !item.estTelecharge &&
+                                        (index == 0 ||
+                                            liste[index - 1].estTelecharge);
+
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (estPremierNonTelecharge) ...[
+                                      if (nbTelecharges > 0)
+                                        const SizedBox(height: 8),
+                                      _buildSectionLabel(
+                                        'Disponibles en ligne',
+                                        '$nbDistants cours',
+                                      ),
+                                    ],
+                                    _buildCoursCard(item),
+                                  ],
+                                );
+                              },
+                              childCount: liste.length,
+                            ),
+                          ),
+                        ),
                       ],
-                    );
-                  },
-                  childCount: liste.length,
-                ),
-              ),
+                    ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -699,22 +713,22 @@ class _AllCoursViewState extends State<AllCoursView> {
           const Spacer(),
           toutEnCours
               ? const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : TextButton.icon(
-            onPressed: _toutTelecharger,
-            icon: const Icon(Icons.download, size: 16),
-            label: const Text('Tout télécharger',
-                style: TextStyle(fontSize: 13)),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey[700],
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 8, vertical: 4),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
+                  onPressed: _toutTelecharger,
+                  icon: const Icon(Icons.download, size: 16),
+                  label: const Text('Tout télécharger',
+                      style: TextStyle(fontSize: 13)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.grey[700],
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
         ],
       ),
     );
@@ -749,9 +763,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: item.estTelecharge
-                      ? couleurAccent
-                      : Colors.grey[300],
+                  color: item.estTelecharge ? couleurAccent : Colors.grey[300],
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

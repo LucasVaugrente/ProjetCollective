@@ -206,7 +206,8 @@ class CoursComplet {
 
   CoursComplet({required this.cours, required this.pages});
 
-  factory CoursComplet.fromJson(Map<String, dynamic> json, List<PageDistante> pages) {
+  factory CoursComplet.fromJson(
+      Map<String, dynamic> json, List<PageDistante> pages) {
     return CoursComplet(
       cours: CoursDistant.fromJson(json),
       pages: pages,
