@@ -591,8 +591,8 @@ class _AllCoursViewState extends State<AllCoursView> {
             ),
             onPressed: _rafraichir,
             tooltip: _apiConnectee
-                ? 'API connectée — Rafraîchir'
-                : 'API non disponible — Réessayer',
+                ? 'Connecté à internet — Rafraîchir'
+                : 'Non connecté à internet — Réessayer',
           ),
         ],
       ),
@@ -610,6 +610,10 @@ class _AllCoursViewState extends State<AllCoursView> {
                 '$nbTelecharges cours',
                 Colors.black87,
               ),
+
+            if (!_apiConnectee && nbTelecharges > 0)
+              _buildBanniereHorsLigne(),
+
             SliverPadding(
               padding: const EdgeInsets.only(
                   left: 16, right: 16, bottom: 24),
@@ -818,7 +822,7 @@ class _AllCoursViewState extends State<AllCoursView> {
           Text(
             _apiConnectee
                 ? 'Aucun cours disponible'
-                : 'Aucun cours téléchargé\net API non disponible',
+                : 'Aucun cours téléchargé\net non connecté à internet',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
@@ -829,6 +833,34 @@ class _AllCoursViewState extends State<AllCoursView> {
             label: const Text('Réessayer'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBanniereHorsLigne() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.cloud_off, color: Colors.grey[500], size: 22),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Connectez-vous à internet pour télécharger d\'autres cours.',
+                  style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

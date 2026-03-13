@@ -39,12 +39,12 @@ Future<void> insertModule1() async {
   //   medias: [
   //     MediaItem(
   //       ordre: 1,
-  //       url: 'lib/data/AppData/Module1/Cours1/source_information_definition.txt',
+  //       url: 'lib/data/AppData/ModuleTest/Cours1/source_information_definition.txt',
   //       type: 'text',
   //     ),
   //     MediaItem(
   //       ordre: 2,
-  //       url: 'lib/data/AppData/Module1/Cours1/journaliste_interview.jpg',
+  //       url: 'lib/data/AppData/ModuleTest/Cours1/journaliste_interview.jpg',
   //       type: 'image',
   //       caption: 'Journaliste réalisant une interview',
   //     ),
@@ -59,12 +59,12 @@ Future<void> insertModule1() async {
   //   medias: [
   //     MediaItem(
   //       ordre: 1,
-  //       url: 'lib/data/AppData/Module1/Cours1/types_sources.txt',
+  //       url: 'lib/data/AppData/ModuleTest/Cours1/types_sources.txt',
   //       type: 'text',
   //     ),
   //     MediaItem(
   //       ordre: 2,
-  //       url: 'lib/data/AppData/Module1/Cours1/source_primaire_secondaire.png',
+  //       url: 'lib/data/AppData/ModuleTest/Cours1/source_primaire_secondaire.png',
   //       type: 'image',
   //       caption: 'Illustration des sources primaires et secondaires',
   //     ),
@@ -79,12 +79,12 @@ Future<void> insertModule1() async {
   //   medias: [
   //     MediaItem(
   //       ordre: 1,
-  //       url: 'lib/data/AppData/Module1/Cours1/evaluer_sources.txt',
+  //       url: 'lib/data/AppData/ModuleTest/Cours1/evaluer_sources.txt',
   //       type: 'text',
   //     ),
   //     MediaItem(
   //       ordre: 2,
-  //       url: 'lib/data/AppData/Module1/Cours1/fake_news_verification.png',
+  //       url: 'lib/data/AppData/ModuleTest/Cours1/fake_news_verification.png',
   //       type: 'image',
   //       caption: 'Techniques de vérification des fake news',
   //     ),
@@ -108,12 +108,12 @@ Future<void> insertModule1() async {
   //   medias: [
   //     MediaItem(
   //       ordre: 1,
-  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+  //       url: 'lib/data/AppData/ModuleTest/Cours2/genre_d_information.txt',
   //       type: 'text',
   //     ),
   //     MediaItem(
   //       ordre: 2,
-  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.jpg',
+  //       url: 'lib/data/AppData/ModuleTest/Cours2/genre_d_information.jpg',
   //       type: 'image',
   //       caption: 'Journaliste réalisant une interview',
   //     ),
@@ -127,12 +127,12 @@ Future<void> insertModule1() async {
   //   medias: [
   //     MediaItem(
   //       ordre: 1,
-  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+  //       url: 'lib/data/AppData/ModuleTest/Cours2/genre_d_information.txt',
   //       type: 'text',
   //     ),
   //     MediaItem(
   //       ordre: 2,
-  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.mp3',
+  //       url: 'lib/data/AppData/ModuleTest/Cours2/genre_d_information.mp3',
   //       type: 'audio',
   //       caption: 'Illustration des sources primaires et secondaires',
   //     ),
@@ -146,12 +146,12 @@ Future<void> insertModule1() async {
   //   medias: [
   //     MediaItem(
   //       ordre: 1,
-  //       url: 'lib/data/AppData/Module1/Cours2/genre_d_information.txt',
+  //       url: 'lib/data/AppData/ModuleTest/Cours2/genre_d_information.txt',
   //       type: 'text',
   //     ),
   //     MediaItem(
   //       ordre: 2,
-  //       url: 'lib/data/AppData/Module1/Cours2/genre_opinion.mp4',
+  //       url: 'lib/data/AppData/ModuleTest/Cours2/genre_opinion.mp4',
   //       type: 'video',
   //       caption: 'Techniques de vérification des fake news',
   //     ),
