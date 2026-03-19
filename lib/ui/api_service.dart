@@ -38,6 +38,65 @@ class ApiService {
     }
   }
 
+  Future<List<ModuleDistant>> getModulesDisponibles() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConfig.effectiveApiUrl}/api/modules'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(Duration(seconds: AppConfig.apiTimeout));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final modulesList = <ModuleDistant>[];
+        for (var jsonItem in data) {
+          try {
+            modulesList.add(ModuleDistant.fromJson(jsonItem));
+          } catch (e) {
+            if (kDebugMode) {
+              print('Erreur parsing module: $e');
+              print('   JSON: $jsonItem');
+            }
+          }
+        }
+        return modulesList;
+      } else {
+        throw Exception('Erreur HTTP ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion à l\'API (modules): $e');
+    }
+  }
+
+  /// Récupère les cours distants appartenant à un module donné
+  Future<List<CoursDistant>> getCoursDistantsDuModule(int moduleId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConfig.effectiveApiUrl}/api/cours'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(Duration(seconds: AppConfig.apiTimeout));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final coursList = <CoursDistant>[];
+        for (var jsonItem in data) {
+          try {
+            final cours = CoursDistant.fromJson(jsonItem);
+            if (cours.idModule == moduleId) {
+              coursList.add(cours);
+            }
+          } catch (e) {
+            if (kDebugMode) print('Erreur parsing cours: $e');
+          }
+        }
+        return coursList;
+      } else {
+        throw Exception('Erreur HTTP ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erreur de connexion à l\'API (cours du module): $e');
+    }
+  }
+
   Future<CoursComplet> getCoursComplet(int coursId) async {
     try {
       final response = await http.get(
@@ -284,6 +343,26 @@ class ClozeDistant {
       numeroReponseCorrecte: (json['numero_reponse_correcte'] as int?) ?? 1,
       explication: json['explication']?.toString(),
       idCours: json['id_cours'] as int,
+    );
+  }
+}
+
+class ModuleDistant {
+  final int id;
+  final String titre;
+  final String description;
+
+  ModuleDistant({
+    required this.id,
+    required this.titre,
+    required this.description,
+  });
+
+  factory ModuleDistant.fromJson(Map<String, dynamic> json) {
+    return ModuleDistant(
+      id: json['id'] as int,
+      titre: json['titre']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
     );
   }
 }

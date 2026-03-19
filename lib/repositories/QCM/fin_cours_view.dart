@@ -92,16 +92,16 @@ class FinCoursView extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // Bouton retour à la liste des cours
+            // Bouton retour à la liste des chapitres du module
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  GoRouter.of(context).go('/cours');
+                  GoRouter.of(context).go('/list_cours');
                 },
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 label: const Text(
-                  "Retour à la liste des cours",
+                  "Retour aux chapitres",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

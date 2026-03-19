@@ -3,10 +3,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:factoscope/models/cours.dart';
+import 'package:factoscope/models/module.dart';
 import 'package:factoscope/repositories/cours_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:factoscope/models/page.dart';
-import 'package:factoscope/ui/cours_selectionne.dart';
+import 'package:factoscope/ui/module_selectionne.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
@@ -30,12 +31,17 @@ class _AllCoursViewState extends State<AllCoursView> {
   final CoursRepository _coursRepository = CoursRepository();
   final ApiService _apiService = ApiService();
 
-  List<Cours> _coursLocaux = [];
-  List<CoursDistant> _coursDistants = [];
+  // Modules récupérés depuis l'API distante
+  List<ModuleDistant> _modulesDistants = [];
+
+  // Titres des modules dont au moins un cours est téléchargé localement
+  List<String> _titresModulesTelecharges = [];
+
   bool _isLoading = true;
   bool _apiConnectee = false;
-  final Set<int> _coursEnCoursDeTelechargement = {};
-  List<String> _titresTelecharges = [];
+
+  // IDs des modules en cours de téléchargement
+  final Set<int> _modulesEnCoursDeTelechargement = {};
 
   @override
   void initState() {
@@ -45,30 +51,27 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   Future<void> _initialiserPage() async {
     setState(() => _isLoading = true);
-
     await _verifierConnexionApi();
-    await _chargerCoursLocaux();
-
-    if (_apiConnectee) {
-      await _chargerCoursDistants();
-    }
-
+    await _chargerModulesTelecharges();
+    if (_apiConnectee) await _chargerModulesDistants();
     if (mounted) setState(() => _isLoading = false);
   }
 
   Future<void> _verifierConnexionApi() async {
     final connectee = await _apiService.testConnection();
-    _apiConnectee = connectee;
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _apiConnectee = connectee);
   }
 
-  Future<void> _chargerCoursLocaux() async {
+  /// Un module est considéré "téléchargé" si au moins un cours avec cet id_module existe localement
+  Future<void> _chargerModulesTelecharges() async {
     try {
-      final cours = await _coursRepository.getAll();
+      final coursLocaux = await _coursRepository.getAll();
+      // On récupère les titres de modules distants déjà en local via id_module
+      // Pour affichage, on garde une liste des idModule présents localement
       if (mounted) {
         setState(() {
-          _coursLocaux = cours;
-          _titresTelecharges = cours.map((c) => c.titre).toList();
+          _titresModulesTelecharges =
+              coursLocaux.map((c) => c.idModule.toString()).toSet().toList();
         });
       }
     } catch (e) {
@@ -76,43 +79,67 @@ class _AllCoursViewState extends State<AllCoursView> {
     }
   }
 
-  Future<void> _chargerCoursDistants() async {
+  Future<void> _chargerModulesDistants() async {
     try {
-      final distants = await _apiService.getCoursDisponibles();
-      if (mounted) setState(() => _coursDistants = distants);
+      final modules = await _apiService.getModulesDisponibles();
+      if (mounted) setState(() => _modulesDistants = modules);
     } catch (e) {
-      if (kDebugMode) print('Erreur chargement cours distants: $e');
+      if (kDebugMode) print('Erreur chargement modules distants: $e');
     }
   }
 
   Future<void> _rafraichir() async {
     setState(() => _isLoading = true);
     await _verifierConnexionApi();
-    await _chargerCoursLocaux();
-    if (_apiConnectee) await _chargerCoursDistants();
+    await _chargerModulesTelecharges();
+    if (_apiConnectee) await _chargerModulesDistants();
     if (mounted) setState(() => _isLoading = false);
   }
 
-  Future<void> _telechargerCours(CoursDistant cours) async {
-    if (_coursEnCoursDeTelechargement.contains(cours.id)) return;
-    if (_titresTelecharges.contains(cours.titre)) return;
+  bool _estModuleTelecharge(int moduleId) =>
+      _titresModulesTelecharges.contains(moduleId.toString());
 
-    setState(() => _coursEnCoursDeTelechargement.add(cours.id));
+  /// Télécharge tous les cours d'un module et les sauvegarde localement
+  Future<void> _telechargerModule(ModuleDistant module) async {
+    if (_modulesEnCoursDeTelechargement.contains(module.id)) return;
+    if (_estModuleTelecharge(module.id)) return;
+
+    setState(() => _modulesEnCoursDeTelechargement.add(module.id));
 
     try {
-      final coursComplet = await _apiService.getCoursComplet(cours.id);
-      await _sauvegarderCoursLocalement(coursComplet);
-      await _chargerCoursLocaux();
+      // Récupère tous les cours distants liés à ce module
+      final coursDistants =
+          await _apiService.getCoursDistantsDuModule(module.id);
+
+      if (coursDistants.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ce module ne contient aucun cours.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
+      // Télécharge chaque cours du module
+      for (final coursDistant in coursDistants) {
+        final coursComplet = await _apiService.getCoursComplet(coursDistant.id);
+        await _sauvegarderCoursLocalement(coursComplet);
+      }
+
+      await _chargerModulesTelecharges();
 
       if (mounted) {
-        setState(() => _titresTelecharges.add(cours.titre));
-        _afficherPopupSucces(cours.titre);
+        setState(() => _titresModulesTelecharges.add(module.id.toString()));
+        _afficherPopupSucces(module.titre);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors du téléchargement: $e'),
+            content: Text('Erreur lors du téléchargement : $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -120,45 +147,50 @@ class _AllCoursViewState extends State<AllCoursView> {
       }
     } finally {
       if (mounted) {
-        setState(() => _coursEnCoursDeTelechargement.remove(cours.id));
+        setState(() => _modulesEnCoursDeTelechargement.remove(module.id));
       }
     }
   }
 
+  /// Télécharge tous les modules disponibles non encore téléchargés
   Future<void> _toutTelecharger() async {
-    final coursATelechargement = _coursDistants
-        .where((c) => !_titresTelecharges.contains(c.titre))
-        .toList();
+    final aTelechargement =
+        _modulesDistants.where((m) => !_estModuleTelecharge(m.id)).toList();
 
-    if (coursATelechargement.isEmpty) return;
+    if (aTelechargement.isEmpty) return;
 
     setState(() {
-      for (final c in coursATelechargement) {
-        _coursEnCoursDeTelechargement.add(c.id);
+      for (final m in aTelechargement) {
+        _modulesEnCoursDeTelechargement.add(m.id);
       }
     });
 
     int succes = 0;
     final List<String> erreurs = [];
 
-    for (final cours in coursATelechargement) {
+    for (final module in aTelechargement) {
       try {
-        final coursComplet = await _apiService.getCoursComplet(cours.id);
-        await _sauvegarderCoursLocalement(coursComplet);
+        final coursDistants =
+            await _apiService.getCoursDistantsDuModule(module.id);
+        for (final coursDistant in coursDistants) {
+          final coursComplet =
+              await _apiService.getCoursComplet(coursDistant.id);
+          await _sauvegarderCoursLocalement(coursComplet);
+        }
         if (mounted) {
-          setState(() => _titresTelecharges.add(cours.titre));
+          setState(() => _titresModulesTelecharges.add(module.id.toString()));
         }
         succes++;
       } catch (e) {
-        erreurs.add(cours.titre);
+        erreurs.add(module.titre);
       } finally {
         if (mounted) {
-          setState(() => _coursEnCoursDeTelechargement.remove(cours.id));
+          setState(() => _modulesEnCoursDeTelechargement.remove(module.id));
         }
       }
     }
 
-    await _chargerCoursLocaux();
+    await _chargerModulesTelecharges();
 
     if (!mounted) return;
 
@@ -168,7 +200,7 @@ class _AllCoursViewState extends State<AllCoursView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '$succes cours téléchargé(s). Échec : ${erreurs.join(', ')}',
+            '$succes module(s) téléchargé(s). Échec : ${erreurs.join(', ')}',
           ),
           backgroundColor: Colors.orange,
           duration: const Duration(seconds: 4),
@@ -176,6 +208,8 @@ class _AllCoursViewState extends State<AllCoursView> {
       );
     }
   }
+
+  // ─── Sauvegarde locale (inchangée par rapport à l'ancien all_cours_view) ─────
 
   Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
     if (kDebugMode) {
@@ -192,41 +226,29 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
 
     final coursIdLocal = await _coursRepository.create(coursLocal);
-    if (kDebugMode) {
-      print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
-    }
+    if (kDebugMode) print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
 
     final dossierCours = await _creerDossierCours(
       idModule: coursComplet.cours.idModule,
-      idCours: coursComplet.cours.id,
+      titreCours: coursComplet.cours.titre,
     );
 
-    // ── Pages ──────────────────────────────────────────────────────────────
+    // Médias
     final List<String> tousLesMedias = [];
     for (final page in coursComplet.pages) {
-      if (kDebugMode) {
-        print(
-            '   📄 Page "${page.description}" — medias bruts: "${page.medias}"');
-      }
       if (page.medias.isNotEmpty) {
         final noms = page.medias
             .split('@')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
-        if (kDebugMode) print('   └─ Médias extraits: $noms');
         tousLesMedias.addAll(noms);
       }
     }
 
-    if (kDebugMode) {
-      print(
-          '🎯 Total médias à télécharger: ${tousLesMedias.length} → $tousLesMedias');
-    }
-
     await _telechargerTousLesMediasDuCours(
       idModule: coursComplet.cours.idModule,
-      idCoursDistant: coursComplet.cours.id,
+      titreCours: coursComplet.cours.titre,
       nomsMedias: tousLesMedias,
       dossierCours: dossierCours,
     );
@@ -254,11 +276,6 @@ class _AllCoursViewState extends State<AllCoursView> {
           }
 
           final cheminLocal = path.join(dossierCours.path, nomFichier);
-          if (kDebugMode) {
-            print(
-                '   💾 MediaItem: $nomFichier → type=$typeMedia → $cheminLocal');
-          }
-
           mediasList.add(MediaItem(
             ordre: i + 1,
             url: cheminLocal,
@@ -276,46 +293,29 @@ class _AllCoursViewState extends State<AllCoursView> {
       );
 
       await pageRepository.create(pageLocale);
-      if (kDebugMode) {
-        print('   ✅ Page "${pageDistante.description}" sauvegardée');
-      }
     }
 
-    // ── QCM ───────────────────────────────────────────────────────────────
     await _sauvegarderQcm(
       coursIdDistant: coursComplet.cours.id,
       coursIdLocal: coursIdLocal,
     );
-
-    // ── Cloze (texte à trou) ──────────────────────────────────────────────
     await _sauvegarderCloze(
       coursIdDistant: coursComplet.cours.id,
       coursIdLocal: coursIdLocal,
     );
 
-    if (kDebugMode) {
+    if (kDebugMode)
       print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
-    }
   }
 
-  /// Télécharge les QCM distants et les insère en BDD locale
-  Future<void> _sauvegarderQcm({
-    required int coursIdDistant,
-    required int coursIdLocal,
-  }) async {
+  Future<void> _sauvegarderQcm(
+      {required int coursIdDistant, required int coursIdLocal}) async {
     try {
       final qcmDistants = await _apiService.getQcmDuCours(coursIdDistant);
-
-      if (kDebugMode) {
-        print('🎯 QCM à sauvegarder: ${qcmDistants.length}');
-      }
-
       if (qcmDistants.isEmpty) return;
-
       final qcmRepository = QCMRepository();
-
       for (final q in qcmDistants) {
-        final qcmLocal = QCM(
+        await qcmRepository.insert(QCM(
           question: q.question,
           rep1: q.rep1,
           rep2: q.rep2,
@@ -323,36 +323,21 @@ class _AllCoursViewState extends State<AllCoursView> {
           rep4: q.rep4,
           soluce: q.soluce,
           idCours: coursIdLocal,
-        );
-        await qcmRepository.insert(qcmLocal);
-        if (kDebugMode) {
-          print('   ✅ QCM inséré: "${q.question}"');
-        }
+        ));
       }
     } catch (e) {
-      // On ne bloque pas le téléchargement du cours si les QCM échouent
       if (kDebugMode) print('⚠️ Erreur sauvegarde QCM: $e');
     }
   }
 
-  /// Télécharge les Cloze distants et les insère en BDD locale
-  Future<void> _sauvegarderCloze({
-    required int coursIdDistant,
-    required int coursIdLocal,
-  }) async {
+  Future<void> _sauvegarderCloze(
+      {required int coursIdDistant, required int coursIdLocal}) async {
     try {
       final clozeDistants = await _apiService.getClozesDuCours(coursIdDistant);
-
-      if (kDebugMode) {
-        print('🧩 Cloze à sauvegarder: ${clozeDistants.length}');
-      }
-
       if (clozeDistants.isEmpty) return;
-
       final clozeRepository = ClozeRepository();
-
       for (final c in clozeDistants) {
-        final clozeLocal = ClozeQuestion(
+        await clozeRepository.insert(ClozeQuestion(
           phrase: c.texte,
           rep1: c.reponse1,
           rep2: c.reponse2,
@@ -360,82 +345,54 @@ class _AllCoursViewState extends State<AllCoursView> {
           rep4: c.reponse4,
           soluce: c.numeroReponseCorrecte,
           idCours: coursIdLocal,
-        );
-        await clozeRepository.insert(clozeLocal);
-        if (kDebugMode) {
-          print(
-              '   ✅ Cloze inséré: "${c.texte.substring(0, c.texte.length.clamp(0, 40))}..."');
-        }
+        ));
       }
     } catch (e) {
-      // On ne bloque pas le téléchargement du cours si les Cloze échouent
       if (kDebugMode) print('⚠️ Erreur sauvegarde Cloze: $e');
     }
   }
 
-  Future<Directory> _creerDossierCours({
-    required int idModule,
-    required int idCours,
-  }) async {
+  Future<Directory> _creerDossierCours(
+      {required int idModule, required String titreCours}) async {
     final appDir = await getApplicationDocumentsDirectory();
     final dossier = Directory(
-      path.join(appDir.path, 'AppData', 'Module$idModule', 'Cours$idCours'),
+      path.join(appDir.path, 'AppData', 'Module$idModule', titreCours),
     );
-    if (!await dossier.exists()) {
-      await dossier.create(recursive: true);
-    }
+    if (!await dossier.exists()) await dossier.create(recursive: true);
     return dossier;
   }
 
   Future<void> _telechargerTousLesMediasDuCours({
     required int idModule,
-    required int idCoursDistant,
+    required String titreCours,
     required List<String> nomsMedias,
     required Directory dossierCours,
   }) async {
-    final String baseUrl =
-        '${AppConfig.urlMedias}/AppData/Module$idModule/Cours$idCoursDistant';
-    if (kDebugMode) print('🌐 Base URL médias: $baseUrl');
-
-    if (nomsMedias.isEmpty) {
-      if (kDebugMode) print('⚠️  Aucun média à télécharger');
-      return;
-    }
+    final String baseUrl = Uri.encodeFull(
+      '${AppConfig.urlMedias}/AppData/Module$idModule/$titreCours',
+    );
+    if (nomsMedias.isEmpty) return;
 
     final futures = nomsMedias.map((nomFichier) async {
-      final urlComplete = '$baseUrl/$nomFichier';
       final fichier = File(path.join(dossierCours.path, nomFichier));
-
-      if (await fichier.exists()) {
-        if (kDebugMode) print('⏭️  $nomFichier déjà présent, skip');
-        return;
-      }
-
-      if (kDebugMode) print('⬇️  Téléchargement: $urlComplete');
+      if (await fichier.exists()) return;
       try {
-        final response = await http.get(Uri.parse(urlComplete));
-        if (kDebugMode) {
-          print(
-              '   └─ Status: ${response.statusCode} — ${response.bodyBytes.length} bytes');
-        }
+        final url = Uri.encodeFull('$baseUrl/$nomFichier');
+        final response = await http.get(Uri.parse(url));
         if (response.statusCode == 200) {
           await fichier.writeAsBytes(response.bodyBytes);
-          if (kDebugMode) print('   └─ ✅ Sauvegardé: ${fichier.path}');
-        } else {
-          if (kDebugMode) {
-            print('   └─ ❌ Introuvable (${response.statusCode}): $urlComplete');
-          }
         }
       } catch (e) {
-        if (kDebugMode) print('   └─ ❌ Erreur pour $nomFichier: $e');
+        if (kDebugMode) print('❌ Erreur média \$nomFichier: \$e');
       }
     });
 
     await Future.wait(futures);
-    if (kDebugMode) print('✅ Tous les médias téléchargés');
   }
 
-  void _afficherPopupSucces(String titreCours) {
+  // ─── Popups ──────────────────────────────────────────────────────────────────
+
+  void _afficherPopupSucces(String titreModule) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -457,20 +414,20 @@ class _AllCoursViewState extends State<AllCoursView> {
               ),
               const SizedBox(height: 20),
               const Text(
-                'Téléchargement réussi !',
+                'Module téléchargé !',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                '"$titreCours"',
+                '"$titreModule"',
                 style:
                     const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               const Text(
-                'Le cours et ses jeux ont été ajoutés à votre bibliothèque',
+                'Tous les chapitres ont été ajoutés à votre bibliothèque',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
@@ -483,8 +440,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 child: const Text('OK', style: TextStyle(fontSize: 16)),
               ),
@@ -510,9 +466,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                 width: 80,
                 height: 80,
                 decoration: const BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
+                    color: Colors.green, shape: BoxShape.circle),
                 child:
                     const Icon(Icons.cloud_done, color: Colors.white, size: 46),
               ),
@@ -524,7 +478,7 @@ class _AllCoursViewState extends State<AllCoursView> {
               ),
               const SizedBox(height: 12),
               Text(
-                '$nb cours ajouté${nb > 1 ? 's' : ''} à votre bibliothèque',
+                '$nb module${nb > 1 ? 's' : ''} ajouté${nb > 1 ? 's' : ''} à votre bibliothèque',
                 style: const TextStyle(fontSize: 15, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
@@ -548,50 +502,34 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
   }
 
-  bool _estTelecharge(String titre) => _titresTelecharges.contains(titre);
+  // ─── Liste unifiée modules ────────────────────────────────────────────────────
 
-  Cours? _coursLocalPourTitre(String titre) {
-    try {
-      return _coursLocaux.firstWhere((c) => c.titre == titre);
-    } catch (_) {
-      return null;
-    }
-  }
+  List<_ModuleItem> get _listeUnifiee {
+    final List<_ModuleItem> telecharges = [];
+    final List<_ModuleItem> nonTelecharges = [];
 
-  List<_CoursItem> get _listeUnifiee {
-    final List<_CoursItem> telecharges = [];
-    final List<_CoursItem> nonTelecharges = [];
-
-    for (final distant in _coursDistants) {
-      if (_estTelecharge(distant.titre)) {
-        final local = _coursLocalPourTitre(distant.titre);
-        if (local != null) {
-          telecharges.add(_CoursItem.local(local));
-        }
+    for (final module in _modulesDistants) {
+      if (_estModuleTelecharge(module.id)) {
+        telecharges.add(_ModuleItem(module: module, estTelecharge: true));
       } else {
-        nonTelecharges.add(_CoursItem.distant(distant));
-      }
-    }
-
-    for (final local in _coursLocaux) {
-      final dejaDans = telecharges.any((item) => item.titre == local.titre);
-      if (!dejaDans) {
-        telecharges.add(_CoursItem.local(local));
+        nonTelecharges.add(_ModuleItem(module: module, estTelecharge: false));
       }
     }
 
     return [...telecharges, ...nonTelecharges];
   }
 
+  // ─── Build ────────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final liste = _listeUnifiee;
     final nbTelecharges = liste.where((i) => i.estTelecharge).length;
-    final nbDistants = liste.where((i) => !i.estTelecharge).length;
+    final nbDisponibles = liste.where((i) => !i.estTelecharge).length;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes Cours'),
+        title: const Text('Mes Modules'),
         centerTitle: true,
         backgroundColor: Colors.white,
         titleTextStyle: const TextStyle(
@@ -601,14 +539,12 @@ class _AllCoursViewState extends State<AllCoursView> {
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.cloud,
-              color: _apiConnectee ? Colors.green : Colors.grey,
-            ),
+            icon: Icon(Icons.cloud,
+                color: _apiConnectee ? Colors.green : Colors.grey),
             onPressed: _rafraichir,
             tooltip: _apiConnectee
-                ? 'Connecté à internet — Rafraîchir'
-                : 'Non connecté à internet — Réessayer',
+                ? 'Connecté — Rafraîchir'
+                : 'Non connecté — Réessayer',
           ),
         ],
       ),
@@ -623,7 +559,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                         if (nbTelecharges > 0)
                           _buildSectionHeader(
                             'Téléchargés',
-                            '$nbTelecharges cours',
+                            '$nbTelecharges module${nbTelecharges > 1 ? 's' : ''}',
                             Colors.black87,
                           ),
                         if (!_apiConnectee && nbTelecharges > 0)
@@ -648,10 +584,10 @@ class _AllCoursViewState extends State<AllCoursView> {
                                         const SizedBox(height: 8),
                                       _buildSectionLabel(
                                         'Disponibles en ligne',
-                                        '$nbDistants cours',
+                                        '$nbDisponibles module${nbDisponibles > 1 ? 's' : ''}',
                                       ),
                                     ],
-                                    _buildCoursCard(item),
+                                    _buildModuleCard(item),
                                   ],
                                 );
                               },
@@ -671,19 +607,12 @@ class _AllCoursViewState extends State<AllCoursView> {
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
         child: Row(
           children: [
-            Text(
-              titre,
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-                color: couleur,
-              ),
-            ),
+            Text(titre,
+                style: TextStyle(
+                    fontSize: 17, fontWeight: FontWeight.bold, color: couleur)),
             const SizedBox(width: 8),
-            Text(
-              sousTitre,
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
-            ),
+            Text(sousTitre,
+                style: const TextStyle(fontSize: 13, color: Colors.grey)),
           ],
         ),
       ),
@@ -691,25 +620,19 @@ class _AllCoursViewState extends State<AllCoursView> {
   }
 
   Widget _buildSectionLabel(String titre, String sousTitre) {
-    final bool toutEnCours = _coursEnCoursDeTelechargement.isNotEmpty;
-
+    final bool toutEnCours = _modulesEnCoursDeTelechargement.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 16, 4, 4),
       child: Row(
         children: [
-          Text(
-            titre,
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-            ),
-          ),
+          Text(titre,
+              style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey)),
           const SizedBox(width: 8),
-          Text(
-            sousTitre,
-            style: const TextStyle(fontSize: 13, color: Colors.grey),
-          ),
+          Text(sousTitre,
+              style: const TextStyle(fontSize: 13, color: Colors.grey)),
           const Spacer(),
           toutEnCours
               ? const SizedBox(
@@ -734,10 +657,9 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
   }
 
-  Widget _buildCoursCard(_CoursItem item) {
-    final enTelechargement = item.distantId != null &&
-        _coursEnCoursDeTelechargement.contains(item.distantId);
-
+  Widget _buildModuleCard(_ModuleItem item) {
+    final enTelechargement =
+        _modulesEnCoursDeTelechargement.contains(item.module.id);
     const couleurAccent = Color.fromRGBO(252, 179, 48, 1);
 
     return Card(
@@ -748,17 +670,26 @@ class _AllCoursViewState extends State<AllCoursView> {
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
-          if (item.estTelecharge && item.coursLocal != null) {
-            CoursSelectionne.instance.setCours(item.coursLocal!);
-            GoRouter.of(context).go('/cours/${item.coursLocal!.id}');
-          } else if (item.coursDistant != null && !enTelechargement) {
-            _telechargerCours(item.coursDistant!);
+          if (item.estTelecharge) {
+            // Naviguer vers la liste des cours du module
+            ModuleSelectionne.instance.changeModule(
+              Module(
+                id: item.module.id,
+                titre: item.module.titre,
+                description: item.module.description,
+                urlImg: '',
+              ),
+            );
+            GoRouter.of(context).push('/list_cours');
+          } else if (!enTelechargement) {
+            _telechargerModule(item.module);
           }
         },
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
             children: [
+              // Icône module
               Container(
                 width: 50,
                 height: 50,
@@ -767,18 +698,19 @@ class _AllCoursViewState extends State<AllCoursView> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  Icons.school,
+                  Icons.folder_open,
                   color: item.estTelecharge ? Colors.white : Colors.grey[500],
                   size: 28,
                 ),
               ),
               const SizedBox(width: 14),
+              // Titre + description
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.titre,
+                      item.module.titre,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -787,10 +719,10 @@ class _AllCoursViewState extends State<AllCoursView> {
                             : Colors.grey[600],
                       ),
                     ),
-                    if (item.description.isNotEmpty) ...[
+                    if (item.module.description.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
-                        item.description,
+                        item.module.description,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -805,6 +737,7 @@ class _AllCoursViewState extends State<AllCoursView> {
                 ),
               ),
               const SizedBox(width: 8),
+              // Action droite
               if (item.estTelecharge)
                 const Icon(Icons.arrow_forward_ios,
                     size: 16, color: Colors.grey)
@@ -829,12 +762,12 @@ class _AllCoursViewState extends State<AllCoursView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.school_outlined, size: 64, color: Colors.grey[400]),
+          Icon(Icons.folder_open, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             _apiConnectee
-                ? 'Aucun cours disponible'
-                : 'Aucun cours téléchargé\net non connecté à internet',
+                ? 'Aucun module disponible'
+                : 'Aucun module téléchargé\net non connecté à internet',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
@@ -866,7 +799,7 @@ class _AllCoursViewState extends State<AllCoursView> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Connectez-vous à internet pour télécharger d\'autres cours.',
+                  'Connectez-vous à internet pour télécharger d\'autres modules.',
                   style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                 ),
               ),
@@ -878,26 +811,11 @@ class _AllCoursViewState extends State<AllCoursView> {
   }
 }
 
-class _CoursItem {
-  final String titre;
-  final String description;
+// ─── Data classes ─────────────────────────────────────────────────────────────
+
+class _ModuleItem {
+  final ModuleDistant module;
   final bool estTelecharge;
-  final Cours? coursLocal;
-  final CoursDistant? coursDistant;
 
-  _CoursItem.local(Cours c)
-      : titre = c.titre,
-        description = c.contenu,
-        estTelecharge = true,
-        coursLocal = c,
-        coursDistant = null;
-
-  _CoursItem.distant(CoursDistant c)
-      : titre = c.titre,
-        description = c.description,
-        estTelecharge = false,
-        coursLocal = null,
-        coursDistant = c;
-
-  int? get distantId => coursDistant?.id;
+  _ModuleItem({required this.module, required this.estTelecharge});
 }
