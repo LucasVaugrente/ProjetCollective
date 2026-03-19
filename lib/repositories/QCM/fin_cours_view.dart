@@ -49,7 +49,7 @@ class FinCoursView extends StatelessWidget {
 
             // Message
             Text(
-              "Vous avez terminé le cours\n« ${cours.titre} »",
+              "Vous avez terminé le chapitre\n« ${cours.titre} »",
               style: const TextStyle(
                 fontSize: 20,
                 color: Colors.black87,

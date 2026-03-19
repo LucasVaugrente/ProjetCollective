@@ -52,7 +52,7 @@ class DescriptionView extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  coursViewModel.changementPageSuivante(cours);
+                  coursViewModel.resetCours();
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(

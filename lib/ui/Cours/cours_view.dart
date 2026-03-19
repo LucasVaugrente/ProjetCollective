@@ -92,13 +92,16 @@ class _CoursViewState extends State<CoursView> {
         int nbCloze = snapshot.data![1] as int;
         String typeJeu = snapshot.data![2] as String;
 
+        int nbJeux = nbQCM + nbCloze;
+        bool aucunJeu = nbJeux == 0;
+
         int transitionPage = nbPageCours + 1;
         int firstQCMPage = transitionPage + 1;
         int lastQCMPage = firstQCMPage + nbQCM - 1;
         int firstClozePage = lastQCMPage + 1;
         int lastClozePage = firstClozePage + nbCloze - 1;
-        int finPage = lastClozePage + 1;
 
+        int finPage = aucunJeu ? nbPageCours + 1 : lastClozePage + 1;
         Widget nouvellePage;
 
         if (currentPage == 0) {
@@ -111,12 +114,14 @@ class _CoursViewState extends State<CoursView> {
             cours: coursSelectionne.cours,
             selectedPageIndex: currentPage - 1,
           );
-        } else if (currentPage == transitionPage) {
+        } else if (!aucunJeu && currentPage == transitionPage) {
           nouvellePage = TransitionQCMView(
             cours: coursSelectionne.cours,
             coursViewModel: coursViewModel,
           );
-        } else if (currentPage >= firstQCMPage && currentPage <= lastQCMPage) {
+        } else if (!aucunJeu &&
+            currentPage >= firstQCMPage &&
+            currentPage <= lastQCMPage) {
           if (typeJeu == 'qcm') {
             nouvellePage = JeuQCMView(cours: coursSelectionne.cours);
           } else if (typeJeu == 'cloze') {
@@ -128,7 +133,9 @@ class _CoursViewState extends State<CoursView> {
           } else {
             nouvellePage = const Center(child: Text("Aucun jeu disponible"));
           }
-        } else if (currentPage >= firstClozePage && currentPage <= lastClozePage) {
+        } else if (!aucunJeu &&
+            currentPage >= firstClozePage &&
+            currentPage <= lastClozePage) {
           if (typeJeu == 'cloze') {
             int clozeIndex = currentPage - firstClozePage;
             nouvellePage = ClozePage(
@@ -148,7 +155,8 @@ class _CoursViewState extends State<CoursView> {
             backgroundColor: Colors.white,
             elevation: 2,
             title: FutureBuilder(
-              future: coursViewModel.getProgressionActuelle(coursSelectionne.cours),
+              future:
+                  coursViewModel.getProgressionActuelle(coursSelectionne.cours),
               builder: (context, snapshot) {
                 return HeaderWidget(
                   cours: coursSelectionne.cours,
@@ -160,13 +168,13 @@ class _CoursViewState extends State<CoursView> {
           ),
           body: nouvellePage,
           bottomNavigationBar: (nouvellePage.runtimeType != DescriptionView &&
-              nouvellePage.runtimeType != FinCoursView)
+                  nouvellePage.runtimeType != FinCoursView)
               ? FooterWidget(
-            courseTitle: coursSelectionne.cours.titre,
-            pageNumber: currentPage,
-            coursViewModel: coursViewModel,
-            cours: coursSelectionne.cours,
-          )
+                  courseTitle: coursSelectionne.cours.titre,
+                  pageNumber: currentPage,
+                  coursViewModel: coursViewModel,
+                  cours: coursSelectionne.cours,
+                )
               : null,
         );
       },
@@ -240,11 +248,16 @@ class FooterWidget extends StatelessWidget {
               coursViewModel.changementPagePrecedente();
             },
           ),
-          Text(
-            '$courseTitle : Page $pageNumber',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              '$courseTitle : Page $pageNumber',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
           IconButton(

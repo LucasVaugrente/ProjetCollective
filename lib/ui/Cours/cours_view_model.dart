@@ -26,7 +26,9 @@ class CoursViewModel extends ChangeNotifier {
   }
 
   Future<int> getNombrePageQCM(Cours cours) async {
-    int nbQCM = await qcmRepository.getAllIdByCoursId(cours.id!).then((lstIdPageJeu) => lstIdPageJeu.length);
+    int nbQCM = await qcmRepository
+        .getAllIdByCoursId(cours.id!)
+        .then((lstIdPageJeu) => lstIdPageJeu.length);
     return nbQCM;
   }
 
@@ -45,21 +47,28 @@ class CoursViewModel extends ChangeNotifier {
     final nbPages = await getNombrePageDeContenu(cours);
     int nbJeux = await getNombrePageQCM(cours);
     nbJeux += await getNombrePageCloze(cours);
-    // Total: description(0) + pages(nbPages) + transition(1) + qcm(nbJeux) + fin(1)
-    final totalPages =
-        nbPages + nbJeux + 2; // +2 c'est pour la transition et la page de fin
+
+    final bool aucunJeu = nbJeux == 0;
+
+    // Sans jeu : description(0) + pages(nbPages) + fin(1)
+    // Avec jeu  : description(0) + pages(nbPages) + transition(1) + jeux(nbJeux) + fin(1)
+    final totalPages = aucunJeu ? nbPages + 1 : nbPages + nbJeux + 2;
 
     if (page < totalPages) {
       page++;
 
-      // Marquer la page comme visitée seulement si c'est une page de contenu (pas description, pas transition, pas jeu)
+      // Sauter transition + jeux si aucun jeu (on arrive directement à la fin)
+      if (aucunJeu && page == nbPages + 1) {
+        page = totalPages; // ← page de fin directement
+      }
+
+      // Marquer la page comme visitée si c'est une page de contenu
       if (page > 0 && page <= nbPages) {
         final pages = await pageRepository.getPagesByCourseId(cours.id!);
         if (page - 1 < pages.length) {
           await pageRepository.setPageVisite(pages[page - 1].id!);
         }
       }
-
       notifyListeners();
     }
   }
@@ -69,6 +78,12 @@ class CoursViewModel extends ChangeNotifier {
       page--;
       notifyListeners();
     }
+  }
+
+  void resetCours() {
+    page = 1;
+    print("CoursViewModel: resetCours called, page set to $page");
+    notifyListeners();
   }
 
   final clozeRepository = ClozeRepository();
