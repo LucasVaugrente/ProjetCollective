@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.factoscope"
     compileSdk = 36 //flutter.compileSdkVersion
-    ndkVersion = "26.1.10909125" //flutter.ndkVersion
+    ndkVersion = "27.0.12077973" //flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
