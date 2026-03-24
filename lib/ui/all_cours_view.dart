@@ -308,9 +308,6 @@ class _AllCoursViewState extends State<AllCoursView> {
       coursIdDistant: coursComplet.cours.id,
       coursIdLocal: coursIdLocal,
     );
-
-    if (kDebugMode)
-      print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
   }
 
   Future<void> _sauvegarderQcm(

@@ -82,7 +82,6 @@ class CoursViewModel extends ChangeNotifier {
 
   void resetCours() {
     page = 1;
-    print("CoursViewModel: resetCours called, page set to $page");
     notifyListeners();
   }
 
