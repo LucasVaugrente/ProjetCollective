@@ -1,10 +1,9 @@
-import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_audio_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_image_widget.dart';
-import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_text_widget.dart';
+import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_audio_widget.dart';
 import 'package:factoscope/ui/Contenu/WidgetContenu/contenu_video_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -68,10 +67,6 @@ class ContenuCoursView extends StatelessWidget {
                 return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ContenuAudioWidget(urlAudio: media.url));
-              } else if (media.type == "text") {
-                return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ContenuTextWidget(filePath: media.url));
               } else {
                 return const Padding(
                     padding: EdgeInsets.all(8.0),
