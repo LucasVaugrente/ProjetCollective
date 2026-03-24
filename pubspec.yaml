@@ -43,7 +43,3 @@ flutter:
   assets:
     - .env
     - lib/assets/
-    - lib/data/AppData/
-    - lib/data/AppData/Module1/
-    - lib/data/AppData/Module2/
-    - lib/data/AppData/Module3/
