@@ -5,9 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:factoscope/models/page.dart';
 import 'package:video_player/video_player.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Widget principal — charge la vidéo et l'affiche
+// ─────────────────────────────────────────────────────────────────────────────
+
 class ContenuVideoWidget extends StatefulWidget {
   final MediaItem data;
-
   const ContenuVideoWidget({super.key, required this.data});
 
   @override
@@ -27,8 +30,7 @@ class _ContenuVideoWidgetState extends State<ContenuVideoWidget> {
 
   Future<void> _initController() async {
     try {
-      final ContenuCoursViewModel fileLoader = ContenuCoursViewModel();
-      _controller = await fileLoader.videoLoader(widget.data);
+      _controller = await ContenuCoursViewModel().videoLoader(widget.data);
       await _controller.initialize();
       _controller.setLooping(true);
     } catch (_) {
@@ -47,68 +49,202 @@ class _ContenuVideoWidgetState extends State<ContenuVideoWidget> {
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
-    if (_error) {
-      return const Center(child: Text("Vidéo introuvable"));
-    }
-    return VideoPlayerScreen(controller: _controller);
+    if (_error) return const Center(child: Text("Vidéo introuvable"));
+
+    return _VideoPlayer(controller: _controller);
   }
 }
 
-class VideoPlayerScreen extends StatefulWidget {
-  final VideoPlayerController controller;
+// ─────────────────────────────────────────────────────────────────────────────
+// Lecteur portrait — vit dans le scroll normal, pas de Scaffold ici
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const VideoPlayerScreen({super.key, required this.controller});
+class _VideoPlayer extends StatefulWidget {
+  final VideoPlayerController controller;
+  const _VideoPlayer({required this.controller});
 
   @override
-  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+  State<_VideoPlayer> createState() => _VideoPlayerState();
 }
 
-class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+class _VideoPlayerState extends State<_VideoPlayer> {
   VideoPlayerController get _controller => widget.controller;
 
-  Duration _videoLength = Duration.zero;
-  Duration _videoPosition = Duration.zero;
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
   double _volume = 0.5;
-  bool _isFullscreen = false;
-  bool _showControls =
-      true; // toujours visible en portrait mais bon... temporaire en fullscreen
-  bool _hasStarted = false;
-  Timer? _hideControlsTimer;
 
   @override
   void initState() {
     super.initState();
-
-    _videoLength = _controller.value.duration;
+    _duration = _controller.value.duration;
     _controller.setVolume(_volume);
-
-    _controller.addListener(_onControllerUpdate);
+    _controller.addListener(_onUpdate);
   }
 
-  void _onControllerUpdate() {
+  void _onUpdate() {
     if (!mounted) return;
     setState(() {
-      _videoPosition = _controller.value.position;
-      _videoLength = _controller.value.duration;
+      _position = _controller.value.position;
+      _duration = _controller.value.duration;
     });
   }
 
   @override
   void dispose() {
-    _hideControlsTimer?.cancel();
-    _controller.removeListener(_onControllerUpdate);
+    _controller.removeListener(_onUpdate);
     super.dispose();
   }
 
-  void _enterFullscreen() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+  void _togglePlay() {
+    setState(() {
+      _controller.value.isPlaying ? _controller.pause() : _controller.play();
+    });
+  }
+
+  void _openFullscreen() {
+    // On pousse une nouvelle route plein écran — pas de Scaffold imbriqué
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: true,
+        barrierColor: Colors.black,
+        pageBuilder: (_, __, ___) => _FullscreenVideoPage(
+          controller: _controller,
+        ),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ),
+    );
+  }
+
+  String _fmt(Duration d) {
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final maxMs = _duration.inMilliseconds.toDouble();
+    final curMs =
+        _position.inMilliseconds.toDouble().clamp(0.0, maxMs > 0 ? maxMs : 1.0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Vidéo
+        GestureDetector(
+          onTap: _togglePlay,
+          child: AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          ),
+        ),
+
+        // Barre de progression
+        Slider(
+          value: curMs,
+          min: 0,
+          max: maxMs > 0 ? maxMs : 1.0,
+          activeColor: Colors.red,
+          thumbColor: Colors.red,
+          onChanged: (v) =>
+              _controller.seekTo(Duration(milliseconds: v.toInt())),
+        ),
+
+        // Contrôles
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                  _controller.value.isPlaying ? Icons.pause : Icons.play_arrow),
+              onPressed: _togglePlay,
+            ),
+            Icon(_volume == 0
+                ? Icons.volume_mute
+                : _volume < 0.5
+                    ? Icons.volume_down
+                    : Icons.volume_up),
+            SizedBox(
+              width: 80,
+              child: Slider(
+                value: _volume,
+                min: 0,
+                max: 1,
+                onChanged: (v) {
+                  setState(() => _volume = v);
+                  _controller.setVolume(v);
+                },
+              ),
+            ),
+            const Spacer(),
+            Text(_fmt(_position), style: const TextStyle(fontSize: 13)),
+            Text(' / ${_fmt(_duration)}',
+                style: const TextStyle(fontSize: 13, color: Colors.grey)),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.fullscreen),
+              onPressed: _openFullscreen,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Page fullscreen — vrai Scaffold autonome, poussé via Navigator
+// Gère sa propre orientation, se ferme quand on repivote en portrait
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _FullscreenVideoPage extends StatefulWidget {
+  final VideoPlayerController controller;
+  const _FullscreenVideoPage({required this.controller});
+
+  @override
+  State<_FullscreenVideoPage> createState() => _FullscreenVideoPageState();
+}
+
+class _FullscreenVideoPageState extends State<_FullscreenVideoPage> {
+  VideoPlayerController get _controller => widget.controller;
+
+  bool _showControls = true;
+  Timer? _hideTimer;
+  Duration _position = Duration.zero;
+  Duration _duration = Duration.zero;
+  double _volume = 0.5;
+
+  @override
+  void initState() {
+    super.initState();
+    _duration = _controller.value.duration;
+    _volume = _controller.value.volume;
+    _controller.addListener(_onUpdate);
+
+    // Passer en paysage
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+
+    _startHideTimer();
   }
 
-  void _exitFullscreen() {
+  void _onUpdate() {
+    if (!mounted) return;
+    setState(() {
+      _position = _controller.value.position;
+      _duration = _controller.value.duration;
+    });
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    _controller.removeListener(_onUpdate);
+    // Restaurer portrait à la fermeture
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
     SystemChrome.setPreferredOrientations([
@@ -117,127 +253,31 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    super.dispose();
   }
 
-  void _toggleFullscreen() {
-    setState(() => _isFullscreen = !_isFullscreen);
-    _isFullscreen ? _enterFullscreen() : _exitFullscreen();
-    if (_isFullscreen) _startHideControlsTimer();
-  }
-
-  void _startHideControlsTimer() {
-    _hideControlsTimer?.cancel();
-    _hideControlsTimer = Timer(const Duration(seconds: 3), () {
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) setState(() => _showControls = false);
     });
   }
 
-  void _onTapFullscreen() {
+  void _onTap() {
     setState(() => _showControls = !_showControls);
-    if (_showControls) _startHideControlsTimer();
+    if (_showControls) _startHideTimer();
   }
 
   void _togglePlay() {
     setState(() {
-      if (_controller.value.isPlaying) {
-        _controller.pause();
-      } else {
-        _controller.play();
-        _hasStarted = true;
-      }
+      _controller.value.isPlaying ? _controller.pause() : _controller.play();
     });
-    if (_isFullscreen) _startHideControlsTimer();
+    _startHideTimer();
   }
 
-  Widget _videoDisplay() {
-    return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: VideoPlayer(_controller),
-    );
-  }
+  void _exitFullscreen() => Navigator.of(context).pop();
 
-  Slider _progressBar() {
-    final maxVal = _videoLength.inMilliseconds.toDouble();
-    final currentVal = _videoPosition.inMilliseconds
-        .toDouble()
-        .clamp(0.0, maxVal > 0 ? maxVal : 1.0);
-
-    return Slider(
-      value: currentVal,
-      min: 0,
-      max: maxVal > 0 ? maxVal : 1.0,
-      thumbColor: const Color.fromARGB(255, 246, 1, 1),
-      activeColor: const Color.fromARGB(255, 246, 1, 1),
-      onChanged: (value) {
-        _controller.seekTo(Duration(milliseconds: value.toInt()));
-      },
-    );
-  }
-
-  Widget _volumeControl(Color iconColor) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(_volumeIcon(_volume), color: iconColor),
-        SizedBox(
-          width: 90,
-          child: Slider(
-            value: _volume,
-            min: 0,
-            max: 1,
-            onChanged: (val) {
-              setState(() => _volume = val);
-              _controller.setVolume(val);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  IconData _volumeIcon(double vol) {
-    if (vol == 0) return Icons.volume_mute;
-    if (vol < 0.5) return Icons.volume_down;
-    return Icons.volume_up;
-  }
-
-  IconButton _playButton(Color color) {
-    return IconButton(
-      icon: Icon(
-        _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        size: 20,
-        color: color,
-      ),
-      onPressed: _togglePlay,
-    );
-  }
-
-  IconButton _restartButton(Color color) {
-    return IconButton(
-      onPressed: () => _controller.seekTo(Duration.zero),
-      icon: Icon(Icons.restart_alt_rounded, color: color, size: 20),
-    );
-  }
-
-  IconButton _fullscreenButton(Color color) {
-    return IconButton(
-      onPressed: _toggleFullscreen,
-      icon: Icon(
-        _isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen,
-        color: color,
-        size: 20,
-      ),
-    );
-  }
-
-  Widget _timeDisplay(Color color) {
-    return Text(
-      '${_format(_videoPosition)} / ${_format(_videoLength)}',
-      style: TextStyle(color: color, fontSize: 13),
-    );
-  }
-
-  String _format(Duration d) {
+  String _fmt(Duration d) {
     final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$m:$s';
@@ -245,93 +285,115 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isPortrait =
-        MediaQuery.of(context).orientation == Orientation.portrait;
+    final maxMs = _duration.inMilliseconds.toDouble();
+    final curMs =
+        _position.inMilliseconds.toDouble().clamp(0.0, maxMs > 0 ? maxMs : 1.0);
 
-    if (isPortrait && _isFullscreen) {
-      setState(() => _isFullscreen = false);
-      _exitFullscreen();
-    }
-
-    return isPortrait ? _buildPortrait() : _buildFullscreen();
-  }
-
-  Widget _buildPortrait() {
-    return Column(
-      children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _togglePlay,
-          child: _videoDisplay(),
-        ),
-        _progressBar(),
-        Row(
-          children: [
-            _playButton(Colors.black),
-            _volumeControl(Colors.black),
-            const Spacer(),
-            _timeDisplay(Colors.black),
-            const Spacer(),
-            _restartButton(Colors.black),
-            _fullscreenButton(Colors.black),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFullscreen() {
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: _onTapFullscreen,
+        onTap: _onTap,
         child: Stack(
           children: [
-            Center(child: _videoDisplay()),
+            // Vidéo centrée
+            Center(
+              child: AspectRatio(
+                aspectRatio: _controller.value.aspectRatio,
+                child: VideoPlayer(_controller),
+              ),
+            ),
+
+            // Contrôles superposés
             AnimatedOpacity(
-              opacity: (_showControls || !_hasStarted) ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
+              opacity: _showControls ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 250),
               child: Container(
-                color: Colors.black26,
+                color: Colors.black38,
                 child: Column(
                   children: [
                     const Spacer(),
+
                     // Bouton play central
                     Center(
                       child: IconButton(
+                        iconSize: 64,
                         icon: Icon(
                           _controller.value.isPlaying
-                              ? Icons.pause
-                              : Icons.play_arrow,
+                              ? Icons.pause_circle
+                              : Icons.play_circle,
                           color: Colors.white,
-                          size: 60,
                         ),
                         onPressed: _togglePlay,
                       ),
                     ),
+
                     const Spacer(),
+
                     // Barre du bas
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          _progressBar(),
+                          Slider(
+                            value: curMs,
+                            min: 0,
+                            max: maxMs > 0 ? maxMs : 1.0,
+                            activeColor: Colors.red,
+                            thumbColor: Colors.red,
+                            onChanged: (v) => _controller
+                                .seekTo(Duration(milliseconds: v.toInt())),
+                          ),
                           Row(
                             children: [
-                              _playButton(Colors.white),
-                              _volumeControl(Colors.white),
+                              IconButton(
+                                icon: Icon(
+                                  _controller.value.isPlaying
+                                      ? Icons.pause
+                                      : Icons.play_arrow,
+                                  color: Colors.white,
+                                ),
+                                onPressed: _togglePlay,
+                              ),
+                              Icon(
+                                _volume == 0
+                                    ? Icons.volume_mute
+                                    : _volume < 0.5
+                                        ? Icons.volume_down
+                                        : Icons.volume_up,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 80,
+                                child: Slider(
+                                  value: _volume,
+                                  min: 0,
+                                  max: 1,
+                                  onChanged: (v) {
+                                    setState(() => _volume = v);
+                                    _controller.setVolume(v);
+                                  },
+                                ),
+                              ),
                               const Spacer(),
-                              _timeDisplay(Colors.white),
+                              Text(
+                                '${_fmt(_position)} / ${_fmt(_duration)}',
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 13),
+                              ),
                               const Spacer(),
-                              _restartButton(Colors.white),
-                              _fullscreenButton(Colors.white),
+                              IconButton(
+                                icon: const Icon(Icons.fullscreen_exit,
+                                    color: Colors.white),
+                                onPressed: _exitFullscreen,
+                              ),
                             ],
                           ),
+                          const SizedBox(height: 8),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
                   ],
                 ),
               ),

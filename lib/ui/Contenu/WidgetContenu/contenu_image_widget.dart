@@ -5,14 +5,14 @@ import 'package:factoscope/models/page.dart';
 
 class ContenuImageWidget extends StatelessWidget {
   final MediaItem media;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
 
   const ContenuImageWidget({
     super.key,
     required this.media,
-    this.width = 200,
-    this.height = 200,
+    this.width,
+    this.height,
   });
 
   @override
@@ -20,33 +20,35 @@ class ContenuImageWidget extends StatelessWidget {
     final fichier = File(media.url);
 
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        child: Center(
-          child: Column(
-            children: [
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: Center(
+        child: Column(
+          children: [
             Image.file(
-                fichier,
-                width: width,
-                height: height,
-                fit: BoxFit.cover,
-                semanticLabel: media.caption,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.broken_image,
-                      size: 50, color: Colors.grey);
-                },
-              ),
-              if (media.caption != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    media.caption!,
-                    style: const TextStyle(
-                        fontSize: 12, fontStyle: FontStyle.italic),
-                    textAlign: TextAlign.center,
-                  ),
+              fichier,
+              // Pleine largeur disponible, hauteur proportionnelle
+              width: width,
+              height: height,
+              fit: BoxFit.contain,
+              semanticLabel: media.caption,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.broken_image,
+                    size: 50, color: Colors.grey);
+              },
+            ),
+            if (media.caption != null && media.caption!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  media.caption!,
+                  style: const TextStyle(
+                      fontSize: 12, fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center,
                 ),
-            ],
-          ),
-        ));
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
