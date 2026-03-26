@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:factoscope/models/list_cours_view_model.dart';
+import 'package:factoscope/ui/list_cours_view_model.dart';
 import 'package:factoscope/ui/cours_selectionne.dart';
 
 import '../models/cours.dart';

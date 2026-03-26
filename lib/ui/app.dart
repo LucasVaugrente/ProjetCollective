@@ -1,7 +1,7 @@
 import 'package:factoscope/ui/validation_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:factoscope/ui/LaunchScreen/launch_screen_view.dart';
+import 'package:factoscope/ui/launch_screen_view.dart';
 import 'package:factoscope/ui/list_module_view.dart';
 import 'package:factoscope/ui/Cours/cours_view.dart';
 import 'package:factoscope/ui/all_cours_view.dart';

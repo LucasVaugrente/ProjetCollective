@@ -20,7 +20,6 @@ class DescriptionView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image du cours
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
@@ -31,37 +30,27 @@ class DescriptionView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            // Titre du cours
             Text(
               cours.titre,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            // Description du cours
             Text(
               cours.contenu,
               style: const TextStyle(fontSize: 18),
             ),
-            const SizedBox(height: 24),
-            // ✅ Section objectifs supprimée car n'existe plus
             const SizedBox(height: 32),
-            // Bouton pour commencer le cours
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  coursViewModel.resetCours();
+                  // page 0 → page 1 : première page de contenu
+                  coursViewModel.changementPageSuivante(cours);
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      borderRadius: BorderRadius.circular(12)),
                   backgroundColor: const Color.fromRGBO(252, 179, 48, 1),
                 ),
                 child: const Text(

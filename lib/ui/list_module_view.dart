@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/module.dart';
 import 'package:factoscope/ui/module_selectionne.dart';
-import 'package:factoscope/models/list_module_view_model.dart';
+import 'package:factoscope/ui/list_module_view_model.dart';
 import 'package:go_router/go_router.dart';
 
 // Widget de la page d'accueil/Liste des modules
