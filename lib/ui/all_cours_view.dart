@@ -43,6 +43,9 @@ class _AllCoursViewState extends State<AllCoursView> {
   // IDs des modules en cours de téléchargement
   final Set<int> _modulesEnCoursDeTelechargement = {};
 
+  // IDs des modules qui ont de nouveaux chapitres disponibles
+  final Set<int> _modulesAvecMiseAJour = {};
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +57,7 @@ class _AllCoursViewState extends State<AllCoursView> {
     await _verifierConnexionApi();
     await _chargerModulesTelecharges();
     if (_apiConnectee) await _chargerModulesDistants();
+    if (_apiConnectee) await _detecterMisesAJour();
     if (mounted) setState(() => _isLoading = false);
   }
 
@@ -93,11 +97,74 @@ class _AllCoursViewState extends State<AllCoursView> {
     await _verifierConnexionApi();
     await _chargerModulesTelecharges();
     if (_apiConnectee) await _chargerModulesDistants();
+    if (_apiConnectee) await _detecterMisesAJour();
     if (mounted) setState(() => _isLoading = false);
   }
 
   bool _estModuleTelecharge(int moduleId) =>
       _titresModulesTelecharges.contains(moduleId.toString());
+
+  /// Compare les cours distants vs locaux pour détecter les nouveaux chapitres
+  Future<void> _detecterMisesAJour() async {
+    final Set<int> avecMaj = {};
+    for (final module in _modulesDistants) {
+      if (!_estModuleTelecharge(module.id)) continue;
+      try {
+        final distants = await _apiService.getCoursDistantsDuModule(module.id);
+        final locaux = await _coursRepository.getCoursesByModuleId(module.id);
+        final titresLocaux =
+            locaux.map((c) => c.titre.trim().toLowerCase()).toSet();
+        final nbNouveaux = distants
+            .where((d) => !titresLocaux.contains(d.titre.trim().toLowerCase()))
+            .length;
+        if (nbNouveaux > 0) avecMaj.add(module.id);
+      } catch (_) {}
+    }
+    if (mounted)
+      setState(() => _modulesAvecMiseAJour
+        ..clear()
+        ..addAll(avecMaj));
+  }
+
+  /// Télécharge uniquement les chapitres manquants d'un module déjà téléchargé
+  Future<void> _mettreAJourModule(ModuleDistant module) async {
+    if (_modulesEnCoursDeTelechargement.contains(module.id)) return;
+    setState(() => _modulesEnCoursDeTelechargement.add(module.id));
+
+    try {
+      final distants = await _apiService.getCoursDistantsDuModule(module.id);
+      final locaux = await _coursRepository.getCoursesByModuleId(module.id);
+      // Comparaison par titre — les IDs locaux/distants peuvent différer
+      final titresLocaux =
+          locaux.map((c) => c.titre.trim().toLowerCase()).toSet();
+
+      // On télécharge seulement les cours distants absents localement
+      final nouveaux = distants
+          .where((d) => !titresLocaux.contains(d.titre.trim().toLowerCase()))
+          .toList();
+
+      for (final coursDistant in nouveaux) {
+        final coursComplet = await _apiService.getCoursComplet(coursDistant.id);
+        await _sauvegarderCoursLocalement(coursComplet);
+      }
+
+      await _chargerModulesTelecharges();
+      if (mounted) {
+        setState(() => _modulesAvecMiseAJour.remove(module.id));
+        _afficherPopupMiseAJour(module.titre, nouveaux.length);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erreur mise à jour : $e'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } finally {
+      if (mounted)
+        setState(() => _modulesEnCoursDeTelechargement.remove(module.id));
+    }
+  }
 
   /// Télécharge tous les cours d'un module et les sauvegarde localement
   Future<void> _telechargerModule(ModuleDistant module) async {
@@ -126,8 +193,7 @@ class _AllCoursViewState extends State<AllCoursView> {
       // Télécharge chaque cours du module
       for (final coursDistant in coursDistants) {
         final coursComplet = await _apiService.getCoursComplet(coursDistant.id);
-        await _sauvegarderCoursLocalement(coursComplet,
-            titreModule: module.titre);
+        await _sauvegarderCoursLocalement(coursComplet);
       }
 
       await _chargerModulesTelecharges();
@@ -176,8 +242,7 @@ class _AllCoursViewState extends State<AllCoursView> {
         for (final coursDistant in coursDistants) {
           final coursComplet =
               await _apiService.getCoursComplet(coursDistant.id);
-          await _sauvegarderCoursLocalement(coursComplet,
-              titreModule: module.titre);
+          await _sauvegarderCoursLocalement(coursComplet);
         }
         if (mounted) {
           setState(() => _titresModulesTelecharges.add(module.id.toString()));
@@ -213,10 +278,7 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   // ─── Sauvegarde locale (inchangée par rapport à l'ancien all_cours_view) ─────
 
-  Future<void> _sauvegarderCoursLocalement(
-    CoursComplet coursComplet, {
-    required String titreModule,
-  }) async {
+  Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
     if (kDebugMode) {
       print(
           '📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
@@ -234,7 +296,7 @@ class _AllCoursViewState extends State<AllCoursView> {
     if (kDebugMode) print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
 
     final dossierCours = await _creerDossierCours(
-      titreModule: titreModule,
+      idModule: coursComplet.cours.idModule,
       titreCours: coursComplet.cours.titre,
     );
 
@@ -252,7 +314,7 @@ class _AllCoursViewState extends State<AllCoursView> {
     }
 
     await _telechargerTousLesMediasDuCours(
-      titreModule: titreModule,
+      idModule: coursComplet.cours.idModule,
       titreCours: coursComplet.cours.titre,
       nomsMedias: tousLesMedias,
       dossierCours: dossierCours,
@@ -308,6 +370,9 @@ class _AllCoursViewState extends State<AllCoursView> {
       coursIdDistant: coursComplet.cours.id,
       coursIdLocal: coursIdLocal,
     );
+
+    if (kDebugMode)
+      print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
   }
 
   Future<void> _sauvegarderQcm(
@@ -354,53 +419,39 @@ class _AllCoursViewState extends State<AllCoursView> {
     }
   }
 
-  Future<Directory> _creerDossierCours({
-    required String titreModule, // ← titre au lieu de idModule
-    required String titreCours,
-  }) async {
+  Future<Directory> _creerDossierCours(
+      {required int idModule, required String titreCours}) async {
     final appDir = await getApplicationDocumentsDirectory();
     final dossier = Directory(
-      path.join(appDir.path, 'AppData', titreModule, titreCours),
+      path.join(appDir.path, 'AppData', 'Module$idModule', titreCours),
     );
     if (!await dossier.exists()) await dossier.create(recursive: true);
     return dossier;
   }
 
   Future<void> _telechargerTousLesMediasDuCours({
-    required String titreModule,
+    required int idModule,
     required String titreCours,
     required List<String> nomsMedias,
     required Directory dossierCours,
   }) async {
+    // Uri.encodeFull encode les espaces et caractères spéciaux comme Cloudflare les attend
+    final String baseUrl = Uri.encodeFull(
+      '${AppConfig.urlMedias}/AppData/Module$idModule/$titreCours',
+    );
     if (nomsMedias.isEmpty) return;
 
     final futures = nomsMedias.map((nomFichier) async {
       final fichier = File(path.join(dossierCours.path, nomFichier));
       if (await fichier.exists()) return;
       try {
-        // Construire l'URI segment par segment pour éviter le double encodage
-        final uri = Uri(
-          scheme: Uri.parse(AppConfig.urlMedias).scheme,
-          host: Uri.parse(AppConfig.urlMedias).host,
-          pathSegments: [
-            ...Uri.parse(AppConfig.urlMedias)
-                .pathSegments
-                .where((s) => s.isNotEmpty),
-            'AppData',
-            titreModule,
-            titreCours,
-            nomFichier,
-          ],
-        );
-        if (kDebugMode) print('⬇️ Téléchargement: $uri');
-        final response = await http.get(uri);
-        if (kDebugMode) print('📡 Status $nomFichier: ${response.statusCode}');
+        final url = Uri.encodeFull('$baseUrl/$nomFichier');
+        final response = await http.get(Uri.parse(url));
         if (response.statusCode == 200) {
           await fichier.writeAsBytes(response.bodyBytes);
-          if (kDebugMode) print('✅ Sauvegardé: $nomFichier');
         }
       } catch (e) {
-        if (kDebugMode) print('❌ Erreur média $nomFichier: $e');
+        if (kDebugMode) print('❌ Erreur média \$nomFichier: \$e');
       }
     });
 
@@ -519,6 +570,60 @@ class _AllCoursViewState extends State<AllCoursView> {
     );
   }
 
+  void _afficherPopupMiseAJour(String titreModule, int nb) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: const BoxDecoration(
+                    color: Colors.blue, shape: BoxShape.circle),
+                child: const Icon(Icons.system_update,
+                    color: Colors.white, size: 46),
+              ),
+              const SizedBox(height: 20),
+              const Text('Module mis à jour !',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 12),
+              Text('"$titreModule"',
+                  style: const TextStyle(
+                      fontSize: 16, fontStyle: FontStyle.italic),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              Text(
+                '$nb nouveau${nb > 1 ? 'x' : ''} chapitre${nb > 1 ? 's' : ''} ajouté${nb > 1 ? 's' : ''}',
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('OK', style: TextStyle(fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ─── Liste unifiée modules ────────────────────────────────────────────────────
 
   List<_ModuleItem> get _listeUnifiee {
@@ -527,7 +632,11 @@ class _AllCoursViewState extends State<AllCoursView> {
 
     for (final module in _modulesDistants) {
       if (_estModuleTelecharge(module.id)) {
-        telecharges.add(_ModuleItem(module: module, estTelecharge: true));
+        telecharges.add(_ModuleItem(
+          module: module,
+          estTelecharge: true,
+          aMiseAJourDisponible: _modulesAvecMiseAJour.contains(module.id),
+        ));
       } else {
         nonTelecharges.add(_ModuleItem(module: module, estTelecharge: false));
       }
@@ -688,7 +797,6 @@ class _AllCoursViewState extends State<AllCoursView> {
         borderRadius: BorderRadius.circular(10),
         onTap: () {
           if (item.estTelecharge) {
-            // Naviguer vers la liste des cours du module
             ModuleSelectionne.instance.changeModule(
               Module(
                 id: item.module.id,
@@ -721,20 +829,46 @@ class _AllCoursViewState extends State<AllCoursView> {
                 ),
               ),
               const SizedBox(width: 14),
-              // Titre + description
+              // Titre + description + badge
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.module.titre,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: item.estTelecharge
-                            ? Colors.black87
-                            : Colors.grey[600],
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.module.titre,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: item.estTelecharge
+                                  ? Colors.black87
+                                  : Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                        // Badge "Nouveau" si mise à jour disponible
+                        if (item.aMiseAJourDisponible) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              'Nouveau',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     if (item.module.description.isNotEmpty) ...[
                       const SizedBox(height: 4),
@@ -755,15 +889,22 @@ class _AllCoursViewState extends State<AllCoursView> {
               ),
               const SizedBox(width: 8),
               // Action droite
-              if (item.estTelecharge)
+              if (enTelechargement)
+                const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+              else if (item.aMiseAJourDisponible)
+                // Bouton "Mettre à jour" séparé
+                IconButton(
+                  icon: const Icon(Icons.system_update_alt,
+                      color: Colors.blue, size: 26),
+                  tooltip: 'Mettre à jour',
+                  onPressed: () => _mettreAJourModule(item.module),
+                )
+              else if (item.estTelecharge)
                 const Icon(Icons.arrow_forward_ios,
                     size: 16, color: Colors.grey)
-              else if (enTelechargement)
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
               else
                 Icon(Icons.download_outlined,
                     color: Colors.grey[500], size: 26),
@@ -828,11 +969,14 @@ class _AllCoursViewState extends State<AllCoursView> {
   }
 }
 
-// ─── Data classes ─────────────────────────────────────────────────────────────
-
 class _ModuleItem {
   final ModuleDistant module;
   final bool estTelecharge;
+  final bool aMiseAJourDisponible;
 
-  _ModuleItem({required this.module, required this.estTelecharge});
+  _ModuleItem({
+    required this.module,
+    required this.estTelecharge,
+    this.aMiseAJourDisponible = false,
+  });
 }
