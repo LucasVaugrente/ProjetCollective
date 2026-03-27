@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/ui/Cours/cours_view_model.dart';
-import 'package:factoscope/ui/Cours/description_view.dart';
+import 'description_view.dart';
 import 'package:factoscope/ui/Contenu/contenu_cours_view.dart';
 import 'package:factoscope/ui/QCM/jeu_qcm_view.dart';
 import 'package:factoscope/ui/cours_selectionne.dart';
@@ -167,7 +167,8 @@ class _CoursViewState extends State<CoursView> {
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.white,
-            elevation: 2,
+            elevation: 0,
+            scrolledUnderElevation: 1,
             title: FutureBuilder(
               future:
                   coursViewModel.getProgressionActuelle(coursSelectionne.cours),
@@ -202,21 +203,24 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(width: 8),
         Text(
           cours.titre,
           style: const TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+              fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black87),
+          overflow: TextOverflow.ellipsis,
         ),
+        const SizedBox(height: 4),
         if (progression != null)
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: progression,
-              minHeight: 6,
-              color: Colors.teal,
-              backgroundColor: Colors.teal.withValues(alpha: 0.2),
+              minHeight: 4,
+              color: const Color.fromRGBO(252, 179, 48, 1),
+              backgroundColor: const Color.fromRGBO(252, 179, 48, 0.2),
             ),
           ),
       ],

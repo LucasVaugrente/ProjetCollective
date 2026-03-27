@@ -3,7 +3,6 @@ import 'package:factoscope/logic/progression_use_case.dart';
 import 'package:factoscope/models/module.dart';
 import 'package:factoscope/repositories/module_repository.dart';
 
-// Classe permettant d'extraire la liste des modules
 class ListModuleViewModel with ChangeNotifier {
   final progressionUseCase = ProgressionUseCase();
 
@@ -14,18 +13,18 @@ class ListModuleViewModel with ChangeNotifier {
       listModule = await ModuleRepository().getAll();
       notifyListeners();
     } catch (e) {
-      if (kDebugMode) {
-        print("Erreur lors de la récupération des modules : $e");
-      }
+      if (kDebugMode) print("Erreur lors de la récupération des modules : $e");
     }
   }
 
+  // Progression globale en % entier
   Future<int> getProgressionGlobale() async {
-    double progress = await progressionUseCase.calculerProgressionGlobale();
+    final progress = await progressionUseCase.calculerProgressionGlobale();
     return progress.round();
   }
 
+  // Progression d'un module → [0.0, 1.0] pour LinearProgressIndicator
   Future<double> getProgressionModule(Module module) async {
-    return 0.0;
+    return await progressionUseCase.calculerProgressionModule(module.id!);
   }
 }
