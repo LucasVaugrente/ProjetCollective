@@ -82,16 +82,47 @@ class JeuQCMView extends StatelessWidget {
               itemCount: vm.options.length,
               itemBuilder: (context, i) {
                 final isSelected = vm.selectedAnswer == i;
-                Color tileColor = Colors.white;
-                if (vm.isCorrect != null && isSelected) {
-                  tileColor = vm.isCorrect!
-                      ? Colors.green.shade200
-                      : Colors.red.shade200;
+                // La bonne réponse = index vm.controller!.currentQuestion.soluce
+                // soluce est 1-based dans le modèle QCM
+                final isBonneReponse = vm.isCorrect != null &&
+                    i == vm.controller!.currentQuestion.soluce;
+
+                Color bgColor = Colors.white;
+                Color borderColor = Colors.transparent;
+
+                if (vm.isCorrect != null) {
+                  if (isSelected && vm.isCorrect!) {
+                    // Bonne réponse sélectionnée
+                    bgColor = Colors.green.shade100;
+                    borderColor = Colors.green;
+                  } else if (isSelected && !vm.isCorrect!) {
+                    // Mauvaise réponse sélectionnée
+                    bgColor = Colors.red.shade100;
+                    borderColor = Colors.red;
+                  } else if (isBonneReponse) {
+                    // Afficher la bonne réponse en vert
+                    bgColor = Colors.green.shade100;
+                    borderColor = Colors.green;
+                  }
                 }
-                return Card(
-                  color: tileColor,
-                  elevation: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
+
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 6),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: borderColor,
+                      width: borderColor == Colors.transparent ? 1 : 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   child: ListTile(
                     title: Text(vm.options[i],
                         style: const TextStyle(fontSize: 16)),

@@ -61,11 +61,39 @@ class _ClozePageState extends State<ClozePage> {
     });
   }
 
+  // Calcule la bonne réponse textuelle selon le champ soluce
+  String _getBonneReponse() {
+    final q = questions[currentIndex];
+    return switch (q.soluce) {
+      1 => q.rep1,
+      2 => q.rep2,
+      3 => q.rep3,
+      4 => q.rep4,
+      _ => '',
+    };
+  }
+
   Widget _buildAnswer(String answer) {
+    final isSelected = selectedAnswer != null && answer == selectedAnswer;
+    final bonneReponse = selectedAnswer != null ? _getBonneReponse() : null;
+    final isBonneReponse = bonneReponse != null && answer == bonneReponse;
+
     Color bgColor = Colors.white;
-    if (selectedAnswer != null && answer == selectedAnswer) {
-      bgColor = isCorrect! ? Colors.green.shade200 : Colors.red.shade200;
+    Color borderColor = Colors.grey.shade200;
+
+    if (selectedAnswer != null) {
+      if (isSelected && isCorrect!) {
+        bgColor = Colors.green.shade100;
+        borderColor = Colors.green;
+      } else if (isSelected && !isCorrect!) {
+        bgColor = Colors.red.shade100;
+        borderColor = Colors.red;
+      } else if (isBonneReponse) {
+        bgColor = Colors.green.shade100;
+        borderColor = Colors.green;
+      }
     }
+
     return GestureDetector(
       onTap: selectedAnswer != null
           ? null
@@ -77,11 +105,19 @@ class _ClozePageState extends State<ClozePage> {
             },
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+        margin: const EdgeInsets.symmetric(vertical: 5),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: borderColor, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(answer,
             style: const TextStyle(fontSize: 16, color: Colors.black87)),
