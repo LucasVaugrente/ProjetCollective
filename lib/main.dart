@@ -1,3 +1,4 @@
+import 'package:factoscope/config.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/service_locator.dart';
 import 'data_initializer.dart';
@@ -7,6 +8,7 @@ import 'ui/app.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
+  await AppConfig.init();
   setupLocator();
   runApp(const MainApp());
 }

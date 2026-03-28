@@ -146,7 +146,8 @@ class _AllCoursViewState extends State<AllCoursView> {
 
       for (final coursDistant in nouveaux) {
         final coursComplet = await _apiService.getCoursComplet(coursDistant.id);
-        await _sauvegarderCoursLocalement(coursComplet);
+        await _sauvegarderCoursLocalement(coursComplet,
+            titreModule: module.titre);
       }
 
       await _chargerModulesTelecharges();
@@ -195,7 +196,8 @@ class _AllCoursViewState extends State<AllCoursView> {
       // Télécharge chaque cours du module
       for (final coursDistant in coursDistants) {
         final coursComplet = await _apiService.getCoursComplet(coursDistant.id);
-        await _sauvegarderCoursLocalement(coursComplet);
+        await _sauvegarderCoursLocalement(coursComplet,
+            titreModule: module.titre);
       }
 
       await _chargerModulesTelecharges();
@@ -244,7 +246,8 @@ class _AllCoursViewState extends State<AllCoursView> {
         for (final coursDistant in coursDistants) {
           final coursComplet =
               await _apiService.getCoursComplet(coursDistant.id);
-          await _sauvegarderCoursLocalement(coursComplet);
+          await _sauvegarderCoursLocalement(coursComplet,
+              titreModule: module.titre);
         }
         if (mounted) {
           setState(() => _titresModulesTelecharges.add(module.id.toString()));
@@ -280,7 +283,8 @@ class _AllCoursViewState extends State<AllCoursView> {
 
   // ─── Sauvegarde locale (inchangée par rapport à l'ancien all_cours_view) ─────
 
-  Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet) async {
+  Future<void> _sauvegarderCoursLocalement(CoursComplet coursComplet,
+      {required String titreModule}) async {
     if (kDebugMode) {
       print(
           '📚 Début sauvegarde cours: "${coursComplet.cours.titre}" (module ${coursComplet.cours.idModule})');
@@ -298,7 +302,7 @@ class _AllCoursViewState extends State<AllCoursView> {
     if (kDebugMode) print('✅ Cours créé en BDD locale avec id: $coursIdLocal');
 
     final dossierCours = await _creerDossierCours(
-      idModule: coursComplet.cours.idModule,
+      titreModule: titreModule,
       titreCours: coursComplet.cours.titre,
     );
 
@@ -316,7 +320,7 @@ class _AllCoursViewState extends State<AllCoursView> {
     }
 
     await _telechargerTousLesMediasDuCours(
-      idModule: coursComplet.cours.idModule,
+      titreModule: titreModule,
       titreCours: coursComplet.cours.titre,
       nomsMedias: tousLesMedias,
       dossierCours: dossierCours,
@@ -372,6 +376,10 @@ class _AllCoursViewState extends State<AllCoursView> {
       coursIdDistant: coursComplet.cours.id,
       coursIdLocal: coursIdLocal,
     );
+
+    if (kDebugMode) {
+      print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
+    }
   }
 
   Future<void> _sauvegarderQcm(
@@ -419,33 +427,42 @@ class _AllCoursViewState extends State<AllCoursView> {
   }
 
   Future<Directory> _creerDossierCours(
-      {required int idModule, required String titreCours}) async {
+      {required String titreModule, required String titreCours}) async {
     final appDir = await getApplicationDocumentsDirectory();
     final dossier = Directory(
-      path.join(appDir.path, 'AppData', 'Module$idModule', titreCours),
+      path.join(appDir.path, 'AppData', titreModule, titreCours),
     );
     if (!await dossier.exists()) await dossier.create(recursive: true);
     return dossier;
   }
 
   Future<void> _telechargerTousLesMediasDuCours({
-    required int idModule,
+    required String titreModule,
     required String titreCours,
     required List<String> nomsMedias,
     required Directory dossierCours,
   }) async {
-    // Uri.encodeFull encode les espaces et caractères spéciaux comme Cloudflare les attend
-    final String baseUrl = Uri.encodeFull(
-      '${AppConfig.urlMedias}/AppData/Module$idModule/$titreCours',
-    );
     if (nomsMedias.isEmpty) return;
+
+    final baseUri = Uri.parse(AppConfig.urlMedias);
 
     final futures = nomsMedias.map((nomFichier) async {
       final fichier = File(path.join(dossierCours.path, nomFichier));
       if (await fichier.exists()) return;
       try {
-        final url = Uri.encodeFull('$baseUrl/$nomFichier');
-        final response = await http.get(Uri.parse(url));
+        // Construction segment par segment pour éviter le double encodage
+        final uri = Uri(
+          scheme: baseUri.scheme,
+          host: baseUri.host,
+          pathSegments: [
+            ...baseUri.pathSegments.where((s) => s.isNotEmpty),
+            'AppData',
+            titreModule,
+            titreCours,
+            nomFichier,
+          ],
+        );
+        final response = await http.get(uri);
         if (response.statusCode == 200) {
           await fichier.writeAsBytes(response.bodyBytes);
         }
