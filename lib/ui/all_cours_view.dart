@@ -120,10 +120,11 @@ class _AllCoursViewState extends State<AllCoursView> {
         if (nbNouveaux > 0) avecMaj.add(module.id);
       } catch (_) {}
     }
-    if (mounted)
+    if (mounted) {
       setState(() => _modulesAvecMiseAJour
         ..clear()
         ..addAll(avecMaj));
+    }
   }
 
   /// Télécharge uniquement les chapitres manquants d'un module déjà téléchargé
@@ -161,8 +162,9 @@ class _AllCoursViewState extends State<AllCoursView> {
         ));
       }
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() => _modulesEnCoursDeTelechargement.remove(module.id));
+      }
     }
   }
 
@@ -370,9 +372,6 @@ class _AllCoursViewState extends State<AllCoursView> {
       coursIdDistant: coursComplet.cours.id,
       coursIdLocal: coursIdLocal,
     );
-
-    if (kDebugMode)
-      print('🏁 Sauvegarde terminée pour "${coursComplet.cours.titre}"');
   }
 
   Future<void> _sauvegarderQcm(
