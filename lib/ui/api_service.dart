@@ -3,6 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../config.dart';
 
+const int kModuleOfficielId = 11;
+const int kCoursOfficielId = 15;
+
 class ApiService {
   static final ApiService _instance = ApiService._internal();
   factory ApiService() => _instance;
@@ -50,7 +53,9 @@ class ApiService {
         final modulesList = <ModuleDistant>[];
         for (var jsonItem in data) {
           try {
-            modulesList.add(ModuleDistant.fromJson(jsonItem));
+            final module = ModuleDistant.fromJson(jsonItem);
+            if (module.id == kModuleOfficielId) continue;
+            modulesList.add(module);
           } catch (e) {
             if (kDebugMode) {
               print('Erreur parsing module: $e');

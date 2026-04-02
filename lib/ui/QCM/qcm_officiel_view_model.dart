@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:factoscope/services/qcm_officiel_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
 import 'package:factoscope/models/cours.dart';
@@ -32,7 +34,10 @@ class QCMOfficielViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      List<int> ids = await _repo.getAllIdByCoursId(cours.id!);
+      List<int> ids = await _repo.getAllIdByCoursId(kCoursOfficielDistantId);
+      if (kDebugMode) {
+        print('🔍 IDs trouvés pour cours $kCoursOfficielDistantId: $ids');
+      }
       List<QCM> qcms = [];
 
       for (int id in ids) {
@@ -101,7 +106,14 @@ class QCMOfficielViewModel extends ChangeNotifier {
     }
   }
 
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
   void _finishExam() {
+    timer?.cancel();
     int correct = 0;
 
     for (int i = 0; i < totalQuestions; i++) {

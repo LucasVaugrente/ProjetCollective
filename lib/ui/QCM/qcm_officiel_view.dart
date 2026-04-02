@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'qcm_officiel_view_model.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
 import 'package:factoscope/ui/QCM/page_succes_qcm.dart';
+import 'package:factoscope/ui/validation_view.dart';
 
 class QCMOfficielView extends StatelessWidget {
   final Cours cours;
@@ -16,11 +18,16 @@ class QCMOfficielView extends StatelessWidget {
       create: (_) {
         final vm = QCMOfficielViewModel();
 
-        vm.onSuccess = () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const PageSuccesQCM()),
-          );
+        vm.onSuccess = () async {
+          // Sauvegarder la réussite pour ne pas refaire le test
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool(kCertificatObtenu, true);
+          if (context.mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PageSuccesQCM()),
+            );
+          }
         };
 
         vm.onFailure = (score) {
@@ -135,7 +142,7 @@ class QCMOfficielView extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
+                            isSelected ? FontWeight.bold : FontWeight.normal,
                         color: isSelected ? Colors.blue : Colors.black87,
                       ),
                     ),
@@ -154,7 +161,8 @@ class QCMOfficielView extends StatelessWidget {
               GestureDetector(
                 onTap: vm.currentIndex > 0 ? vm.previous : null,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
                   decoration: BoxDecoration(
                     color: vm.currentIndex > 0
                         ? const Color(0xFFFFD54F)
@@ -178,11 +186,11 @@ class QCMOfficielView extends StatelessWidget {
                   ),
                 ),
               ),
-
               GestureDetector(
                 onTap: vm.selectedIndex != null ? vm.next : null,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
                   decoration: BoxDecoration(
                     color: vm.selectedIndex != null
                         ? const Color(0xFFFFD54F)
@@ -216,10 +224,6 @@ class QCMOfficielView extends StatelessWidget {
   }
 }
 
-//
-//  PAGE D’ÉCHEC PROFESSIONNELLE
-//
-
 class PageEchecDetaillee extends StatelessWidget {
   final double score;
   final List<QCM> qcms;
@@ -244,16 +248,52 @@ class PageEchecDetaillee extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Analyse des erreurs"),
+        automaticallyImplyLeading: false,
+        title: const Text("Vos réponses"),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 2,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: wrongIndexes.isEmpty
-            ? _buildPerfectScore()
-            : _buildWrongAnswersList(wrongIndexes),
+      body: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: wrongIndexes.isEmpty
+                  ? _buildPerfectScore()
+                  : _buildWrongAnswersList(wrongIndexes),
+            ),
+          ),
+          // Bouton retour à la page Validation
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  // Retour à la racine de la page Validation
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                label: const Text(
+                  "Retour au test de validation",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 3, 47, 122),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -288,9 +328,7 @@ class PageEchecDetaillee extends StatelessWidget {
           "Vous avez ${wrongIndexes.length} erreur(s)",
           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-
         const SizedBox(height: 16),
-
         Expanded(
           child: ListView.builder(
             itemCount: wrongIndexes.length,
@@ -324,9 +362,7 @@ class PageEchecDetaillee extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 12),
-
                       Text(
                         q.question,
                         style: const TextStyle(
@@ -334,9 +370,7 @@ class PageEchecDetaillee extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -359,9 +393,7 @@ class PageEchecDetaillee extends StatelessWidget {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 10),
-
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(

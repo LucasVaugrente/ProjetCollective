@@ -1,4 +1,5 @@
 import 'package:factoscope/config.dart';
+import 'package:factoscope/services/qcm_officiel_service.dart';
 import 'package:flutter/material.dart';
 import 'package:factoscope/service_locator.dart';
 import 'data_initializer.dart';
@@ -9,6 +10,7 @@ import 'ui/app.dart';
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
   await AppConfig.init();
+  await QCMOfficielService().syncIfNeeded();
   setupLocator();
   runApp(const MainApp());
 }
@@ -19,8 +21,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-        // future: insertSampleData(),
-        future: resetDatabaseForDebug(),
+        future: insertSampleData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return MaterialApp.router(

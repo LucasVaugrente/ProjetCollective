@@ -66,4 +66,9 @@ class QCMRepository {
       whereArgs: [id],
     );
   }
+
+  Future<void> deleteByCoursId(int coursId) async {
+    final db = await _dbHelper.database;
+    await db.delete('qcm', where: 'id_cours = ?', whereArgs: [coursId]);
+  }
 }
