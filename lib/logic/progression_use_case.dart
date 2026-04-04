@@ -1,5 +1,4 @@
 import 'package:factoscope/repositories/cours_repository.dart';
-import 'package:factoscope/repositories/module_repository.dart';
 import 'package:factoscope/repositories/page_repository.dart';
 import 'package:flutter/foundation.dart';
 
@@ -9,108 +8,88 @@ import '../repositories/Cloze/cloze_repository.dart';
 class ProgressionUseCase {
   final pageRepository = PageRepository();
   final coursRepository = CoursRepository();
-  final moduleRepository = ModuleRepository();
   final ClozeRepository _repository = ClozeRepository();
 
   ProgressionUseCase();
 
-  // Méthode pour récupérer le pourcentage de pages vues pour un module donné en passant l'ID du module en paramètre
-  Future<double> calculerProgressionGlobale() async {
-    try {
-      // Récupération des modules
-      final lstModules = await moduleRepository.getAll();
+  // ─── Un chapitre est "terminé" si toutes ses pages sont vues ───────────────
 
-      // Somme des progressions des modules
-      double pourcentage = 0;
-      for (final module in lstModules) {
-        pourcentage += await calculerProgressionModule(module.id!);
-      }
-
-      // Moyenne
-      pourcentage /= lstModules.length;
-
-      return pourcentage;
-    } catch (e) {
-      if (kDebugMode) {
-        print(
-            "Erreur lors du calcul du pourcentage de progression globale : $e");
-      }
-      return 0;
-    }
+  Future<bool> estChapitreTermine(int coursId) async {
+    final total = await pageRepository.getNbPageByCourseId(coursId);
+    if (total == 0) return false;
+    final vues = await pageRepository.getNbPageVisite(coursId);
+    return vues >= total;
   }
 
-  // Méthode pour récupérer le pourcentage de pages vues pour un module donné en passant l'ID du module en paramètre
+  // ─── Progression d'un module : chapitres terminés / chapitres téléchargés ──
+  // Utilise les cours locaux (les modules ne sont pas sauvegardés en BDD locale)
+
   Future<double> calculerProgressionModule(int moduleId) async {
     try {
-      // Récupération des cours du module
       final lstCours = await coursRepository.getCoursesByModuleId(moduleId);
+      if (lstCours.isEmpty) return 0.0;
 
-      // Somme des progressions des cours du module
-      double pourcentage = 0;
+      int termines = 0;
       for (final cours in lstCours) {
-        pourcentage += await calculerProgressionCours(cours.id!);
+        if (await estChapitreTermine(cours.id!)) termines++;
       }
 
-      // Moyenne
-      pourcentage /= lstCours.length;
-
-      return pourcentage;
+      return termines / lstCours.length;
     } catch (e) {
-      if (kDebugMode) {
-        print(
-            "Erreur lors du calcul du pourcentage de progression de module : $e");
-      }
-      return 0;
+      if (kDebugMode) print("Erreur progression module $moduleId : $e");
+      return 0.0;
     }
   }
 
-  // Méthode pour récupérer le pourcentage de pages vues pour un cours donné en passant l'ID du cours en paramètre
+  // ─── Progression globale : chapitres terminés / chapitres téléchargés ──────
+  // Calculée directement depuis tous les cours locaux
+
+  Future<double> calculerProgressionGlobale() async {
+    try {
+      final tousLesCours = await coursRepository.getAll();
+      if (tousLesCours.isEmpty) return 0.0;
+
+      int termines = 0;
+      for (final cours in tousLesCours) {
+        if (await estChapitreTermine(cours.id!)) termines++;
+      }
+
+      return (termines / tousLesCours.length) * 100;
+    } catch (e) {
+      if (kDebugMode) print("Erreur progression globale : $e");
+      return 0.0;
+    }
+  }
+
+  // ─── Progression d'un cours (pages vues / total) — pour la barre in-cours ──
+
   Future<double> calculerProgressionCours(int coursId) async {
     try {
-      // Récupération du nombre total de pages pour le cours
-      final totalPages = await pageRepository.getNbPageByCourseId(coursId);
-
-      // Récupération du nombre de pages vues pour le cours
-      final pagesVues = await pageRepository.getNbPageVisite(coursId);
-
-      // Calcul du pourcentage de pages vues
-      double pourcentage;
-      if (totalPages > 0) {
-        pourcentage = (pagesVues / totalPages) * 100;
-      } else {
-        pourcentage = 0;
-      }
-
-      return pourcentage;
+      final total = await pageRepository.getNbPageByCourseId(coursId);
+      if (total == 0) return 0.0;
+      final vues = await pageRepository.getNbPageVisite(coursId);
+      return (vues / total) * 100;
     } catch (e) {
-      if (kDebugMode) {
-        print("Erreur lors du calcul du pourcentage de pages vues : $e");
-      }
-      return 0;
+      if (kDebugMode) print("Erreur progression cours $coursId : $e");
+      return 0.0;
+    }
+  }
+
+  // ─── Progression actuelle dans le cours (page courante / total pages) ──────
+
+  Future<double> calculerProgressionActuelleCours(int coursId, int page) async {
+    try {
+      final totalPages = await pageRepository.getNbPageByCourseId(coursId);
+      if (totalPages == 0) return 0.0;
+      return (page / totalPages) * 100;
+    } catch (e) {
+      if (kDebugMode) print("Erreur progression actuelle cours : $e");
+      return 0.0;
     }
   }
 
   Future<int> getNombrePageDeCloze(Cours cours) async {
-    final clozes =
-    await _repository.getByCoursId(cours.id!);
+    final clozes = await _repository.getByCoursId(cours.id!);
     return clozes.length;
-  }
-
-  // Méthode pour récupérer le pourcentage de pages vues pour un cours donné en passant l'ID du cours en paramètre
-  Future<double> calculerProgressionActuelleCours(int coursId, int page) async {
-    try {
-      // Récupération du nombre total de pages pour le cours
-      final totalPages = await pageRepository.getNbPageByCourseId(coursId);
-
-      // Calcul du pourcentage de pages vues
-      final pourcentage = (page / totalPages) * 100;
-
-      return pourcentage;
-    } catch (e) {
-      if (kDebugMode) {
-        print("Erreur lors du calcul du pourcentage de pages vues : $e");
-      }
-      return 0;
-    }
   }
 }

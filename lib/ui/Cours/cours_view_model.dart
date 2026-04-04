@@ -10,10 +10,6 @@ import '../../repositories/Cloze/cloze_repository.dart';
 class CoursViewModel extends ChangeNotifier {
   CoursViewModel();
 
-  // Information de la page actuelle
-  // 0 : Page de description
-  // 1-nbPage : Page de contenu
-  // >nbPage : Page de jeu
   int page = 0;
 
   final pageRepository = PageRepository();
@@ -26,7 +22,9 @@ class CoursViewModel extends ChangeNotifier {
   }
 
   Future<int> getNombrePageQCM(Cours cours) async {
-    int nbQCM = await qcmRepository.getAllIdByCoursId(cours.id!).then((lstIdPageJeu) => lstIdPageJeu.length);
+    int nbQCM = await qcmRepository
+        .getAllIdByCoursId(cours.id!)
+        .then((lstIdPageJeu) => lstIdPageJeu.length);
     return nbQCM;
   }
 
@@ -36,8 +34,14 @@ class CoursViewModel extends ChangeNotifier {
   }
 
   Future<void> setIndexPageVisite(Cours cours) async {
-    final indexPage = await pageRepository.getNbPageVisite(cours.id!);
-    page = indexPage;
+    final nbVisitees = await pageRepository.getNbPageVisite(cours.id!);
+    final nbTotal = await getNombrePageDeContenu(cours);
+
+    if (nbTotal > 0 && nbVisitees >= nbTotal) {
+      page = 0;
+    } else {
+      page = nbVisitees;
+    }
     notifyListeners();
   }
 
@@ -62,6 +66,16 @@ class CoursViewModel extends ChangeNotifier {
 
       notifyListeners();
     }
+  }
+
+  void resetCours() {
+    page = 0;
+    notifyListeners();
+  }
+
+  void allerAPage(int index) {
+    page = index;
+    notifyListeners();
   }
 
   void changementPagePrecedente() {

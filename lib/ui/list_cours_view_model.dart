@@ -20,10 +20,8 @@ class ListCoursViewModel with ChangeNotifier {
 
   Future<void> getCours(int? idModule) async {
     if (idModule == null) return;
-
     _isLoading = true;
     notifyListeners();
-
     try {
       _cours = await _coursRepository.getCoursesByModuleId(idModule);
       ModuleSelectionne().updateListModule(_cours);
@@ -38,7 +36,6 @@ class ListCoursViewModel with ChangeNotifier {
   Future<void> getAllCours() async {
     _isLoading = true;
     notifyListeners();
-
     try {
       _cours = await _coursRepository.getAll();
     } catch (e) {
@@ -52,19 +49,13 @@ class ListCoursViewModel with ChangeNotifier {
   Future<void> downloadCours(int coursId) async {
     _isLoading = true;
     notifyListeners();
-
     try {
       final response = await http
           .get(Uri.parse('${AppConfig.effectiveApiUrl}/api/cours/$coursId'));
       if (response.statusCode == 200) {
         final courseData = jsonDecode(response.body);
-
-        // Créer ou mettre à jour le cours avec ses pages et médias en JSON
         await _coursRepository.createOrUpdate(Cours.fromJson(courseData));
-
-        // Marquer le cours comme téléchargé
         await _coursRepository.markAsDownloaded(coursId);
-
         await getCours(ModuleSelectionne().moduleSelectionne.id);
       }
     } catch (e) {
@@ -75,12 +66,12 @@ class ListCoursViewModel with ChangeNotifier {
     }
   }
 
-  // Calcule la progression d'un module
+  // Progression du module : chapitres terminés / chapitres téléchargés → [0.0, 1.0]
   Future<double> getProgressionModule(Module module) async {
-    return await progressionUseCase.calculerProgressionCours(module.id!) / 100;
+    return await progressionUseCase.calculerProgressionModule(module.id!);
   }
 
-  // Calcule la progression d'un cours
+  // Progression d'un cours : pages vues / pages totales → [0.0, 1.0]
   Future<double> getProgressionCours(Cours cours) async {
     return await progressionUseCase.calculerProgressionCours(cours.id!) / 100;
   }

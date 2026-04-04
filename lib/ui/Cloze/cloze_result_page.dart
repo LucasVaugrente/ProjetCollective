@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'cloze_page.dart';
 
 class ClozeResultPage extends StatelessWidget {
   final int score;
   final int totalQuestions;
   final int coursId;
+  final void Function(int score, int total)? onRecommencer;
 
   const ClozeResultPage({
     super.key,
     required this.score,
     required this.totalQuestions,
     required this.coursId,
-
+    this.onRecommencer,
   });
 
   @override
   Widget build(BuildContext context) {
-    bool isPerfect = score == totalQuestions;
+    final bool isPerfect = score == totalQuestions;
 
     return Scaffold(
       appBar: AppBar(
@@ -30,60 +30,37 @@ class ClozeResultPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               Icon(
                 isPerfect ? Icons.celebration : Icons.thumb_up,
                 size: 80,
                 color: isPerfect ? Colors.green : Colors.orange,
               ),
-
               const SizedBox(height: 20),
-
               Text(
                 isPerfect ? "Félicitations !" : "Bravo !",
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                style:
+                    const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 15),
-
               Text(
                 isPerfect
                     ? "Excellent travail ! Vous avez tout réussi 🎉"
-                    : "Bon travail ! Continuez à vous entraîner pour progresser 💪",
+                    : "Bon travail ! Continuez à vous entraîner 💪",
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 16),
               ),
-
               const SizedBox(height: 20),
-
               Text(
                 "Score : $score / $totalQuestions",
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
-
               const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ClozePage(
-                        coursId: coursId,
-                      ),
-                    ),
-                  );
-                },
-                child: const Text("Recommencer"),
-              ),
-
-              const SizedBox(height: 12),
-
+              if (onRecommencer != null)
+                ElevatedButton(
+                  onPressed: () => onRecommencer!(0, totalQuestions),
+                  child: const Text("Recommencer"),
+                ),
             ],
           ),
         ),

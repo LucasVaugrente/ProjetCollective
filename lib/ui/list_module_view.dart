@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:factoscope/models/module.dart';
 import 'package:factoscope/ui/module_selectionne.dart';
-import 'package:factoscope/models/list_module_view_model.dart';
 import 'package:go_router/go_router.dart';
+import 'list_module_view_model.dart';
 
 // Widget de la page d'accueil/Liste des modules
 class ListModulesView extends StatefulWidget {
@@ -244,66 +244,80 @@ SizedBox moduleHeader(Module module, double? progress) {
   );
 }
 
-// Header affichant l'avancement dans le cours de l'utilisateur
-SizedBox headerAvancement() {
-  return SizedBox(
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: const Color.fromARGB(255, 219, 218, 215),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-            margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
-            child: const Column(
+// Header affichant l'avancement global de l'utilisateur
+Widget headerAvancement() {
+  return FutureBuilder<int>(
+    future: ListModuleViewModel().getProgressionGlobale(),
+    builder: (context, snapshot) {
+      final int pct = snapshot.data ?? 0;
+      final double ratio = pct / 100.0;
+
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        padding: const EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+              color: const Color.fromRGBO(252, 179, 48, 1), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Votre Avancement",
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Votre Avancement",
-                  style: TextStyle(
-                    fontSize: 20,
+                  "$pct%",
+                  style: const TextStyle(
+                    fontSize: 42,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Color(0xFF032F7A),
+                    height: 1.0,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: LinearProgressIndicator(
+                      value: ratio,
+                      minHeight: 10,
+                      color: const Color.fromRGBO(252, 179, 48, 1),
+                      backgroundColor: const Color.fromRGBO(252, 179, 48, 0.15),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          const Spacer(),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              const Icon(
-                Icons.bookmark,
-                size: 140,
-                color: Color.fromARGB(255, 3, 47, 122),
-              ),
-              FutureBuilder(
-                future: ListModuleViewModel().getProgressionGlobale(),
-                builder: (context, snapshot) {
-                  String progress = "";
-                  if (snapshot.hasData) {
-                    progress = snapshot.data.toString();
-                  }
-
-                  return Text(
-                    "$progress%",
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
+            const SizedBox(height: 8),
+            Text(
+              pct == 100
+                  ? "Tous les chapitres terminés 🎉"
+                  : pct == 0
+                      ? "Commencez votre formation !"
+                      : "Continuez comme ça, vous progressez !",
+              style: const TextStyle(fontSize: 13, color: Colors.black45),
+            ),
+          ],
+        ),
+      );
+    },
   );
 }
