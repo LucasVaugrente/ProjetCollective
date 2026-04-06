@@ -3,8 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../config.dart';
 
-const int kModuleOfficielId = 11;
-const int kCoursOfficielId = 15;
+const String kTitreModuleOfficiel = 'Test Officiel';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -54,7 +53,9 @@ class ApiService {
         for (var jsonItem in data) {
           try {
             final module = ModuleDistant.fromJson(jsonItem);
-            if (module.id == kModuleOfficielId) continue;
+            // Exclure le module fantôme du test officiel par son titre
+            if (module.titre.trim().toLowerCase() ==
+                kTitreModuleOfficiel.trim().toLowerCase()) continue;
             modulesList.add(module);
           } catch (e) {
             if (kDebugMode) {

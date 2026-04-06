@@ -14,7 +14,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import '../config.dart';
-import 'api_service.dart';
+import '../services/api_service.dart';
 import '../models/QCM/qcm.dart';
 import '../models/Cloze/cloze_page.dart';
 import '../repositories/QCM/qcm_repository.dart';
