@@ -78,6 +78,7 @@ class ModuleLogic {
       titresModulesTelecharges.contains(moduleId.toString());
 
   /// Retourne les modules triés : téléchargés en premier, puis disponibles.
+  // ignore: library_private_types_in_public_api
   List<_ModuleItem> get listeUnifiee {
     final telecharges = <_ModuleItem>[];
     final nonTelecharges = <_ModuleItem>[];

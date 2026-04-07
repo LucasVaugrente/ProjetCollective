@@ -55,7 +55,9 @@ class ApiService {
             final module = ModuleDistant.fromJson(jsonItem);
             // Exclure le module fantôme du test officiel par son titre
             if (module.titre.trim().toLowerCase() ==
-                kTitreModuleOfficiel.trim().toLowerCase()) continue;
+                kTitreModuleOfficiel.trim().toLowerCase()) {
+              continue;
+            }
             modulesList.add(module);
           } catch (e) {
             if (kDebugMode) {

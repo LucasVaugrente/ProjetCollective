@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:factoscope/services/qcm_officiel_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:factoscope/models/QCM/qcm.dart';
 import 'package:factoscope/models/cours.dart';
 import 'package:factoscope/repositories/QCM/qcm_controller.dart';
