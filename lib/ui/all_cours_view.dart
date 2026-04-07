@@ -671,7 +671,7 @@ class _AllCoursViewState extends State<AllCoursView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes Modules'),
+        title: const Text('Mes Cours'),
         centerTitle: true,
         backgroundColor: Colors.white,
         titleTextStyle: const TextStyle(
@@ -681,7 +681,7 @@ class _AllCoursViewState extends State<AllCoursView> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.cloud,
+            icon: Icon(Icons.refresh,
                 color: _apiConnectee ? Colors.green : Colors.grey),
             onPressed: _rafraichir,
             tooltip: _apiConnectee

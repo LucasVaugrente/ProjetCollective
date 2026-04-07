@@ -18,6 +18,7 @@ class QCMOfficielViewModel extends ChangeNotifier {
 
   List<int?> userAnswers = [];
   int? selectedIndex;
+  bool _isDisposed = false;
 
   VoidCallback? onSuccess;
   Function(double score)? onFailure;
@@ -70,6 +71,10 @@ class QCMOfficielViewModel extends ChangeNotifier {
 
   void _startTimer() {
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_isDisposed) {
+        t.cancel();
+        return;
+      }
       duration--;
       notifyListeners();
 
@@ -131,5 +136,12 @@ class QCMOfficielViewModel extends ChangeNotifier {
     } else {
       onFailure?.call(score);
     }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    timer?.cancel();
+    super.dispose();
   }
 }
