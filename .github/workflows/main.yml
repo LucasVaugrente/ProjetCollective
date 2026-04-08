@@ -1,34 +1,53 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Build & Release
+name: Build & Release APK
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
+    name: Build and Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set Up Java
-        uses: actions/setup-java@v3.12.0
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          distribution: "oracle"
-          java-version: "17"
+          distribution: 'zulu'
+          java-version: '17'
 
-      - name: Set Up Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.35.4"
-          channel: "stable"
+          channel: 'stable'
+          cache: true
 
-      - name: Install Dependencies
+      - name: Get dependencies
         run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
+
+      - name: Build APK (split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Get version from pubspec
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          BUILD=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "build=$BUILD" >> $GITHUB_OUTPUT
+
+      - name: Push to Releases
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/apk/release/*.apk"
+          tag: ${{ steps.version.outputs.version }}+${{ steps.version.outputs.build }}
+          name: "Release ${{ steps.version.outputs.version }} (build ${{ steps.version.outputs.build }})"
+          makeLatest: true
+          token: ${{ secrets.TOKEN }}
