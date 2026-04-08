@@ -13,7 +13,7 @@ class QCMOfficielViewModel extends ChangeNotifier {
   bool isLoading = true;
   bool hasError = false;
 
-  int duration = 300;
+  int duration = 1800; // 30 minutes pour le test final
   Timer? timer;
 
   List<int?> userAnswers = [];
