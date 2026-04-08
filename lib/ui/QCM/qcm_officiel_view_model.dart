@@ -13,11 +13,12 @@ class QCMOfficielViewModel extends ChangeNotifier {
   bool isLoading = true;
   bool hasError = false;
 
-  int duration = 300;
+  int duration = 1800; // 30 minutes pour le test final
   Timer? timer;
 
   List<int?> userAnswers = [];
   int? selectedIndex;
+  bool _isDisposed = false;
 
   VoidCallback? onSuccess;
   Function(double score)? onFailure;
@@ -33,10 +34,17 @@ class QCMOfficielViewModel extends ChangeNotifier {
       isLoading = true;
       notifyListeners();
 
-      List<int> ids = await _repo.getAllIdByCoursId(kCoursOfficielDistantId);
+      // Récupérer l'ID du cours officiel mémorisé dynamiquement
+      final coursOfficielId =
+          await QCMOfficielService().getCoursOfficielIdLocal();
       if (kDebugMode) {
-        print('🔍 IDs trouvés pour cours $kCoursOfficielDistantId: $ids');
+        print('🔍 Chargement QCM officiel pour cours id=$coursOfficielId');
       }
+
+      List<int> ids = coursOfficielId != -1
+          ? await _repo.getAllIdByCoursId(coursOfficielId)
+          : [];
+      if (kDebugMode) print('🔍 IDs trouvés: $ids');
       List<QCM> qcms = [];
 
       for (int id in ids) {
@@ -63,6 +71,10 @@ class QCMOfficielViewModel extends ChangeNotifier {
 
   void _startTimer() {
     timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_isDisposed) {
+        t.cancel();
+        return;
+      }
       duration--;
       notifyListeners();
 
@@ -105,14 +117,7 @@ class QCMOfficielViewModel extends ChangeNotifier {
     }
   }
 
-  @override
-  void dispose() {
-    timer?.cancel();
-    super.dispose();
-  }
-
   void _finishExam() {
-    timer?.cancel();
     int correct = 0;
 
     for (int i = 0; i < totalQuestions; i++) {
@@ -131,5 +136,12 @@ class QCMOfficielViewModel extends ChangeNotifier {
     } else {
       onFailure?.call(score);
     }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    timer?.cancel();
+    super.dispose();
   }
 }

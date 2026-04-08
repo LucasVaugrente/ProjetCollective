@@ -14,7 +14,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import '../config.dart';
-import 'api_service.dart';
+import '../services/api_service.dart';
 import '../models/QCM/qcm.dart';
 import '../models/Cloze/cloze_page.dart';
 import '../repositories/QCM/qcm_repository.dart';
@@ -671,7 +671,7 @@ class _AllCoursViewState extends State<AllCoursView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes Modules'),
+        title: const Text('Mes Cours'),
         centerTitle: true,
         backgroundColor: Colors.white,
         titleTextStyle: const TextStyle(
@@ -681,7 +681,7 @@ class _AllCoursViewState extends State<AllCoursView> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.cloud,
+            icon: Icon(Icons.refresh,
                 color: _apiConnectee ? Colors.green : Colors.grey),
             onPressed: _rafraichir,
             tooltip: _apiConnectee

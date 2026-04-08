@@ -7,7 +7,7 @@ import 'dart:async' as _i3;
 
 import 'package:factoscope/models/cours.dart' as _i5;
 import 'package:factoscope/repositories/cours_repository.dart' as _i4;
-import 'package:factoscope/ui/api_service.dart' as _i2;
+import 'package:factoscope/services/api_service.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint

@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:factoscope/ui/api_service.dart';
+import 'package:factoscope/services/api_service.dart';
 import 'package:factoscope/repositories/cours_repository.dart';
 import 'package:factoscope/models/cours.dart';
 
@@ -78,6 +78,7 @@ class ModuleLogic {
       titresModulesTelecharges.contains(moduleId.toString());
 
   /// Retourne les modules triés : téléchargés en premier, puis disponibles.
+  // ignore: library_private_types_in_public_api
   List<_ModuleItem> get listeUnifiee {
     final telecharges = <_ModuleItem>[];
     final nonTelecharges = <_ModuleItem>[];
@@ -105,7 +106,7 @@ class ModuleLogic {
       final distants = await apiService.getCoursDistantsDuModule(module.id);
       final locaux = await coursRepository.getCoursesByModuleId(module.id);
       final titresLocaux =
-      locaux.map((c) => c.titre.trim().toLowerCase()).toSet();
+          locaux.map((c) => c.titre.trim().toLowerCase()).toSet();
       final nbNouveaux = distants
           .where((d) => !titresLocaux.contains(d.titre.trim().toLowerCase()))
           .length;
@@ -119,7 +120,7 @@ class ModuleLogic {
     final distants = await apiService.getCoursDistantsDuModule(module.id);
     final locaux = await coursRepository.getCoursesByModuleId(module.id);
     final titresLocaux =
-    locaux.map((c) => c.titre.trim().toLowerCase()).toSet();
+        locaux.map((c) => c.titre.trim().toLowerCase()).toSet();
     return distants
         .where((d) => !titresLocaux.contains(d.titre.trim().toLowerCase()))
         .toList();
@@ -288,10 +289,10 @@ void main() {
 
     test('renseigne les IDs de modules à partir des cours locaux', () async {
       when(mockRepo.getAll()).thenAnswer((_) async => [
-        _coursLocal(idModule: 1),
-        _coursLocal(idModule: 2),
-        _coursLocal(idModule: 2), // doublon intentionnel
-      ]);
+            _coursLocal(idModule: 1),
+            _coursLocal(idModule: 2),
+            _coursLocal(idModule: 2), // doublon intentionnel
+          ]);
 
       await logic.chargerModulesTelecharges();
 
@@ -383,9 +384,9 @@ void main() {
       logic.titresModulesTelecharges = ['1'];
 
       when(mockApi.getCoursDistantsDuModule(1)).thenAnswer((_) async => [
-        _coursDistant(titre: 'Chapitre 1'),
-        _coursDistant(titre: 'Chapitre 2'), // nouveau
-      ]);
+            _coursDistant(titre: 'Chapitre 1'),
+            _coursDistant(titre: 'Chapitre 2'), // nouveau
+          ]);
       when(mockRepo.getCoursesByModuleId(1))
           .thenAnswer((_) async => [_coursLocal(titre: 'Chapitre 1')]);
 
@@ -399,8 +400,8 @@ void main() {
       logic.modulesDistants = [module];
       logic.titresModulesTelecharges = ['1'];
 
-      when(mockApi.getCoursDistantsDuModule(1)).thenAnswer(
-              (_) async => [_coursDistant(titre: 'Chapitre 1')]);
+      when(mockApi.getCoursDistantsDuModule(1))
+          .thenAnswer((_) async => [_coursDistant(titre: 'Chapitre 1')]);
       when(mockRepo.getCoursesByModuleId(1))
           .thenAnswer((_) async => [_coursLocal(titre: 'Chapitre 1')]);
 
@@ -426,8 +427,8 @@ void main() {
       logic.modulesDistants = [module];
       logic.titresModulesTelecharges = ['1'];
 
-      when(mockApi.getCoursDistantsDuModule(1)).thenAnswer(
-              (_) async => [_coursDistant(titre: '  Chapitre 1  ')]);
+      when(mockApi.getCoursDistantsDuModule(1))
+          .thenAnswer((_) async => [_coursDistant(titre: '  Chapitre 1  ')]);
       when(mockRepo.getCoursesByModuleId(1))
           .thenAnswer((_) async => [_coursLocal(titre: 'CHAPITRE 1')]);
 
@@ -465,14 +466,14 @@ void main() {
       final module = _module(id: 1);
 
       when(mockApi.getCoursDistantsDuModule(1)).thenAnswer((_) async => [
-        _coursDistant(id: 10, titre: 'Chapitre 1'),
-        _coursDistant(id: 11, titre: 'Chapitre 2'),
-        _coursDistant(id: 12, titre: 'Chapitre 3'),
-      ]);
+            _coursDistant(id: 10, titre: 'Chapitre 1'),
+            _coursDistant(id: 11, titre: 'Chapitre 2'),
+            _coursDistant(id: 12, titre: 'Chapitre 3'),
+          ]);
       when(mockRepo.getCoursesByModuleId(1)).thenAnswer((_) async => [
-        _coursLocal(titre: 'Chapitre 1'),
-        _coursLocal(titre: 'Chapitre 2'),
-      ]);
+            _coursLocal(titre: 'Chapitre 1'),
+            _coursLocal(titre: 'Chapitre 2'),
+          ]);
 
       final nouveaux = await logic.nouveauxCoursPourModule(module);
 
@@ -483,22 +484,23 @@ void main() {
     test('retourne une liste vide si rien de nouveau', () async {
       final module = _module(id: 1);
 
-      when(mockApi.getCoursDistantsDuModule(1)).thenAnswer(
-              (_) async => [_coursDistant(titre: 'Chapitre 1')]);
-      when(mockRepo.getCoursesByModuleId(1)).thenAnswer(
-              (_) async => [_coursLocal(titre: 'Chapitre 1')]);
+      when(mockApi.getCoursDistantsDuModule(1))
+          .thenAnswer((_) async => [_coursDistant(titre: 'Chapitre 1')]);
+      when(mockRepo.getCoursesByModuleId(1))
+          .thenAnswer((_) async => [_coursLocal(titre: 'Chapitre 1')]);
 
       final nouveaux = await logic.nouveauxCoursPourModule(module);
       expect(nouveaux, isEmpty);
     });
 
-    test('retourne tous les cours si le module n\'a aucun cours local', () async {
+    test('retourne tous les cours si le module n\'a aucun cours local',
+        () async {
       final module = _module(id: 1);
 
       when(mockApi.getCoursDistantsDuModule(1)).thenAnswer((_) async => [
-        _coursDistant(id: 10, titre: 'Chapitre 1'),
-        _coursDistant(id: 11, titre: 'Chapitre 2'),
-      ]);
+            _coursDistant(id: 10, titre: 'Chapitre 1'),
+            _coursDistant(id: 11, titre: 'Chapitre 2'),
+          ]);
       when(mockRepo.getCoursesByModuleId(1)).thenAnswer((_) async => []);
 
       final nouveaux = await logic.nouveauxCoursPourModule(module);
@@ -521,9 +523,9 @@ void main() {
 
     test('stocke les modules renvoyés par l\'API', () async {
       when(mockApi.getModulesDisponibles()).thenAnswer((_) async => [
-        _module(id: 1, titre: 'Anatomie'),
-        _module(id: 2, titre: 'Physiologie'),
-      ]);
+            _module(id: 1, titre: 'Anatomie'),
+            _module(id: 2, titre: 'Physiologie'),
+          ]);
 
       await logic.chargerModulesDistants();
 
@@ -542,7 +544,7 @@ void main() {
           .thenThrow(Exception('Réseau indisponible'));
 
       expect(
-            () async => await logic.chargerModulesDistants(),
+        () async => await logic.chargerModulesDistants(),
         throwsA(isA<Exception>()),
       );
     });

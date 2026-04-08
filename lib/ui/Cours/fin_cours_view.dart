@@ -36,37 +36,45 @@ class FinCoursView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: (parfait
-                        ? Colors.green
-                        : bien
-                            ? Colors.orange
-                            : Colors.red)
+                color: (!aUnJeu
+                        ? const Color.fromRGBO(252, 179, 48, 1)
+                        : parfait
+                            ? Colors.green
+                            : bien
+                                ? Colors.orange
+                                : Colors.red)
                     .withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                parfait
-                    ? Icons.celebration
-                    : bien
-                        ? Icons.thumb_up
-                        : Icons.sentiment_dissatisfied,
+                !aUnJeu
+                    ? Icons.check_circle
+                    : parfait
+                        ? Icons.celebration
+                        : bien
+                            ? Icons.thumb_up
+                            : Icons.sentiment_dissatisfied,
                 size: 100,
-                color: parfait
-                    ? Colors.green
-                    : bien
-                        ? Colors.orange
-                        : Colors.red,
+                color: !aUnJeu
+                    ? const Color.fromRGBO(252, 179, 48, 1)
+                    : parfait
+                        ? Colors.green
+                        : bien
+                            ? Colors.orange
+                            : Colors.red,
               ),
             ),
             const SizedBox(height: 32),
 
             // Titre
             Text(
-              parfait
-                  ? "Félicitations !"
-                  : bien
-                      ? "Bien joué !"
-                      : "Dommage...",
+              !aUnJeu
+                  ? "Chapitre terminé !"
+                  : parfait
+                      ? "Félicitations !"
+                      : bien
+                          ? "Bien joué !"
+                          : "Dommage...",
               style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,

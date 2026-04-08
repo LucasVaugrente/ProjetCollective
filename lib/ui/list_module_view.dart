@@ -29,105 +29,98 @@ class _ListModulesViewState extends State<ListModulesView> {
       listenable: listModuleViewModel,
       builder: (context, child) {
         return SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Accueil",
-                      style: TextStyle(
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Column(
+              children: [
+                // --- Section Accueil ---
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Accueil",
+                            style: TextStyle(
+                              fontSize: 35,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.info_outline, size: 30),
+                            onPressed: () => context.push('/about'),
+                          ),
+                        ],
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.info_outline, size: 30),
-                      onPressed: () => context.push('/about'),
-                    ),
-                  ],
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                child: Text(
-                  "Factoscope est un outil pédagogique conçu pour vous accompagner dans votre formation. Notre objectif est de vous donner les clés pour décrypter l'information au quotidien.",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
+                      const SizedBox(height: 4),
+                      const Text(
+                        "Factoscope est un outil pédagogique conçu pour vous accompagner dans votre formation. Notre objectif est de vous donner les clés pour décrypter l'information au quotidien.",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
 
-              const Divider(height: 1),
+                const Divider(height: 1),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: const Text(
-                    "Tableau de bord",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
+                // --- Section Tableau de bord ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Tableau de bord",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      headerAvancement(),
+                    ],
                   ),
                 ),
-              ),
-              headerAvancement(), // Appel à headerAvancement
 
-              const Divider(height: 1),
+                const Divider(height: 1),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: const Text(
-                    "Cours récemment vus :",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.left,
+                // --- Section Soutien ---
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Avec le soutien de",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _partnerLogo('lib/assets/cfi.jpg'),
+                          _partnerLogo('lib/assets/epjt.png'),
+                          _partnerLogo('lib/assets/nothing2hide.jpg'),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 30),
-              const Divider(height: 1),
-              const SizedBox(height: 20),
-
-              const Text(
-                "Avec le soutien de",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 15),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _partnerLogo('lib/assets/cfi.jpg'),
-                    _partnerLogo('lib/assets/epjt.png'),
-                    _partnerLogo('lib/assets/nothing2hide.jpg'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         );
       },
@@ -253,7 +246,6 @@ Widget headerAvancement() {
       final double ratio = pct / 100.0;
 
       return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         padding: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           color: Colors.white,
