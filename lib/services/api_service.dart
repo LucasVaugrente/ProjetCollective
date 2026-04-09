@@ -200,13 +200,22 @@ class ApiService {
 
   Future<bool> testConnection() async {
     try {
+      final url = AppConfig.effectiveApiUrl;
+      if (kDebugMode) {
+        print('🔍 Test connexion URL: $url');
+      }
       final response = await http.get(
-        Uri.parse(AppConfig.effectiveApiUrl),
+        Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 5));
-
+      if (kDebugMode) {
+        print('🔍 Status code: ${response.statusCode}');
+      }
       return response.statusCode == 200;
     } catch (e) {
+      if (kDebugMode) {
+        print('🔍 Erreur testConnection: $e');
+      }
       return false;
     }
   }
