@@ -201,7 +201,7 @@ class ApiService {
   Future<bool> testConnection() async {
     try {
       final response = await http.get(
-        Uri.parse('${AppConfig.effectiveApiUrl}/'),
+        Uri.parse(AppConfig.effectiveApiUrl),
         headers: {'Content-Type': 'application/json'},
       ).timeout(const Duration(seconds: 5));
 
